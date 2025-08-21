@@ -150,7 +150,7 @@ const TiendaMLPage: React.FC = () => {
               onClick={() => handleProductClick(producto._id)}
               style={{ cursor: 'pointer' }}
             >
-              <img src={producto.main_image} alt={producto.title} />
+              <img src={producto.images[0].url} alt={producto.title} />
               <p>{producto.title}</p>
               <p>${producto.price}</p>
               <button 
