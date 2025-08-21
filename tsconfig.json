@@ -13,11 +13,14 @@
     "isolatedModules": true,
     "noEmit": true,
 
+    /* JSX */
+    "jsx": "preserve",
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/ts/index.ts", "tienda.ts"]
+  "include": ["src"]
 }
