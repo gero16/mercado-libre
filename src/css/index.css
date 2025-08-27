@@ -189,6 +189,10 @@
       height: 22px;
       
     }
+
+    .m-10 {
+      margin: 10px;
+    }
     @media (min-width: 620px) {
       .banner {
         background-repeat: no-repeat;

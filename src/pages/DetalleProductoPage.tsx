@@ -251,7 +251,7 @@ const DetalleProductoPage: React.FC = () => {
                       onClick={() => handleVarianteChange(variante)}
                       style={{ 
                         cursor: 'pointer',
-                        border: varianteSeleccionada?._id === variante._id ? '2px solid blue' : '1px solid #ccc',
+                        border: varianteSeleccionada?._id === variante._id ? '2px solid #4040b5' : '1px solid #ccc',
                         padding: '10px',
                         margin: '5px',
                         borderRadius: '5px'
@@ -266,25 +266,24 @@ const DetalleProductoPage: React.FC = () => {
 
             {/* Talles (solo para la variante seleccionada) */}
             {tallesDisponibles.length > 0 && (
-              <div className="talles">
+              <div className="talles flex gap-20">
                 <h3>Talles disponibles:</h3>
                 <div id="opciones-talles" className="opciones-talles">
                   {tallesDisponibles.map((variante) => (
-                    <div 
+                    <span 
                       key={variante._id}
                       className={`talle-opcion ${talleSeleccionado === variante.size ? 'seleccionada' : ''}`}
                       onClick={() => handleTalleChange(variante.size)}
                       style={{ 
                         cursor: 'pointer',
-                        border: talleSeleccionado === variante.size ? '2px solid blue' : '1px solid #ccc',
+                        border: talleSeleccionado === variante.size ? '2px solid #4040b5' : '1px solid #ccc',
                         padding: '10px',
-                        margin: '5px',
                         borderRadius: '5px'
                       }}
                     >
-                      <p>Talle: {variante.size}</p>
-                      <p>Stock: {variante.stock}</p>
-                    </div>
+                      <span>Talle: {variante.size}</span>
+                      { /* <p>Stock: {variante.stock}</p> */ }
+                    </span>
                   ))}
                 </div>
               </div>
