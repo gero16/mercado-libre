@@ -36,7 +36,7 @@ const DetalleProductoPage: React.FC = () => {
       // Seleccionar la primera variante por defecto
       if (productoData.variantes && productoData.variantes.length > 0) {
         // Agrupar variantes por color y tomar la primera de cada grupo
-        const variantesUnicas = productoData.variantes.reduce((unique: Variante[], variante) => {
+        const variantesUnicas = productoData.variantes.reduce((unique: Variante[], variante: Variante) => {
           if (!unique.some(v => v.color === variante.color)) {
             unique.push(variante);
           }
@@ -45,6 +45,12 @@ const DetalleProductoPage: React.FC = () => {
         
         if (variantesUnicas.length > 0) {
           setVarianteSeleccionada(variantesUnicas[0])
+          
+          // Seleccionar el primer talle disponible para este color
+          const talles = productoData.variantes.filter((v: Variante) => v.color === variantesUnicas[0].color);
+          if (talles.length > 0) {
+            setTalleSeleccionado(talles[0].size);
+          }
         }
       }
       
@@ -57,10 +63,10 @@ const DetalleProductoPage: React.FC = () => {
   }
 
   // Obtener variantes únicas por color
-  const getVariantesUnicas = () => {
+  const getVariantesUnicas = (): Variante[] => {
     if (!producto || !producto.variantes) return [];
     
-    return producto.variantes.reduce((unique: Variante[], variante) => {
+    return producto.variantes.reduce((unique: Variante[], variante: Variante) => {
       if (!unique.some(v => v.color === variante.color)) {
         unique.push(variante);
       }
@@ -69,10 +75,10 @@ const DetalleProductoPage: React.FC = () => {
   }
 
   // Obtener talles disponibles para la variante seleccionada (color)
-  const getTallesDisponibles = () => {
+  const getTallesDisponibles = (): Variante[] => {
     if (!producto || !producto.variantes || !varianteSeleccionada) return [];
     
-    return producto.variantes.filter(v => v.color === varianteSeleccionada.color);
+    return producto.variantes.filter((v: Variante) => v.color === varianteSeleccionada.color);
   }
 
   const handleVarianteChange = (variante: Variante) => {
@@ -98,7 +104,7 @@ const DetalleProductoPage: React.FC = () => {
     // Encontrar el stock para la variante y talle seleccionados
     let stockDisponible = producto?.available_quantity || 0;
     if (varianteSeleccionada && talleSeleccionado && producto?.variantes) {
-      const varianteConTalle = producto.variantes.find(v => 
+      const varianteConTalle = producto.variantes.find((v: Variante) => 
         v.color === varianteSeleccionada.color && v.size === talleSeleccionado
       );
       stockDisponible = varianteConTalle?.stock || 0;
@@ -130,7 +136,7 @@ const DetalleProductoPage: React.FC = () => {
     // Encontrar la variante exacta (color + talle)
     let varianteExacta = null;
     if (varianteSeleccionada && talleSeleccionado && producto.variantes) {
-      varianteExacta = producto.variantes.find(v => 
+      varianteExacta = producto.variantes.find((v: Variante) => 
         v.color === varianteSeleccionada.color && v.size === talleSeleccionado
       );
     }
@@ -190,7 +196,7 @@ const DetalleProductoPage: React.FC = () => {
   // Determinar el stock disponible para mostrar
   let stockDisponible = producto.available_quantity;
   if (varianteSeleccionada && talleSeleccionado && producto.variantes) {
-    const varianteExacta = producto.variantes.find(v => 
+    const varianteExacta = producto.variantes.find((v: Variante) => 
       v.color === varianteSeleccionada.color && v.size === talleSeleccionado
     );
     stockDisponible = varianteExacta?.stock || 0;
