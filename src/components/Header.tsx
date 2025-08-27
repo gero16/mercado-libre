@@ -9,7 +9,7 @@ const Header: React.FC = () => {
   return (
     <>
       <header className="header">
-        <img className="logo" src="/src/img/adidas-logo.png" alt="Logo-Adidas" />
+        <img className="logo" src="/public/img/adidas-logo.png" alt="Logo-Adidas" />
 
         <div className="navbar">
           <ul>
@@ -24,7 +24,7 @@ const Header: React.FC = () => {
                 onClick={() => setCartOpen(!cartOpen)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               >
-                <img className="carrito" src="/src/img/carrito.png" alt="Carrito" />
+                <img className="carrito" src="/public/img/carrito.png" alt="Carrito" />
                 <span className="numero-compras">{cartItemCount}</span>
               </button>
             </li>
