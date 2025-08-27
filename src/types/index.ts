@@ -29,6 +29,8 @@ export interface Variante {
   id: string;
   __v: number;
   color: string;
+  price: number;
+
   image: string;
   product_id: string;
   size: string;
@@ -48,6 +50,7 @@ export interface ProductoML {
   cantidad?: number;
   description?: string;
   categoria?: string;
+  category_id? : string,
   images: Array<{
     id: string;
     url: string;

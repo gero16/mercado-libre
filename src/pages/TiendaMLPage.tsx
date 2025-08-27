@@ -1,36 +1,52 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ProductoML } from '../types'
+import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
+
+// Mapeo de categorías de ML a tus categorías
+const mapeoCategorias: Record<string, string> = {
+  'MLU158376': 'remeras',
+  'MLU163646': 'electronica',
+  'MLU6344': 'consolas',
+}
+
+// Función para obtener categoría segura
+const obtenerCategoria = (categoryId: string | undefined): string => {
+  if (!categoryId) return 'otros'
+  return mapeoCategorias[categoryId] || 'otros'
+}
+
+// Interfaz para items a mostrar
+interface ItemTienda {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  stock: number;
+  esVariante: boolean;
+  variante?: Variante;
+  productoPadre?: ProductoML;
+  categoria?: string;
+}
 
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
-  const [productos, setProductos] = useState<ProductoML[]>([])
-  const [filteredProductos, setFilteredProductos] = useState<ProductoML[]>([])
+  const [itemsTienda, setItemsTienda] = useState<ItemTienda[]>([])
+  const [filteredItems, setFilteredItems] = useState<ItemTienda[]>([])
   const [priceFilter, setPriceFilter] = useState(0)
   const [categoryFilter, setCategoryFilter] = useState('mostrar-todo')
   const [loading, setLoading] = useState(true)
+  const [categorias, setCategorias] = useState<{id: string, name: string}[]>([
+    { id: 'mostrar-todo', name: 'Mostrar Todo' }
+  ])
   const { addToCart } = useCart()
-
-  const categories = [
-    { id: 'mostrar-todo', name: 'Mostrar Todo' },
-    { id: 'championes', name: 'Championes' },
-    { id: 'bermudas', name: 'Bermudas' },
-    { id: 'gorros', name: 'Gorros' },
-    { id: 'medias', name: 'Medias' },
-    { id: 'remeras', name: 'Remeras' },
-    { id: 'mochilas', name: 'Mochilas' },
-    { id: 'pantalones', name: 'Pantalones' }
-  ]
 
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
-      // Usar el endpoint correcto para productos de ML
       const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos')
       const data = await response.json()
-      console.log('Productos ML recibidos:', data) // Debug
-      return data || [] // Los productos ML vienen directamente, no en .registros
+      return data || []
     } catch (error) {
       console.error('Error fetching ML products:', error)
       return []
@@ -40,46 +56,108 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       const productList = await fetchProducts()
-      console.log('Productos cargados:', productList) // Debug
-      setProductos(productList)
-      setFilteredProductos(productList)
+      
+      // Procesar productos para crear items únicos para la tienda
+      const items: ItemTienda[] = []
+      
+      productList.forEach(producto => {
+        const categoria = obtenerCategoria(producto.category_id)
+        
+        // Si el producto tiene variantes, mostramos solo la primera variante de cada combinación única
+        if (producto.variantes && producto.variantes.length > 0) {
+          // Agrupar variantes por color para evitar duplicados
+          const variantesUnicas = producto.variantes.reduce((unique: Variante[], variante) => {
+            // Si ya tenemos una variante con este color, no agregar otra
+            if (!unique.some(v => v.color === variante.color)) {
+              unique.push(variante);
+            }
+            return unique;
+          }, []);
+          
+          // Usar solo la primera variante de cada color
+          variantesUnicas.forEach(variante => {
+            items.push({
+              id: `${producto._id}_${variante.color}`,
+              title: `${producto.title} - ${variante.color || ''}`.trim(),
+              price: variante.price || producto.price,
+              image: variante.image || producto.images[0]?.url || producto.main_image,
+              stock: producto.variantes.reduce((total, v) => total + v.stock, 0), // Stock total de todas las variantes
+              esVariante: true,
+              variante: variante,
+              productoPadre: producto,
+              categoria: categoria
+            })
+          })
+        } else {
+          // Si no tiene variantes, mostramos el producto principal
+          items.push({
+            id: producto._id,
+            title: producto.title,
+            price: producto.price,
+            image: producto.images[0]?.url || producto.main_image,
+            stock: producto.available_quantity,
+            esVariante: false,
+            productoPadre: producto,
+            categoria: categoria
+          })
+        }
+      })
+      
+      setItemsTienda(items)
+      setFilteredItems(items)
+      
+      // Extraer categorías únicas de los items
+      const categoriasUnicas = [...new Set(items.map(item => item.categoria))].filter(Boolean) as string[]
+      
+      // Crear array de categorías para el filtro
+      const categoriasFiltro = categoriasUnicas.map(cat => ({
+        id: cat,
+        name: cat.charAt(0).toUpperCase() + cat.slice(1)
+      }))
+      
+      setCategorias([
+        { id: 'mostrar-todo', name: 'Mostrar Todo' },
+        ...categoriasFiltro
+      ])
+      
       setLoading(false)
     }
     loadProducts()
   }, [])
 
-  // Filtrar productos
+  // Filtrar items
   useEffect(() => {
-    let filtered = productos
+    let filtered = itemsTienda
 
     // Filtro por categoría
     if (categoryFilter !== 'mostrar-todo') {
-      filtered = filtered.filter(product => product.categoria === categoryFilter)
+      filtered = filtered.filter(item => item.categoria === categoryFilter)
     }
 
     // Filtro por precio
-    filtered = filtered.filter(product => product.price >= priceFilter)
+    filtered = filtered.filter(item => item.price >= priceFilter)
 
-    console.log('Productos filtrados:', filtered) // Debug
-    setFilteredProductos(filtered)
-  }, [productos, categoryFilter, priceFilter])
+    setFilteredItems(filtered)
+  }, [itemsTienda, categoryFilter, priceFilter])
 
-  const handleProductClick = (productId: string) => {
-    navigate(`/producto/${productId}`)
+  const handleProductClick = (item: ItemTienda) => {
+    // Navegar al producto principal (no a la variante)
+    navigate(`/producto/${item.productoPadre?._id || item.id}`)
   }
 
-  const handleAddToCart = (e: React.MouseEvent, product: ProductoML) => {
-    e.stopPropagation() // Evitar que se active la navegación al producto
-    // Convertir ProductoML a formato compatible con el carrito
+  const handleAddToCart = (e: React.MouseEvent, item: ItemTienda) => {
+    e.stopPropagation()
+    
     const cartProduct = {
-      id: parseInt(product._id) || 0,
-      name: product.title,
-      image: product.images[0].url,
-      category: product.categoria || 'general',
-      price: product.price,
-      stock: product.available_quantity,
+      id: parseInt(item.id),
+      name: item.title,
+      image: item.image,
+      category: item.categoria || 'general',
+      price: item.price,
+      stock: item.stock,
       cantidad: 1
     }
+    
     addToCart(cartProduct)
   }
 
@@ -126,7 +204,7 @@ const TiendaMLPage: React.FC = () => {
               </section>
 
               <section className="filtro-categorias centrar-texto">
-                {categories.map(category => (
+                {categorias.map(category => (
                   <p 
                     key={category.id}
                     className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
@@ -141,29 +219,29 @@ const TiendaMLPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Productos */}
+        {/* Items de la tienda */}
         <div className="productos">
-          {filteredProductos.map(producto => (
+          {filteredItems.map(item => (
             <div 
-              key={producto._id} 
+              key={item.id}
               className="producto centrar-texto"
-              onClick={() => handleProductClick(producto._id)}
+              onClick={() => handleProductClick(item)}
               style={{ cursor: 'pointer' }}
             >
-              <img src={producto.images[0].url} alt={producto.title} />
-              <p>{producto.title}</p>
-              <p>${producto.price}</p>
+              <img src={item.image} alt={item.title} />
+              <p>{item.title}</p>
+              <p>${item.price}</p>
               <button 
                 className="add"
-                onClick={(e) => handleAddToCart(e, producto)}
-                disabled={producto.available_quantity <= 0}
+                onClick={(e) => handleAddToCart(e, item)}
+                disabled={item.stock <= 0}
               >
-                {producto.available_quantity <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
+                {item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
               </button>
             </div>
           ))}
           
-          {filteredProductos.length === 0 && (
+          {filteredItems.length === 0 && (
             <div className="centrar-texto">
               <p>No se encontraron productos con los filtros seleccionados.</p>
             </div>
@@ -174,4 +252,4 @@ const TiendaMLPage: React.FC = () => {
   )
 }
 
-export default TiendaMLPage 
+export default TiendaMLPage
