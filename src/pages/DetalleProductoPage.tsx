@@ -10,6 +10,7 @@ const DetalleProductoPage: React.FC = () => {
   
   const [producto, setProducto] = useState<ProductoML | null>(null)
   const [varianteSeleccionada, setVarianteSeleccionada] = useState<Variante | null>(null)
+  const [talleSeleccionado, setTalleSeleccionado] = useState<string>('')
   const [cantidad, setCantidad] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -34,7 +35,17 @@ const DetalleProductoPage: React.FC = () => {
       
       // Seleccionar la primera variante por defecto
       if (productoData.variantes && productoData.variantes.length > 0) {
-        setVarianteSeleccionada(productoData.variantes[0])
+        // Agrupar variantes por color y tomar la primera de cada grupo
+        const variantesUnicas = productoData.variantes.reduce((unique: Variante[], variante) => {
+          if (!unique.some(v => v.color === variante.color)) {
+            unique.push(variante);
+          }
+          return unique;
+        }, []);
+        
+        if (variantesUnicas.length > 0) {
+          setVarianteSeleccionada(variantesUnicas[0])
+        }
       }
       
       setLoading(false)
@@ -45,32 +56,100 @@ const DetalleProductoPage: React.FC = () => {
     }
   }
 
+  // Obtener variantes únicas por color
+  const getVariantesUnicas = () => {
+    if (!producto || !producto.variantes) return [];
+    
+    return producto.variantes.reduce((unique: Variante[], variante) => {
+      if (!unique.some(v => v.color === variante.color)) {
+        unique.push(variante);
+      }
+      return unique;
+    }, []);
+  }
+
+  // Obtener talles disponibles para la variante seleccionada (color)
+  const getTallesDisponibles = () => {
+    if (!producto || !producto.variantes || !varianteSeleccionada) return [];
+    
+    return producto.variantes.filter(v => v.color === varianteSeleccionada.color);
+  }
+
   const handleVarianteChange = (variante: Variante) => {
     setVarianteSeleccionada(variante)
+    
+    // Seleccionar el primer talle disponible para este color
+    const talles = getTallesDisponibles();
+    if (talles.length > 0) {
+      setTalleSeleccionado(talles[0].size);
+    }
+    
     setCantidad(1) // Resetear cantidad al cambiar variante
+  }
+
+  const handleTalleChange = (talle: string) => {
+    setTalleSeleccionado(talle);
+    setCantidad(1); // Resetear cantidad al cambiar talle
   }
 
   const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value)
-    if (value > 0 && value <= (producto?.available_quantity || 1)) {
+    
+    // Encontrar el stock para la variante y talle seleccionados
+    let stockDisponible = producto?.available_quantity || 0;
+    if (varianteSeleccionada && talleSeleccionado && producto?.variantes) {
+      const varianteConTalle = producto.variantes.find(v => 
+        v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+      );
+      stockDisponible = varianteConTalle?.stock || 0;
+    }
+    
+    if (value > 0 && value <= stockDisponible) {
       setCantidad(value)
     }
   }
 
   const handleAgregarAlCarrito = () => {
-    if (!producto || !varianteSeleccionada) {
+    if (!producto) {
+      alert('Error: Producto no disponible')
+      return
+    }
+
+    // Si hay variantes pero ninguna seleccionada
+    if (producto.variantes && producto.variantes.length > 0 && !varianteSeleccionada) {
       alert('Por favor, selecciona una variante')
       return
     }
 
-    // Convertir ProductoML a formato compatible con el carrito
+    // Si hay variantes pero ningún talle seleccionado
+    if (producto.variantes && producto.variantes.length > 0 && !talleSeleccionado) {
+      alert('Por favor, selecciona un talle')
+      return
+    }
+
+    // Encontrar la variante exacta (color + talle)
+    let varianteExacta = null;
+    if (varianteSeleccionada && talleSeleccionado && producto.variantes) {
+      varianteExacta = producto.variantes.find(v => 
+        v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+      );
+    }
+
+    // Determinar el stock disponible
+    const stockDisponible = varianteExacta?.stock || producto.available_quantity
+    
+    // Convertir a formato compatible con el carrito
     const cartProduct = {
-      id: parseInt(producto._id) || 0,
-      name: `${producto.title} - ${varianteSeleccionada.color} ${varianteSeleccionada.size}`,
-      image: varianteSeleccionada.image || producto.main_image,
+      id: varianteExacta 
+        ? parseInt(varianteExacta._id)  // Usar ID de la variante exacta
+        : parseInt(producto._id),       // O ID del producto si no hay variantes
+      name: varianteExacta 
+        ? `${producto.title} - ${varianteExacta.color} ${varianteExacta.size}`
+        : producto.title,
+      image: varianteExacta?.image || producto.images[0]?.url || producto.main_image,
       category: producto.categoria || 'general',
-      price: producto.price,
-      stock: varianteSeleccionada.stock,
+      price: varianteExacta?.price || producto.price,
+      stock: stockDisponible,
       cantidad: cantidad
     }
     
@@ -102,6 +181,21 @@ const DetalleProductoPage: React.FC = () => {
     )
   }
 
+  // Obtener variantes únicas por color
+  const variantesUnicas = getVariantesUnicas();
+  
+  // Obtener talles disponibles para la variante seleccionada
+  const tallesDisponibles = getTallesDisponibles();
+  
+  // Determinar el stock disponible para mostrar
+  let stockDisponible = producto.available_quantity;
+  if (varianteSeleccionada && talleSeleccionado && producto.variantes) {
+    const varianteExacta = producto.variantes.find(v => 
+      v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+    );
+    stockDisponible = varianteExacta?.stock || 0;
+  }
+
   return (
     <div className="container">
       <div className="detalle-producto">
@@ -117,7 +211,7 @@ const DetalleProductoPage: React.FC = () => {
           <div className="imagen-producto">
             <img 
               id="imagen-principal" 
-              src={producto.images[0]?.url || producto.main_image} 
+              src={varianteSeleccionada?.image || producto.images[0]?.url || producto.main_image} 
               alt={producto.title}
             />
           </div>
@@ -127,32 +221,62 @@ const DetalleProductoPage: React.FC = () => {
             <h1 id="titulo-producto">{producto.title}</h1>
             
             <div className="precio-disponibilidad">
-              <h2 id="precio-producto">${producto.price}</h2>
+              <h2 id="precio-producto">${varianteSeleccionada?.price || producto.price}</h2>
               <p 
                 id="disponibilidad-producto"
-                style={{ color: producto.available_quantity > 0 ? 'green' : 'red' }}
+                style={{ color: stockDisponible > 0 ? 'green' : 'red' }}
               >
-                {producto.available_quantity > 0 
-                  ? `Disponible (${producto.available_quantity} unidades)` 
+                {stockDisponible > 0 
+                  ? `Disponible (${stockDisponible} unidades)` 
                   : 'Agotado'
                 }
               </p>
             </div>
 
-            {/* Variantes */}
-            {producto.variantes && producto.variantes.length > 0 && (
+            {/* Variantes (solo por color) */}
+            {variantesUnicas.length > 0 && (
               <div className="variantes">
-                <h3>Variantes disponibles:</h3>
+                <h3>Colores disponibles:</h3>
                 <div id="opciones-variantes" className="opciones-variantes">
-                  {producto.variantes.map((variante) => (
+                  {variantesUnicas.map((variante) => (
                     <div 
                       key={variante._id}
                       className={`variante-opcion ${varianteSeleccionada?._id === variante._id ? 'seleccionada' : ''}`}
                       onClick={() => handleVarianteChange(variante)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ 
+                        cursor: 'pointer',
+                        border: varianteSeleccionada?._id === variante._id ? '2px solid blue' : '1px solid #ccc',
+                        padding: '10px',
+                        margin: '5px',
+                        borderRadius: '5px'
+                      }}
                     >
                       <p>Color: {variante.color}</p>
-                      <p>Talla: {variante.size}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Talles (solo para la variante seleccionada) */}
+            {tallesDisponibles.length > 0 && (
+              <div className="talles">
+                <h3>Talles disponibles:</h3>
+                <div id="opciones-talles" className="opciones-talles">
+                  {tallesDisponibles.map((variante) => (
+                    <div 
+                      key={variante._id}
+                      className={`talle-opcion ${talleSeleccionado === variante.size ? 'seleccionada' : ''}`}
+                      onClick={() => handleTalleChange(variante.size)}
+                      style={{ 
+                        cursor: 'pointer',
+                        border: talleSeleccionado === variante.size ? '2px solid blue' : '1px solid #ccc',
+                        padding: '10px',
+                        margin: '5px',
+                        borderRadius: '5px'
+                      }}
+                    >
+                      <p>Talle: {variante.size}</p>
                       <p>Stock: {variante.stock}</p>
                     </div>
                   ))}
@@ -167,9 +291,10 @@ const DetalleProductoPage: React.FC = () => {
                 type="number"
                 id="cantidad"
                 min="1"
-                max={producto.available_quantity}
+                max={stockDisponible}
                 value={cantidad}
                 onChange={handleCantidadChange}
+                disabled={stockDisponible === 0}
               />
             </div>
 
@@ -186,9 +311,9 @@ const DetalleProductoPage: React.FC = () => {
               id="agregar-carrito"
               className="btn-agregar-carrito"
               onClick={handleAgregarAlCarrito}
-              disabled={producto.available_quantity === 0}
+              disabled={stockDisponible === 0}
             >
-              {producto.available_quantity === 0 ? 'Agotado' : 'Agregar al Carrito'}
+              {stockDisponible === 0 ? 'Agotado' : 'Agregar al Carrito'}
             </button>
           </div>
         </div>
@@ -197,4 +322,4 @@ const DetalleProductoPage: React.FC = () => {
   )
 }
 
-export default DetalleProductoPage 
+export default DetalleProductoPage
