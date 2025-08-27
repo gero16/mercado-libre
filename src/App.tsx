@@ -23,11 +23,12 @@ function App() {
     <CartProvider>
       <Router>
         <div className="App">
+          
           <Header />
           
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/tienda" element={<TiendaPage />} />
+            {/* Route path="/tienda" element={<TiendaPage />} />} */ }
             <Route path="/tienda-ml" element={<TiendaMLPage />} />
             <Route path="/producto/:id" element={<DetalleProductoPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />

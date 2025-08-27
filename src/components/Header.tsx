@@ -14,8 +14,8 @@ const Header: React.FC = () => {
         <div className="navbar">
           <ul>
             <li><Link to="/">Inicio</Link></li>
-            <li><Link to="/tienda">Tienda</Link></li>
-            <li><Link to="/tienda-ml">Productos - Mercado Libre</Link></li>
+           { /*<li><Link to="/tienda">Tienda</Link></li> */ }
+            <li><Link to="/tienda-ml">Productos </Link></li>
             <li><Link to="/contacto">Contacto</Link></li>
             
             <li>
