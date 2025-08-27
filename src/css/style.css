@@ -166,8 +166,9 @@ footer img {
   font-weight: bold;
   font-size: 8px;
   position: relative;
-  top: -20px;
-  left: -4px;
+  color: white;
+  top: -8px;
+  left: -8px;
   background-color: rgb(98, 17, 35);
   padding: 3px;
   border-radius: 10px;
