@@ -1,36 +1,56 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Producto } from '../types'
+import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
 
-const TiendaPage: React.FC = () => {
+// Mapeo de categorías de ML a tus categorías
+const mapeoCategorias: Record<string, string> = {
+  'MLU158376': 'remeras',
+  'MLU163646': 'electronica',
+  'MLU6344': 'consolas',
+  "MLU190994": 'mochilas',
+}
+
+// Función para obtener categoría segura
+const obtenerCategoria = (categoryId: string | undefined): string => {
+  if (!categoryId) return 'otros'
+  return mapeoCategorias[categoryId] || 'otros'
+}
+
+// Interfaz para items a mostrar
+interface ItemTienda {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  stock: number;
+  esVariante: boolean;
+  variante?: Variante;
+  productoPadre?: ProductoML;
+  categoria?: string;
+}
+
+const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
-  const [productos, setProductos] = useState<Producto[]>([])
-  const [filteredProductos, setFilteredProductos] = useState<Producto[]>([])
+  const [itemsTienda, setItemsTienda] = useState<ItemTienda[]>([])
+  const [filteredItems, setFilteredItems] = useState<ItemTienda[]>([])
   const [priceFilter, setPriceFilter] = useState(0)
   const [categoryFilter, setCategoryFilter] = useState('mostrar-todo')
   const [loading, setLoading] = useState(true)
+  const [categorias, setCategorias] = useState<{id: string, name: string}[]>([
+    { id: 'mostrar-todo', name: 'Mostrar Todo' }
+  ])
   const { addToCart } = useCart()
 
-  const categories = [
-    { id: 'mostrar-todo', name: 'Mostrar Todo' },
-    { id: 'championes', name: 'Championes' },
-    { id: 'bermudas', name: 'Bermudas' },
-    { id: 'gorros', name: 'Gorros' },
-    { id: 'medias', name: 'Medias' },
-    { id: 'remeras', name: 'Remeras' },
-    { id: 'mochilas', name: 'Mochilas' },
-    { id: 'pantalones', name: 'Pantalones' }
-  ]
-
-  // Fetch productos desde el backend
-  const fetchProducts = async (): Promise<Producto[]> => {
+  // Fetch productos de Mercado Libre desde el backend
+  const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
-      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/api/productos')
+      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos')
       const data = await response.json()
-      return data.registros || []
+      console.log(data)
+      return data || []
     } catch (error) {
-      console.error('Error fetching products:', error)
+      console.error('Error fetching ML products:', error)
       return []
     }
   }
@@ -38,35 +58,109 @@ const TiendaPage: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       const productList = await fetchProducts()
-      setProductos(productList)
-      setFilteredProductos(productList)
+      
+      // Procesar productos para crear items únicos para la tienda
+      const items: ItemTienda[] = []
+      
+      productList.forEach(producto => {
+        const categoria = obtenerCategoria(producto.category_id)
+        
+        // Si el producto tiene variantes, mostramos solo la primera variante de cada combinación única
+        if (producto.variantes && producto.variantes.length > 0) {
+          // Agrupar variantes por color para evitar duplicados
+          const variantesUnicas = producto.variantes.reduce((unique: Variante[], variante) => {
+            // Si ya tenemos una variante con este color, no agregar otra
+            if (!unique.some(v => v.color === variante.color)) {
+              unique.push(variante);
+            }
+            return unique;
+          }, []);
+          
+          // Usar solo la primera variante de cada color
+          variantesUnicas.forEach(variante => {
+            items.push({
+              id: `${producto._id}_${variante.color}`,
+              title: `${producto.title} - ${variante.color || ''}`.trim(),
+              price: variante.price || producto.price,
+              image: variante.image || producto.images[0]?.url || producto.main_image,
+              stock: producto.variantes.reduce((total, v) => total + v.stock, 0), // Stock total de todas las variantes
+              esVariante: true,
+              variante: variante,
+              productoPadre: producto,
+              categoria: categoria
+            })
+          })
+        } else {
+          // Si no tiene variantes, mostramos el producto principal
+          items.push({
+            id: producto._id,
+            title: producto.title,
+            price: producto.price,
+            image: producto.images[0]?.url || producto.main_image,
+            stock: producto.available_quantity,
+            esVariante: false,
+            productoPadre: producto,
+            categoria: categoria
+          })
+        }
+      })
+      
+      setItemsTienda(items)
+      setFilteredItems(items)
+      
+      // Extraer categorías únicas de los items
+      const categoriasUnicas = [...new Set(items.map(item => item.categoria))].filter(Boolean) as string[]
+      
+      // Crear array de categorías para el filtro
+      const categoriasFiltro = categoriasUnicas.map(cat => ({
+        id: cat,
+        name: cat.charAt(0).toUpperCase() + cat.slice(1)
+      }))
+      
+      setCategorias([
+        { id: 'mostrar-todo', name: 'Mostrar Todo' },
+        ...categoriasFiltro
+      ])
+      
       setLoading(false)
     }
     loadProducts()
   }, [])
 
-  // Filtrar productos
+  // Filtrar items
   useEffect(() => {
-    let filtered = productos
+    let filtered = itemsTienda
 
     // Filtro por categoría
     if (categoryFilter !== 'mostrar-todo') {
-      filtered = filtered.filter(product => product.category === categoryFilter)
+      filtered = filtered.filter(item => item.categoria === categoryFilter)
     }
 
     // Filtro por precio
-    filtered = filtered.filter(product => product.price >= priceFilter)
+    filtered = filtered.filter(item => item.price >= priceFilter)
 
-    setFilteredProductos(filtered)
-  }, [productos, categoryFilter, priceFilter])
+    setFilteredItems(filtered)
+  }, [itemsTienda, categoryFilter, priceFilter])
 
-  const handleProductClick = (productId: number) => {
-    navigate(`/producto/${productId}`)
+  const handleProductClick = (item: ItemTienda) => {
+    // Navegar al producto principal (no a la variante)
+    navigate(`/producto/${item.productoPadre?._id || item.id}`)
   }
 
-  const handleAddToCart = (e: React.MouseEvent, product: Producto) => {
-    e.stopPropagation() // Evitar que se active la navegación al producto
-    addToCart(product)
+  const handleAddToCart = (e: React.MouseEvent, item: ItemTienda) => {
+    e.stopPropagation()
+    
+    const cartProduct = {
+      id: parseInt(item.id),
+      name: item.title,
+      image: item.image,
+      category: item.categoria || 'general',
+      price: item.price,
+      stock: item.stock,
+      cantidad: 1
+    }
+    
+    addToCart(cartProduct)
   }
 
   const handleCategoryFilter = (categoryId: string) => {
@@ -80,7 +174,7 @@ const TiendaPage: React.FC = () => {
   if (loading) {
     return (
       <main className="container">
-        <div className="preloader">Cargando productos...</div>
+        <div className="preloader">Cargando productos de Mercado Libre...</div>
       </main>
     )
   }
@@ -112,7 +206,7 @@ const TiendaPage: React.FC = () => {
               </section>
 
               <section className="filtro-categorias centrar-texto">
-                {categories.map(category => (
+                {categorias.map(category => (
                   <p 
                     key={category.id}
                     className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
@@ -127,35 +221,29 @@ const TiendaPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Productos */}
+        {/* Items de la tienda */}
         <div className="productos">
-          {filteredProductos.map(producto => {
-            const imageSrc = producto.image.startsWith('img/') 
-              ? `/${producto.image}` 
-              : producto.image
-
-            return (
-              <div 
-                key={producto.id} 
-                className="producto centrar-texto"
-                onClick={() => handleProductClick(producto.id)}
-                style={{ cursor: 'pointer' }}
+          {filteredItems.map(item => (
+            <div 
+              key={item.id}
+              className="producto centrar-texto"
+              onClick={() => handleProductClick(item)}
+              style={{ cursor: 'pointer' }}
+            >
+              <img src={item.image} alt={item.title} />
+              <p>{item.title}</p>
+              <p>${item.price}</p>
+              <button 
+                className="add"
+                onClick={(e) => handleAddToCart(e, item)}
+                disabled={item.stock <= 0}
               >
-                <img src={imageSrc} alt={producto.name} />
-                <p>{producto.name}</p>
-                <p>${producto.price}</p>
-                <button 
-                  className="add"
-                  onClick={(e) => handleAddToCart(e, producto)}
-                  disabled={producto.stock <= 0}
-                >
-                  {producto.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
-                </button>
-              </div>
-            )
-          })}
+                {item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
+              </button>
+            </div>
+          ))}
           
-          {filteredProductos.length === 0 && (
+          {filteredItems.length === 0 && (
             <div className="centrar-texto">
               <p>No se encontraron productos con los filtros seleccionados.</p>
             </div>
@@ -166,4 +254,4 @@ const TiendaPage: React.FC = () => {
   )
 }
 
-export default TiendaPage 
+export default TiendaMLPage

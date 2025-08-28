@@ -4,7 +4,7 @@ import { CartProvider } from './context/CartContext'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
-import TiendaMLPage from './pages/TiendaMLPage'
+import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
 import CheckoutPage from './pages/CheckoutPage'
 import ContactoPage from './pages/ContactoPage'
@@ -27,8 +27,8 @@ function App() {
           
           <Routes>
             <Route path="/" element={<HomePage />} />
-            {/* Route path="/tienda" element={<TiendaPage />} />} */ }
-            <Route path="/tienda-ml" element={<TiendaMLPage />} />
+            {/* Tienda antigua desde BD - Route path="/tienda" element={<TiendaPage />} />} */ }
+            <Route path="/tienda-ml" element={<TiendaPage />} />
             <Route path="/producto/:id" element={<DetalleProductoPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/contacto" element={<ContactoPage />} />
