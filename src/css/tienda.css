@@ -388,7 +388,7 @@
   }
   .producto {
     width: 190px;
-    height: 360px;
+    height: 340px;
   }
   
   .producto img {
@@ -400,7 +400,7 @@
 @media (min-width: 1300px) {
   .producto {
     width: 200px;
-    height: 365px;
+    height: 345px;
   }
   
   .producto img {
@@ -417,7 +417,7 @@
 
   .producto {
     width: 240px;
-    height: 395px;
+    height: 375px;
   }
   
   .producto img {
