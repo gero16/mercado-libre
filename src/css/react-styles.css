@@ -320,7 +320,7 @@
 
 .producto {
   transition: all 0.3s ease !important;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+  /* box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; */ 
   border: none !important;
   overflow: hidden;
   position: relative;
