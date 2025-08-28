@@ -8,6 +8,7 @@ const mapeoCategorias: Record<string, string> = {
   'MLU158376': 'remeras',
   'MLU163646': 'electronica',
   'MLU6344': 'consolas',
+  "MLU190994": 'mochilas',
 }
 
 // Función para obtener categoría segura
@@ -46,6 +47,7 @@ const TiendaMLPage: React.FC = () => {
     try {
       const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos')
       const data = await response.json()
+      console.log(data)
       return data || []
     } catch (error) {
       console.error('Error fetching ML products:', error)
