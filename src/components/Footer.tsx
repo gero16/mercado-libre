@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="footer">
-          <p>© Copyright 2022 / Tiendita Virtual </p>
+          <p>© Copyright 2023 / Tiendita Virtual </p>
        
           <div className="preguntas">
             <p>Terminos y Condiciones</p>

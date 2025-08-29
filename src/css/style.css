@@ -299,6 +299,11 @@ footer img {
   margin: 30px auto 30px auto;
 }
 
+.redes-sociales {
+  display: flex;
+  gap: 5px;
+}
+
 .redes-sociales img {
   width: 25px;
   height: 25px;
