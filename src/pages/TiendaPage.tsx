@@ -41,7 +41,7 @@ const TiendaMLPage: React.FC = () => {
     { id: 'mostrar-todo', name: 'Mostrar Todo' }
   ])
   const { addToCart } = useCart()
-
+  //
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
