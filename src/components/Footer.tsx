@@ -25,8 +25,10 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="redes-sociales">
-            <img src="/src/img/instagram.png" alt="logo-instagram" />
-            <img src="/src/img/facebook.png" alt="logo-facebook" />
+            <img src="/img/instagram.png" alt="logo-instagram" />
+            <img src="/img/facebook.png" alt="logo-facebook" />
+            <img src="/img/whatsapp.png" alt="logo-whatsapp" />
+
           </div>
         </div>
       </div>
