@@ -202,32 +202,7 @@
 }
 
 
-/** Parte productos **/
-.producto {
-  color: black;
-  background-color: white;
-  border-radius: 10px;
-  margin: 0px auto 20px auto;
-  width: 200px;
-  height: 355px;
-  transition: 0.5s;
-  
-}
 
-.producto img {
-  width: 200px;
-  height: 200px;
-  margin: 0px 0px 10px 0px;
-  border-radius: 8px;
-  transition: all 0.5s;
-}
-
-
-.producto:hover img {
-  filter: opacity(0.8);
-  transform: scale(1.1);
-
-}
 
 .producto:hover .add {
   visibility: visible; /* crimson Antes */
