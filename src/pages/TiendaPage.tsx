@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
+import Loader from '../components/Loader'
+import ProductSkeleton from '../components/ProductSkeleton'
 
 // Mapeo de categorías de ML a tus categorías
 const mapeoCategorias: Record<string, string> = {
@@ -174,7 +176,51 @@ const TiendaMLPage: React.FC = () => {
   if (loading) {
     return (
       <main className="container">
-        <div className="preloader">Cargando productos de Mercado Libre...</div>
+        <section className="pagina-principal">
+          {/* Filtros */}
+          <div className="div-filtros">
+            <div className="filtro">
+              <div className="lista-filtro">
+                <section className="precios centrar-texto">
+                  <h3 className="precios-titulo">Filtrar por Precios</h3>
+                  <div className="div-precios">
+                    <div className="precio-principal">
+                      <label htmlFor="precio"></label>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="1500" 
+                        value={priceFilter} 
+                        className="input-precio" 
+                        id="precio"
+                        onChange={(e) => handlePriceFilter(Number(e.target.value))}
+                      />
+                      <span id="mostrar-precio">${priceFilter}</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="filtro-categorias centrar-texto">
+                  {categorias.map(category => (
+                    <p 
+                      key={category.id}
+                      className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
+                      onClick={() => handleCategoryFilter(category.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {category.name}
+                    </p>
+                  ))}
+                </section>
+              </div>
+            </div>
+          </div>
+
+          {/* Skeleton loader para productos */}
+          <div className="productos">
+            <ProductSkeleton count={8} />
+          </div>
+        </section>
       </main>
     )
   }

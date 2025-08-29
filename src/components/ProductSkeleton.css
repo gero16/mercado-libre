@@ -1,0 +1,125 @@
+/* Los skeletons ahora usan la clase .productos existente */
+
+.skeleton-product {
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  width: 100%;
+  max-width: 220px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-product:hover {
+  transform: scale(1.02);
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  margin-bottom: 0;
+  animation: shimmer 1.5s infinite;
+  object-fit: cover;
+}
+
+.skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-title {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.1s;
+}
+
+.skeleton-price {
+  height: 24px;
+  width: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.2s;
+}
+
+.skeleton-button {
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.3s;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Variantes de skeleton */
+.skeleton-compact {
+  padding: 0.75rem;
+}
+
+.skeleton-compact .skeleton-image {
+  height: 150px;
+}
+
+.skeleton-compact .skeleton-title {
+  height: 16px;
+}
+
+.skeleton-compact .skeleton-price {
+  height: 20px;
+}
+
+.skeleton-compact .skeleton-button {
+  height: 32px;
+}
+
+.skeleton-large {
+  padding: 1.5rem;
+}
+
+.skeleton-large .skeleton-image {
+  height: 250px;
+}
+
+.skeleton-large .skeleton-title {
+  height: 24px;
+}
+
+.skeleton-large .skeleton-price {
+  height: 28px;
+}
+
+.skeleton-large .skeleton-button {
+  height: 48px;
+}
+
+/* Responsive - Los skeletons heredan el responsive de .productos */
+@media (max-width: 768px) {
+  .skeleton-product {
+    padding: 15px;
+  }
+  
+  .skeleton-image {
+    height: 150px;
+  }
+}

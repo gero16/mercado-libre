@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
+import Loader from '../components/Loader'
 
 const DetalleProductoPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -166,9 +167,11 @@ const DetalleProductoPage: React.FC = () => {
   if (loading) {
     return (
       <div className="container">
-        <div className="centrar-texto">
-          <div className="preloader">Cargando producto...</div>
-        </div>
+        <Loader 
+          size="large" 
+          text="Cargando producto..." 
+          className="loader-fullscreen"
+        />
       </div>
     )
   }

@@ -67,7 +67,11 @@ header {
   font-size: medium;
 }
 
-
+.flex-center-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .navbar ul {
   display: flex;
   justify-content: flex-end;
