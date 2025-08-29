@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
 import Loader from '../components/Loader'
+import '../css/detalleProducto.css'
 
 const DetalleProductoPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -167,11 +168,38 @@ const DetalleProductoPage: React.FC = () => {
   if (loading) {
     return (
       <div className="container">
-        <Loader 
-          size="large" 
-          text="Cargando producto..." 
-          className="loader-fullscreen"
-        />
+        <div className="detalle-producto skeleton-container">
+          {/* Breadcrumb skeleton */}
+          <nav className="breadcrumb">
+            <div className="skeleton-breadcrumb"></div>
+          </nav>
+
+          <div className="producto-detalle">
+            {/* Imagen skeleton */}
+            <div className="imagen-producto">
+              <div className="skeleton-image-large"></div>
+            </div>
+
+            {/* Información skeleton */}
+            <div className="info-producto">
+              <div className="skeleton-title-large"></div>
+              <div className="skeleton-price-large"></div>
+              <div className="skeleton-stock"></div>
+              <div className="skeleton-variants">
+                <div className="skeleton-variant"></div>
+                <div className="skeleton-variant"></div>
+                <div className="skeleton-variant"></div>
+              </div>
+              <div className="skeleton-talles">
+                <div className="skeleton-talle"></div>
+                <div className="skeleton-talle"></div>
+                <div className="skeleton-talle"></div>
+              </div>
+              <div className="skeleton-cantidad"></div>
+              <div className="skeleton-button-large"></div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
