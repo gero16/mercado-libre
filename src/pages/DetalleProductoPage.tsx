@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
-import Loader from '../components/Loader'
 import '../css/detalleProducto.css'
 
 const DetalleProductoPage: React.FC = () => {

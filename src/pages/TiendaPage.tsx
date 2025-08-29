@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
-import Loader from '../components/Loader'
 import ProductSkeleton from '../components/ProductSkeleton'
 
 // Mapeo de categorías de ML a tus categorías
