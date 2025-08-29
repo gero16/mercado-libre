@@ -8,6 +8,9 @@ import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
 import CheckoutPage from './pages/CheckoutPage'
 import ContactoPage from './pages/ContactoPage'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import PaymentFailurePage from './pages/PaymentFailurePage'
+import PaymentPendingPage from './pages/PaymentPendingPage'
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -31,6 +34,9 @@ function App() {
             <Route path="/tienda-ml" element={<TiendaPage />} />
             <Route path="/producto/:id" element={<DetalleProductoPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout/success" element={<PaymentSuccessPage />} />
+            <Route path="/checkout/failure" element={<PaymentFailurePage />} />
+            <Route path="/checkout/pending" element={<PaymentPendingPage />} />
             <Route path="/contacto" element={<ContactoPage />} />
           </Routes>
           

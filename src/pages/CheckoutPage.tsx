@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
+import { useMercadoPago } from '../hooks/useMercadoPago'
+import { Wallet, initMercadoPago } from '@mercadopago/sdk-react'
+import { mercadoPagoConfig, validateMercadoPagoConfig } from '../config/mercadopago'
 
 interface CustomerData {
   name: string
@@ -13,8 +16,9 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal, clearCart } = useCart()
+  const { cartItems, cartTotal } = useCart()
   const navigate = useNavigate()
+  const { createPayment, isLoading, error, preferenceId, resetState } = useMercadoPago()
   
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
@@ -26,6 +30,23 @@ const CheckoutPage: React.FC = () => {
     postalCode: ''
   })
 
+  const [isFormValid, setIsFormValid] = useState(false)
+  const [showMercadoPago, setShowMercadoPago] = useState(false)
+
+  // Inicializar Mercado Pago cuando el componente se monta
+  useEffect(() => {
+    if (validateMercadoPagoConfig()) {
+      initMercadoPago(mercadoPagoConfig.publicKey)
+    }
+  }, [])
+
+  // Validar formulario en tiempo real
+  useEffect(() => {
+    const requiredFields = ['name', 'email', 'phone', 'address', 'city', 'state']
+    const isValid = requiredFields.every(field => customerData[field as keyof CustomerData])
+    setIsFormValid(isValid && cartItems.length > 0)
+  }, [customerData, cartItems])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setCustomerData(prev => ({
@@ -34,7 +55,7 @@ const CheckoutPage: React.FC = () => {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Validar campos requeridos
@@ -51,15 +72,39 @@ const CheckoutPage: React.FC = () => {
       return
     }
 
-    // Aquí se podría integrar con Mercado Pago como en el original
-    alert('Orden procesada correctamente!')
-    clearCart()
-    navigate('/')
+    if (!validateMercadoPagoConfig()) {
+      alert('Error: Configuración de Mercado Pago no encontrada. Por favor contacta al administrador.')
+      return
+    }
+
+    try {
+      // Crear preferencia de pago con Mercado Pago
+      const preference = await createPayment(cartItems, customerData)
+      
+      if (preference) {
+        setShowMercadoPago(true)
+        // El botón de Mercado Pago aparecerá automáticamente
+      }
+    } catch (error) {
+      console.error('Error al procesar el pago:', error)
+      alert('Error al procesar el pago. Por favor intenta nuevamente.')
+    }
   }
 
   const handleGoBack = () => {
+    resetState()
     navigate('/tienda')
   }
+
+  const handlePaymentCancel = () => {
+    setShowMercadoPago(false)
+    resetState()
+    // Mantener el carrito intacto para que el usuario pueda intentar nuevamente
+  }
+
+
+
+
 
   if (cartItems.length === 0) {
     return (
@@ -78,6 +123,16 @@ const CheckoutPage: React.FC = () => {
 
   return (
     <div className="container">
+      {/* Overlay de carga */}
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <div className="spinner"></div>
+            <p>Procesando tu solicitud...</p>
+          </div>
+        </div>
+      )}
+      
       <div className="principal">
         <div className="order-page" id="order">
           {/* Datos del Comprador */}
@@ -166,13 +221,57 @@ const CheckoutPage: React.FC = () => {
               <button type="button" className="btn-orden volver" onClick={handleGoBack}>
                 Volver
               </button>
-              <button type="submit" className="btn-orden confirmar">
-                Confirmar
-              </button>
+              {!showMercadoPago && (
+                <button 
+                  type="submit" 
+                  className="btn-orden confirmar"
+                  disabled={!isFormValid || isLoading}
+                >
+                  {isLoading ? 'Procesando...' : 'Continuar al Pago'}
+                </button>
+              )}
             </div>
           </form>
-          
-          <div id="wallet_container"></div>
+
+          {/* Mostrar errores si los hay */}
+          {error && (
+            <div className="error-message" style={{ 
+              color: 'red', 
+              textAlign: 'center', 
+              margin: '20px 0',
+              padding: '10px',
+              backgroundColor: '#ffe6e6',
+              border: '1px solid #ff4444',
+              borderRadius: '5px'
+            }}>
+              {error}
+            </div>
+          )}
+
+          {/* Wallet de Mercado Pago */}
+          {showMercadoPago && preferenceId && validateMercadoPagoConfig() && (
+            <div id="wallet_container" style={{ marginTop: '20px' }}>
+              <h3 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' }}>
+                Pagar con Mercado Pago
+              </h3>
+              <Wallet 
+                initialization={{ 
+                  preferenceId: preferenceId
+                }}
+                onReady={() => console.log('Mercado Pago Wallet ready')}
+              />
+              <div style={{ textAlign: 'center', marginTop: '15px' }}>
+                <button 
+                  type="button" 
+                  className="btn-orden volver"
+                  onClick={handlePaymentCancel}
+                  style={{ marginRight: '10px' }}
+                >
+                  Cambiar Datos
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Resumen del pedido */}
