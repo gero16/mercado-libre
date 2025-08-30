@@ -195,7 +195,6 @@ const CheckoutPage: React.FC = () => {
                   id="city" 
                   value={customerData.city}
                   onChange={handleInputChange}
-                  required
                 />
               </div>
               <div className="form-group">
@@ -206,7 +205,6 @@ const CheckoutPage: React.FC = () => {
                   id="state" 
                   value={customerData.state}
                   onChange={handleInputChange}
-                  required
                 />
               </div>
               <div className="form-group">
