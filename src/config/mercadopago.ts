@@ -3,7 +3,7 @@ export const MERCADOPAGO_CONFIG = {
   // Reemplaza con tu Public Key de MercadoPago
   // Para testing puedes usar TEST-public-key-xxx
   // Para producción usa APP_USR-public-key-xxx
-  PUBLIC_KEY: 'TEST-public-key-xxx', // Reemplaza con tu public key
+  PUBLIC_KEY:  import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY , // Reemplaza con tu public key
   
   // URLs de la aplicación
   SUCCESS_URL: '/payment-success',
