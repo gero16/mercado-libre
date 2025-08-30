@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 import { Payment } from '@mercadopago/sdk-react'
@@ -42,6 +42,37 @@ const CheckoutPage: React.FC = () => {
     isLoading: _mpLoading,
     error: mpError
   } = useMercadoPago()
+
+  // Efecto para controlar el scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (showPaymentBrick) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    // Cleanup al desmontar el componente
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showPaymentBrick])
+
+  // Efecto para cerrar el modal con la tecla Escape
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showPaymentBrick) {
+        setShowPaymentBrick(false)
+      }
+    }
+
+    if (showPaymentBrick) {
+      document.addEventListener('keydown', handleEscapeKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }, [showPaymentBrick])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -220,28 +251,40 @@ const CheckoutPage: React.FC = () => {
             </div>
           )}
           
-          {/* Payment Brick de MercadoPago */}
+          {/* Modal de Payment Brick de MercadoPago */}
           {showPaymentBrick && preferenceId && (
-            <div style={{ marginTop: '20px' }}>
-              <h2>Selecciona tu método de pago</h2>
-              <div id="paymentBrick_container">
-                <Payment
-                  initialization={getInitialization(cartTotal, preferenceId)}
-                  customization={getCustomization()}
-                  onSubmit={onSubmit}
-                  onReady={onReady}
-                  onError={onError}
-                />
-              </div>
-              
-              <div style={{ marginTop: '15px' }}>
-                <button 
-                  type="button" 
-                  className="btn-orden volver"
-                  onClick={() => setShowPaymentBrick(false)}
-                >
-                  Volver a datos del cliente
-                </button>
+            <div className="payment-modal-overlay" onClick={() => setShowPaymentBrick(false)}>
+              <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="payment-modal-header">
+                  <h2>Selecciona tu método de pago</h2>
+                  <button 
+                    className="payment-modal-close"
+                    onClick={() => setShowPaymentBrick(false)}
+                    title="Cerrar"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div id="paymentBrick_container">
+                  <Payment
+                    initialization={getInitialization(cartTotal, preferenceId)}
+                    customization={getCustomization()}
+                    onSubmit={onSubmit}
+                    onReady={onReady}
+                    onError={onError}
+                  />
+                </div>
+                
+                <div className="payment-modal-actions">
+                  <button 
+                    type="button" 
+                    className="btn-orden volver"
+                    onClick={() => setShowPaymentBrick(false)}
+                  >
+                    Volver a datos del cliente
+                  </button>
+                </div>
               </div>
             </div>
           )}
