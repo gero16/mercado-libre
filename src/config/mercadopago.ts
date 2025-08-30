@@ -1,9 +1,17 @@
 // Configuración de MercadoPago
 export const MERCADOPAGO_CONFIG = {
-  // Reemplaza con tu Public Key de MercadoPago
-  // Para testing puedes usar TEST-public-key-xxx
-  // Para producción usa APP_USR-public-key-xxx
-  PUBLIC_KEY: 'TEST-public-key-xxx', // Reemplaza con tu public key
+  // IMPORTANTE: Necesitas reemplazar con tu Public Key REAL de MercadoPago
+  // 
+  // Para obtener tus claves:
+  // 1. Ve a: https://www.mercadopago.com/developers/panel/app
+  // 2. Crea una aplicación o selecciona una existente
+  // 3. Ve a la sección "Credenciales" 
+  // 4. Copia tu "Public key" de TEST o PROD
+  //
+  // Ejemplos de claves reales:
+  // TEST: TEST-1234567890-123456-abc123def456-0a1b2c3d4e5f
+  // PROD: APP_USR-1234567890-123456-abc123def456-0a1b2c3d4e5f
+  PUBLIC_KEY: 'TEST-public-key-xxx', // ⚠️ REEMPLAZA CON TU CLAVE REAL
   
   // URLs de la aplicación
   SUCCESS_URL: '/payment-success',
