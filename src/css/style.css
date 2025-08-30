@@ -225,7 +225,7 @@ footer img {
   padding: 5px;
   position: relative;
   top: 0px;
-  left: 50px;
+  left: 5px;
 }
 
 .btn-borrar:hover {
@@ -345,11 +345,12 @@ footer img {
   justify-content: center;
   align-items: center;
   padding: 2px;
-  border: 1px solid rgb(141, 139, 139);
   border-radius: 5px;
-  margin: 5px 0px 0px 0px;
+  margin: 2px 0px 0px 0px;
   width: 88px;
   font-size: 22px;
+  position: relative;
+  left: 24px;
 }
 
 .sumar,

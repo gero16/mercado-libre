@@ -46,7 +46,7 @@ export const useMercadoPago = () => {
     return {
       amount,
       preferenceId: prefId || preferenceId || undefined,
-      locale: 'es-MX' // Agregar esta línea para español
+      locale: 'es-AR' // Agregar esta línea para español
     }
   }, [preferenceId])
 
