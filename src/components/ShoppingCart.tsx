@@ -42,7 +42,7 @@ const ShoppingCart: React.FC = () => {
                 <div className="stock">
                   <span 
                     className="restar"
-                    onClick={() => updateQuantity(item.id, item.cantidad - 1)}
+                    onClick={() => updateQuantity(item, item.cantidad - 1)}
                   >
                     -
                   </span>
@@ -53,7 +53,7 @@ const ShoppingCart: React.FC = () => {
                   />
                   <span 
                     className="sumar"
-                    onClick={() => updateQuantity(item.id, item.cantidad + 1)}
+                    onClick={() => updateQuantity(item, item.cantidad + 1)}
                   >
                     +
                   </span>
@@ -62,7 +62,7 @@ const ShoppingCart: React.FC = () => {
               
               <span 
                 className="btn-borrar"
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart(item)}
               >
                 x
               </span>

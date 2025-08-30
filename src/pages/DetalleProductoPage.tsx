@@ -157,7 +157,9 @@ const DetalleProductoPage: React.FC = () => {
       category: producto.categoria || 'general',
       price: varianteExacta?.price || producto.price,
       stock: stockDisponible,
-      cantidad: cantidad
+      cantidad: cantidad,
+      color: varianteExacta?.color,
+      size: varianteExacta?.size
     }
     
     addToCart(cartProduct)

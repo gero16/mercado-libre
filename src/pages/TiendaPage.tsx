@@ -158,7 +158,9 @@ const TiendaMLPage: React.FC = () => {
       category: item.categoria || 'general',
       price: item.price,
       stock: item.stock,
-      cantidad: 1
+      cantidad: 1,
+      color: item.variante?.color,
+      size: item.variante?.size
     }
     
     addToCart(cartProduct)

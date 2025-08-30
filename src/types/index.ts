@@ -6,10 +6,12 @@ export interface Producto {
   price: number;
   stock: number;
   cantidad: number;
+  color?: string;
+  size?: string;
 }
 
 export interface CartItem extends Producto {
-  // CartItem hereda de Producto y ya tiene cantidad
+  // CartItem hereda de Producto y ya tiene cantidad, color, size
 }
 
 export interface Order {

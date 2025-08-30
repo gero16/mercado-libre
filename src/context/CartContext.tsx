@@ -5,9 +5,9 @@ interface CartContextType {
   cartItems: CartItem[]
   cartOpen: boolean
   setCartOpen: (open: boolean) => void
-  addToCart: (product: Producto) => void
-  removeFromCart: (productId: number) => void
-  updateQuantity: (productId: number, quantity: number) => void
+  addToCart: (product: Producto & { color?: string; size?: string }) => void
+  removeFromCart: (product: Producto & { color?: string; size?: string }) => void
+  updateQuantity: (product: Producto & { color?: string; size?: string }, quantity: number) => void
   clearCart: () => void
   cartTotal: number
   cartItemCount: number
@@ -49,52 +49,58 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   }, [])
 
-  const addToCart = (product: Producto) => {
-    const existingItem = cartItems.find(item => item.id === product.id)
-    
+  // Utilidad para obtener una clave única de producto+variante+talle
+  const getCartItemKey = (item: Partial<CartItem> & { color?: string; size?: string }) => {
+    // Si tiene color y talle, los usa; si no, solo id
+    return [item.id, item.color, item.size].filter(Boolean).join('-');
+  };
+
+  const addToCart = (product: Producto & { color?: string; size?: string }) => {
+    const productKey = getCartItemKey(product);
+    const existingItem = cartItems.find(
+      item => getCartItemKey(item) === productKey
+    );
+
     if (existingItem) {
-      // Si ya existe, incrementar cantidad
-      updateQuantity(product.id, existingItem.cantidad + 1)
+      updateQuantity(product, existingItem.cantidad + (product.cantidad || 1));
     } else {
-      // Si es nuevo, agregarlo
-      const newItem: CartItem = { ...product, cantidad: 1 }
-      const newItems = [...cartItems, newItem]
-      setCartItems(newItems)
-      
-      // Guardar en localStorage
-      const ids = newItems.map(item => item.id.toString())
-      localStorage.setItem('productoIds', JSON.stringify(ids))
-      localStorage.setItem(`producto-${product.id}`, JSON.stringify(newItem))
+      const newItem: CartItem = { ...product, cantidad: product.cantidad || 1 };
+      const newItems = [...cartItems, newItem];
+      setCartItems(newItems);
+
+      // Guardar en localStorage con clave única
+      const ids = newItems.map(item => getCartItemKey(item));
+      localStorage.setItem('productoIds', JSON.stringify(ids));
+      localStorage.setItem(`producto-${productKey}`, JSON.stringify(newItem));
     }
-  }
+  };
 
-  const removeFromCart = (productId: number) => {
-    const newItems = cartItems.filter(item => item.id !== productId)
-    setCartItems(newItems)
-    
+  const removeFromCart = (product: Producto & { color?: string; size?: string }) => {
+    const productKey = getCartItemKey(product);
+    const newItems = cartItems.filter(item => getCartItemKey(item) !== productKey);
+    setCartItems(newItems);
     // Actualizar localStorage
-    const ids = newItems.map(item => item.id.toString())
-    localStorage.setItem('productoIds', JSON.stringify(ids))
-    localStorage.removeItem(`producto-${productId}`)
-  }
+    const ids = newItems.map(item => getCartItemKey(item));
+    localStorage.setItem('productoIds', JSON.stringify(ids));
+    localStorage.removeItem(`producto-${productKey}`);
+  };
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = (product: Producto & { color?: string; size?: string }, quantity: number) => {
+    const productKey = getCartItemKey(product);
     if (quantity <= 0) {
-      removeFromCart(productId)
-      return
+      removeFromCart(product);
+      return;
     }
-    
     const newItems = cartItems.map(item =>
-      item.id === productId ? { ...item, cantidad: quantity } : item
-    )
-    setCartItems(newItems)
-    
+      getCartItemKey(item) === productKey ? { ...item, cantidad: quantity } : item
+    );
+    setCartItems(newItems);
     // Actualizar localStorage
-    const updatedItem = newItems.find(item => item.id === productId)
+    const updatedItem = newItems.find(item => getCartItemKey(item) === productKey);
     if (updatedItem) {
-      localStorage.setItem(`producto-${productId}`, JSON.stringify(updatedItem))
+      localStorage.setItem(`producto-${productKey}`, JSON.stringify(updatedItem));
     }
-  }
+  };
 
   const clearCart = () => {
     setCartItems([])
