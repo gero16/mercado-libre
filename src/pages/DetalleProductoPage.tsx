@@ -50,7 +50,7 @@ const DetalleProductoPage: React.FC = () => {
           // Seleccionar el primer talle disponible para este color
           const talles = productoData.variantes.filter((v: Variante) => v.color === variantesUnicas[0].color);
           if (talles.length > 0) {
-            setTalleSeleccionado(talles[0].size);
+            setTalleSeleccionado(talles[0].size || '');
           }
         }
       }
@@ -88,7 +88,7 @@ const DetalleProductoPage: React.FC = () => {
     // Seleccionar el primer talle disponible para este color
     const talles = getTallesDisponibles();
     if (talles.length > 0) {
-      setTalleSeleccionado(talles[0].size);
+      setTalleSeleccionado(talles[0].size || '');
     }
     
     setCantidad(1) // Resetear cantidad al cambiar variante
@@ -145,15 +145,20 @@ const DetalleProductoPage: React.FC = () => {
     // Determinar el stock disponible
     const stockDisponible = varianteExacta?.stock || producto.available_quantity
     
+    // Obtener la imagen correcta (usar images[0].url en lugar de image)
+    const imagenVariante = varianteExacta?.images && varianteExacta.images.length > 0 
+      ? varianteExacta.images[0].url 
+      : producto.images[0]?.url || producto.main_image;
+
     // Convertir a formato compatible con el carrito
     const cartProduct = {
       id: varianteExacta 
-        ? parseInt(varianteExacta._id)  // Usar ID de la variante exacta
-        : parseInt(producto._id),       // O ID del producto si no hay variantes
+        ? `${producto._id}_${varianteExacta.color}_${varianteExacta.size}` // ID único para la variante
+        : producto._id, // ID del producto si no hay variantes
       name: varianteExacta 
         ? `${producto.title} - ${varianteExacta.color} ${varianteExacta.size}`
         : producto.title,
-      image: varianteExacta?.image || producto.images[0]?.url || producto.main_image,
+      image: imagenVariante,
       category: producto.categoria || 'general',
       price: varianteExacta?.price || producto.price,
       stock: stockDisponible,
@@ -164,6 +169,14 @@ const DetalleProductoPage: React.FC = () => {
     
     addToCart(cartProduct)
     alert('Producto agregado al carrito!')
+  }
+
+  // Obtener la imagen principal a mostrar
+  const getImagenPrincipal = (): string => {
+    if (varianteSeleccionada && varianteSeleccionada.images && varianteSeleccionada.images.length > 0) {
+      return varianteSeleccionada.images[0].url;
+    }
+    return producto?.images[0]?.url || producto?.main_image || '';
   }
 
   if (loading) {
@@ -249,7 +262,7 @@ const DetalleProductoPage: React.FC = () => {
           <div className="imagen-producto">
             <img 
               id="imagen-principal" 
-              src={varianteSeleccionada?.image || producto.images[0]?.url || producto.main_image} 
+              src={getImagenPrincipal()} 
               alt={producto.title}
             />
           </div>
@@ -305,7 +318,7 @@ const DetalleProductoPage: React.FC = () => {
                     <span 
                       key={variante._id}
                       className={`talle-opcion ${talleSeleccionado === variante.size ? 'seleccionada' : ''}`}
-                      onClick={() => handleTalleChange(variante.size)}
+                      onClick={() => handleTalleChange(variante.size || '')}
                       style={{ 
                         cursor: 'pointer',
                         border: talleSeleccionado === variante.size ? '2px solid #4040b5' : '1px solid #ccc',
@@ -314,7 +327,6 @@ const DetalleProductoPage: React.FC = () => {
                       }}
                     >
                       <span>Talle: {variante.size}</span>
-                      { /* <p>Stock: {variante.stock}</p> */ }
                     </span>
                   ))}
                 </div>
