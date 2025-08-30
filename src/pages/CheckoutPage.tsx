@@ -312,8 +312,11 @@ const CheckoutPage: React.FC = () => {
                   />
                   <div className="item-info">
                     <p>{item.name}</p>
-                    <p>Cantidad: {item.cantidad}</p>
-                    <p>Precio: ${item.price * item.cantidad}</p>
+                    <div className='flex'>
+                      <div>  <strong> Cantidad: </strong> <span>{item.cantidad}</span> </div>
+                      <div> <strong> Precio: </strong> <span> ${item.price * item.cantidad} </span> </div>
+                     
+                    </div>
                   </div>
                 </div>
               ))}
