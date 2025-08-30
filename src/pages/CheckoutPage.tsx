@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
+import { Payment } from '@mercadopago/sdk-react'
+import { useMercadoPago } from '../hooks/useMercadoPago'
 
 interface CustomerData {
   name: string
@@ -13,7 +15,7 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal, clearCart } = useCart()
+  const { cartItems, cartTotal } = useCart()
   const navigate = useNavigate()
   
   const [customerData, setCustomerData] = useState<CustomerData>({
@@ -26,6 +28,21 @@ const CheckoutPage: React.FC = () => {
     postalCode: ''
   })
 
+  const [showPaymentBrick, setShowPaymentBrick] = useState(false)
+  const [isCreatingPreference, setIsCreatingPreference] = useState(false)
+  
+  const {
+    createPreference,
+    getInitialization,
+    getCustomization,
+    onSubmit,
+    onError,
+    onReady,
+    preferenceId,
+    isLoading: _mpLoading,
+    error: mpError
+  } = useMercadoPago()
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setCustomerData(prev => ({
@@ -34,7 +51,7 @@ const CheckoutPage: React.FC = () => {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // Validar campos requeridos
@@ -51,10 +68,21 @@ const CheckoutPage: React.FC = () => {
       return
     }
 
-    // Aquí se podría integrar con Mercado Pago como en el original
-    alert('Orden procesada correctamente!')
-    clearCart()
-    navigate('/')
+    try {
+      setIsCreatingPreference(true)
+      
+      // Crear preferencia en MercadoPago
+      await createPreference(cartItems, customerData)
+      
+      // Mostrar el Payment Brick
+      setShowPaymentBrick(true)
+      
+    } catch (error) {
+      console.error('Error creating preference:', error)
+      alert('Error creando la preferencia de pago. Por favor intenta nuevamente.')
+    } finally {
+      setIsCreatingPreference(false)
+    }
   }
 
   const handleGoBack = () => {
@@ -166,13 +194,57 @@ const CheckoutPage: React.FC = () => {
               <button type="button" className="btn-orden volver" onClick={handleGoBack}>
                 Volver
               </button>
-              <button type="submit" className="btn-orden confirmar">
-                Confirmar
-              </button>
+              {!showPaymentBrick && (
+                <button 
+                  type="submit" 
+                  className="btn-orden confirmar"
+                  disabled={isCreatingPreference}
+                >
+                  {isCreatingPreference ? 'Creando orden...' : 'Proceder al Pago'}
+                </button>
+              )}
             </div>
           </form>
+
+          {/* Mostrar errores si los hay */}
+          {mpError && (
+            <div style={{
+              background: '#f8d7da',
+              color: '#721c24',
+              padding: '12px',
+              margin: '10px 0',
+              borderRadius: '4px',
+              border: '1px solid #f5c6cb'
+            }}>
+              <strong>Error:</strong> {mpError}
+            </div>
+          )}
           
-          <div id="wallet_container"></div>
+          {/* Payment Brick de MercadoPago */}
+          {showPaymentBrick && preferenceId && (
+            <div style={{ marginTop: '20px' }}>
+              <h2>Selecciona tu método de pago</h2>
+              <div id="paymentBrick_container">
+                <Payment
+                  initialization={getInitialization(cartTotal, preferenceId)}
+                  customization={getCustomization()}
+                  onSubmit={onSubmit}
+                  onReady={onReady}
+                  onError={onError}
+                />
+              </div>
+              
+              <div style={{ marginTop: '15px' }}>
+                <button 
+                  type="button" 
+                  className="btn-orden volver"
+                  onClick={() => setShowPaymentBrick(false)}
+                >
+                  Volver a datos del cliente
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Resumen del pedido */}
