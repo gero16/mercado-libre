@@ -5,9 +5,9 @@ interface CartContextType {
   cartItems: CartItem[]
   cartOpen: boolean
   setCartOpen: (open: boolean) => void
-  addToCart: (product: Producto & { color?: string; size?: string }) => void
-  removeFromCart: (product: Producto & { color?: string; size?: string }) => void
-  updateQuantity: (product: Producto & { color?: string; size?: string }, quantity: number) => void
+  addToCart: (product: Producto & { color?: string; size?: string | null }) => void
+  removeFromCart: (product: Producto & { color?: string; size?: string | null }) => void
+  updateQuantity: (product: Producto & { color?: string; size?: string | null }, quantity: number) => void
   clearCart: () => void
   cartTotal: number
   cartItemCount: number
@@ -50,12 +50,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, [])
 
   // Utilidad para obtener una clave única de producto+variante+talle
-  const getCartItemKey = (item: Partial<CartItem> & { color?: string; size?: string }) => {
-    // Si tiene color y talle, los usa; si no, solo id
-    return [item.id, item.color, item.size].filter(Boolean).join('-');
+  const getCartItemKey = (item: Partial<CartItem> & { color?: string; size?: string | null }) => {
+    // Convertir null a string vacío para la clave
+    const colorKey = item.color || '';
+    const sizeKey = item.size !== null && item.size !== undefined ? item.size : '';
+    return [item.id, colorKey, sizeKey].filter(Boolean).join('-');
   };
 
-  const addToCart = (product: Producto & { color?: string; size?: string }) => {
+  const addToCart = (product: Producto & { color?: string; size?: string | null }) => {
     const productKey = getCartItemKey(product);
     const existingItem = cartItems.find(
       item => getCartItemKey(item) === productKey
@@ -64,7 +66,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     if (existingItem) {
       updateQuantity(product, existingItem.cantidad + (product.cantidad || 1));
     } else {
-      const newItem: CartItem = { ...product, cantidad: product.cantidad || 1 };
+      const newItem: CartItem = { 
+        ...product, 
+        cantidad: product.cantidad || 1,
+        // Asegurar que size sea null en lugar de undefined si no existe
+        size: product.size !== undefined ? product.size : null
+      };
       const newItems = [...cartItems, newItem];
       setCartItems(newItems);
 
@@ -75,7 +82,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
-  const removeFromCart = (product: Producto & { color?: string; size?: string }) => {
+  const removeFromCart = (product: Producto & { color?: string; size?: string | null }) => {
     const productKey = getCartItemKey(product);
     const newItems = cartItems.filter(item => getCartItemKey(item) !== productKey);
     setCartItems(newItems);
@@ -85,7 +92,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     localStorage.removeItem(`producto-${productKey}`);
   };
 
-  const updateQuantity = (product: Producto & { color?: string; size?: string }, quantity: number) => {
+  const updateQuantity = (product: Producto & { color?: string; size?: string | null }, quantity: number) => {
     const productKey = getCartItemKey(product);
     if (quantity <= 0) {
       removeFromCart(product);
@@ -103,12 +110,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const clearCart = () => {
-    setCartItems([])
-    localStorage.removeItem('productoIds')
+    // Limpiar todos los items del localStorage
     cartItems.forEach(item => {
-      localStorage.removeItem(`producto-${item.id}`)
-    })
-  }
+      const itemKey = getCartItemKey(item);
+      localStorage.removeItem(`producto-${itemKey}`);
+    });
+    localStorage.removeItem('productoIds');
+    setCartItems([]);
+  };
 
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.cantidad), 0)
   const cartItemCount = cartItems.reduce((total, item) => total + item.cantidad, 0)
@@ -126,4 +135,4 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
-} 
+}

@@ -1,4 +1,4 @@
-body {
+.detalle-producto {
     color: rgb(39, 39, 39);
 }
 
@@ -276,7 +276,6 @@ body {
   border-radius: 4px;
   animation: shimmer 1.5s infinite;
   animation-delay: 0.8s;
-  margin-bottom: 10px;
 }
 
 .skeleton-cantidad input {

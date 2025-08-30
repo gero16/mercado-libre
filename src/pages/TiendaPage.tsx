@@ -42,7 +42,7 @@ const TiendaMLPage: React.FC = () => {
     { id: 'mostrar-todo', name: 'Mostrar Todo' }
   ])
   const { addToCart } = useCart()
-  //
+
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
@@ -70,7 +70,6 @@ const TiendaMLPage: React.FC = () => {
         if (producto.variantes && producto.variantes.length > 0) {
           // Agrupar variantes por color para evitar duplicados
           const variantesUnicas = producto.variantes.reduce((unique: Variante[], variante) => {
-            // Si ya tenemos una variante con este color, no agregar otra
             if (!unique.some(v => v.color === variante.color)) {
               unique.push(variante);
             }
@@ -79,12 +78,16 @@ const TiendaMLPage: React.FC = () => {
           
           // Usar solo la primera variante de cada color
           variantesUnicas.forEach(variante => {
+            const imagenVariante = variante.images && variante.images.length > 0 
+              ? variante.images[0].url 
+              : producto.images[0]?.url || producto.main_image;
+            
             items.push({
               id: `${producto._id}_${variante.color}`,
               title: `${producto.title} - ${variante.color || ''}`.trim(),
               price: variante.price || producto.price,
-              image: variante.image || producto.images[0]?.url || producto.main_image,
-              stock: producto.variantes.reduce((total, v) => total + v.stock, 0), // Stock total de todas las variantes
+              image: imagenVariante,
+              stock: producto.variantes.reduce((total, v) => total + v.stock, 0),
               esVariante: true,
               variante: variante,
               productoPadre: producto,
@@ -144,7 +147,6 @@ const TiendaMLPage: React.FC = () => {
   }, [itemsTienda, categoryFilter, priceFilter])
 
   const handleProductClick = (item: ItemTienda) => {
-    // Navegar al producto principal (no a la variante)
     navigate(`/producto/${item.productoPadre?._id || item.id}`)
   }
 
@@ -152,7 +154,7 @@ const TiendaMLPage: React.FC = () => {
     e.stopPropagation()
     
     const cartProduct = {
-      id: parseInt(item.id),
+      id: item.id, // Ahora es string
       name: item.title,
       image: item.image,
       category: item.categoria || 'general',
