@@ -45,7 +45,8 @@ export const useMercadoPago = () => {
   const getInitialization = useCallback((amount: number, prefId?: string): PaymentInitialization => {
     return {
       amount,
-      preferenceId: prefId || preferenceId || undefined
+      preferenceId: prefId || preferenceId || undefined,
+      locale: 'es-MX' // Agregar esta línea para español
     }
   }, [preferenceId])
 

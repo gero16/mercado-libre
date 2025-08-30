@@ -3,6 +3,8 @@
 export interface PaymentInitialization {
   amount: number
   preferenceId?: string
+  locale?: string; 
+
 }
 
 export interface PaymentCustomization {
