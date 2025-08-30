@@ -23,7 +23,7 @@ import './css/detalleProducto.css'
 import './css/react-styles.css'
 
 // Inicializar MercadoPago con la public key y configuración en español
-initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es' })
+initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY)
 
 function App() {
   return (
