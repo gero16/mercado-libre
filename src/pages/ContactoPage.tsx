@@ -42,7 +42,7 @@ const ContactoPage: React.FC = () => {
   }
 
   return (
-    <div className="container">
+    <div className="container-2">
       <div className="formulario">
         <h1 className="titulo-contacto">Contacto</h1>
         <form onSubmit={handleSubmit}>

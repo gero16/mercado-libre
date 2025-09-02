@@ -4,26 +4,96 @@
   background-color: rgb(29, 28, 28);
   height: 70px;
 }
+
+/* Contenedor del formulario centrado */
+.container-2 {
+  display: flex;
+  width: 80vw;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
+  
+}
+
+/* Caja del formulario */
 .formulario {
-  margin: 100px 0px 20px 0px;
-  color: #0e0d0d;
-  height: 300px;
-  padding: 20px;
-  width: 400px;
-  background-color: rgb(233, 233, 233);
-  border-radius: 10px;
+  margin: 10% 0;
+  color: #333;
+  width: 100%;
+  max-width: 450px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.formulario:hover {
+  transform: translateY(-4px);
 }
 
 .titulo-contacto {
-  margin: 0px 0px 20px 0px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.8rem;
+  color: #222;
+  font-weight: bold;
+}
+
+/* Lista del formulario */
+.lista-contacto {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .lista-contacto li {
-  margin: 0px 0px 5px 0px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
-.msg {
-  height: 100px;
+label {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #444;
+}
+
+/* Inputs y textarea */
+input,
+textarea {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  resize: none;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
+}
+
+/* Botón */
+.btn-enviar {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-enviar:hover {
+  background-color: #357abd;
+  transform: scale(1.03);
 }
