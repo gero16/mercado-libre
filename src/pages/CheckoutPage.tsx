@@ -309,18 +309,16 @@ const CheckoutPage: React.FC = () => {
 
             <div className="contenido-pedido">
               {cartItems.map(item => (
-                <div key={item.id} className="item-pedido">
+                <div key={item.id} className="producto-pedido">
                   <img 
                     src={item.image.startsWith('img/') ? `/${item.image}` : item.image} 
                     alt={item.name}
-                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                   />
-                  <div className="item-info">
+                  <div className="info-pedido">
                     <p>{item.name}</p>
-                    <div className='flex'>
-                      <div>  <strong> Cantidad: </strong> <span>{item.cantidad}</span> </div>
-                      <div> <strong> Precio: </strong> <span> ${item.price * item.cantidad} </span> </div>
-                     
+                    <div className='item-meta'>
+                      <div><strong> Cantidad: </strong> <span>{item.cantidad}</span></div>
+                      <div><strong> Precio: </strong> <span> ${item.price * item.cantidad} </span></div>
                     </div>
                   </div>
                 </div>
