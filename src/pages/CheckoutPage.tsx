@@ -15,7 +15,7 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal } = useCart()
+  const { cartItems, cartTotal, cartOpen, setCartOpen } = useCart()
   const navigate = useNavigate()
   
   const [customerData, setCustomerData] = useState<CustomerData>({
@@ -73,6 +73,11 @@ const CheckoutPage: React.FC = () => {
       document.removeEventListener('keydown', handleEscapeKey)
     }
   }, [showPaymentBrick])
+
+  useEffect(() => {
+    setCartOpen(false)
+  }, [])
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
