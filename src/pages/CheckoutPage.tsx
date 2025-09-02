@@ -242,14 +242,7 @@ const CheckoutPage: React.FC = () => {
 
           {/* Mostrar errores si los hay */}
           {mpError && (
-            <div style={{
-              background: '#f8d7da',
-              color: '#721c24',
-              padding: '12px',
-              margin: '10px 0',
-              borderRadius: '4px',
-              border: '1px solid #f5c6cb'
-            }}>
+            <div className="alert alert-error">
               <strong>Error:</strong> {mpError}
             </div>
           )}
@@ -299,9 +292,8 @@ const CheckoutPage: React.FC = () => {
             <div className="titulo-pedido">
               <h2>Resumen del pedido</h2>
               <button 
-                className="editar-carrito"
+                className="editar-carrito link-like"
                 onClick={() => navigate('/tienda')}
-                style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}
               >
                 Editar Carrito
               </button>
