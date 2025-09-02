@@ -15,7 +15,7 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal, cartOpen, setCartOpen } = useCart()
+  const { cartItems, cartTotal, setCartOpen } = useCart()
   const navigate = useNavigate()
   
   const [customerData, setCustomerData] = useState<CustomerData>({

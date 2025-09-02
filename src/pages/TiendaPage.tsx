@@ -194,8 +194,8 @@ const TiendaMLPage: React.FC = () => {
                         min="0" 
                         max="1500" 
                         value={priceFilter} 
-                        className="input-precio" 
-                        id="precio"
+                        className="" 
+                        id="input-precio"
                         onChange={(e) => handlePriceFilter(Number(e.target.value))}
                       />
                       <span id="mostrar-precio">${priceFilter}</span>
@@ -246,7 +246,7 @@ const TiendaMLPage: React.FC = () => {
                       max="1500" 
                       value={priceFilter} 
                       className="input-precio" 
-                      id="precio"
+                      id="input-precio"
                       onChange={(e) => handlePriceFilter(Number(e.target.value))}
                     />
                     <span id="mostrar-precio">${priceFilter}</span>

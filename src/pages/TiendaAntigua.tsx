@@ -183,7 +183,7 @@ const TiendaPage: React.FC = () => {
               <div 
                 key={producto.id} 
                 className="producto centrar-texto"
-                onClick={() => handleProductClick(producto.id)}
+                onClick={() => handleProductClick(Number(producto.id))}
                 style={{ cursor: 'pointer' }}
               >
                 <img src={imageSrc} alt={producto.name} />

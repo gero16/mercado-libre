@@ -36,6 +36,7 @@ export class MercadoPagoService {
         body: JSON.stringify(preferenceData)
       })
 
+      console.log(response)
       if (!response.ok) {
         throw new Error(`Error creating preference: ${response.statusText}`)
       }
