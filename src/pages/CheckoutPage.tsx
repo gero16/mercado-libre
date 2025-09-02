@@ -242,14 +242,7 @@ const CheckoutPage: React.FC = () => {
 
           {/* Mostrar errores si los hay */}
           {mpError && (
-            <div style={{
-              background: '#f8d7da',
-              color: '#721c24',
-              padding: '12px',
-              margin: '10px 0',
-              borderRadius: '4px',
-              border: '1px solid #f5c6cb'
-            }}>
+            <div className="alert alert-error">
               <strong>Error:</strong> {mpError}
             </div>
           )}
@@ -299,9 +292,8 @@ const CheckoutPage: React.FC = () => {
             <div className="titulo-pedido">
               <h2>Resumen del pedido</h2>
               <button 
-                className="editar-carrito"
+                className="editar-carrito link-like"
                 onClick={() => navigate('/tienda')}
-                style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer' }}
               >
                 Editar Carrito
               </button>
@@ -311,23 +303,25 @@ const CheckoutPage: React.FC = () => {
               {cartItems.map(item => (
                 <div key={item.id} className="item-pedido">
                   <img 
+                    className="item-thumb"
                     src={item.image.startsWith('img/') ? `/${item.image}` : item.image} 
                     alt={item.name}
-                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                   />
                   <div className="item-info">
-                    <p>{item.name}</p>
-                    <div className='flex'>
-                      <div>  <strong> Cantidad: </strong> <span>{item.cantidad}</span> </div>
-                      <div> <strong> Precio: </strong> <span> ${item.price * item.cantidad} </span> </div>
-                     
+                    <p className="item-name">{item.name}</p>
+                    <div className='item-meta'>
+                      <span className='badge qty'>x{item.cantidad}</span>
+                      <span className='price'>$ {item.price * item.cantidad}</span>
                     </div>
                   </div>
                 </div>
               ))}
               
               <div className="total-pedido">
-                <h3>Total: ${cartTotal}</h3>
+                <div className="total-box">
+                  <span>Total</span>
+                  <strong>$ {cartTotal}</strong>
+                </div>
               </div>
             </div>
           </div>
