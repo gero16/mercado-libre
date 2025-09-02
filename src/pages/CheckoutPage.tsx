@@ -91,7 +91,7 @@ const CheckoutPage: React.FC = () => {
     e.preventDefault()
     
     // Validar campos requeridos
-    const requiredFields = ['name', 'email', 'phone', 'address', 'city', 'state']
+    const requiredFields = ['name', 'email', 'phone', 'address']
     const emptyFields = requiredFields.filter(field => !customerData[field as keyof CustomerData])
     
     if (emptyFields.length > 0) {
