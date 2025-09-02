@@ -11,7 +11,6 @@ interface CustomerData {
   address: string
   city: string
   state: string
-  postalCode: string
 }
 
 const CheckoutPage: React.FC = () => {
@@ -25,7 +24,6 @@ const CheckoutPage: React.FC = () => {
     address: '',
     city: '',
     state: '',
-    postalCode: ''
   })
 
   const [showPaymentBrick, setShowPaymentBrick] = useState(false)
@@ -209,16 +207,6 @@ const CheckoutPage: React.FC = () => {
                   name="state" 
                   id="state" 
                   value={customerData.state}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="postalCode">Codigo Postal:</label>
-                <input 
-                  type="text" 
-                  name="postalCode" 
-                  id="postalCode" 
-                  value={customerData.postalCode}
                   onChange={handleInputChange}
                 />
               </div>
