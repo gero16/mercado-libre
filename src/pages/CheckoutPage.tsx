@@ -304,12 +304,11 @@ const CheckoutPage: React.FC = () => {
                   </div>
                 </div>
               ))}
-              
-              <div className="total-pedido">
-                <div className="total-box">
-                  <span>Total</span>
-                  <strong>$ {cartTotal}</strong>
-                </div>
+            </div>
+            <div className="total-pedido">
+              <div className="total-box">
+                <span>Total</span>
+                <strong>$ {cartTotal}</strong>
               </div>
             </div>
           </div>
