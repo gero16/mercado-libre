@@ -183,7 +183,6 @@ footer img {
 /** Carrito de compras - carritoHTML - multi pagina **/
 .carritoHTML {
   background-color: white;
-  border: 1px solid rgb(219, 215, 215);
   color: #000000;
   display: none;
   position: fixed;
@@ -201,7 +200,8 @@ footer img {
   /*background-image: url('../img/fondo-negro.jpg');
   background-position: center center;
   */
-  background-color: rgb(24, 22, 22);
+
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: white;
   padding: 36px 0px 36px 0px;
   font-family: "Rubik", sans-serif;
@@ -241,10 +241,8 @@ footer img {
 }
 
 .comprar {
-  background-color: rgb(26, 25, 25);
-  color: white;
-  border: #ced4da;
-  border-radius: 2px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;  border: #ced4da;
+  border-radius: 10px;
   margin: 20px 0px 0px 0px;
   padding: 10px;
   font-size: 18px;
