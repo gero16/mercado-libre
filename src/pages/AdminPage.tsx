@@ -17,6 +17,9 @@ interface AdminItem {
   variantId?: string;
   status: string;
   isPaused: boolean;
+  // Nuevas propiedades
+  tieneVariantes?: boolean;
+  stockTotalVariantes?: number;
 }
 
 const AdminPage: React.FC = () => {
@@ -50,6 +53,15 @@ const AdminPage: React.FC = () => {
       
       productList.forEach(producto => {
         const isPaused = producto.status === 'paused'
+        
+        // Calcular stock total de variantes si existen
+        let totalVariantsStock = 0
+        if (producto.variantes && producto.variantes.length > 0) {
+          totalVariantsStock = producto.variantes.reduce((sum, variante) => {
+            return sum + (isPaused ? 0 : variante.stock)
+          }, 0)
+        }
+        
         const effectiveStock = isPaused ? 0 : producto.available_quantity
         
         // Agregar el producto principal
@@ -62,9 +74,12 @@ const AdminPage: React.FC = () => {
           esVariante: false,
           productoPadre: producto,
           categoria: producto.category_id,
-          productId: producto.ml_id, // ✅ Cambiado a ml_id
+          productId: producto.ml_id,
           status: producto.status,
-          isPaused: isPaused
+          isPaused: isPaused,
+          // Nueva propiedad para indicar si tiene variantes
+          tieneVariantes: producto.variantes && producto.variantes.length > 0,
+          stockTotalVariantes: totalVariantsStock
         })
         
         // Agregar cada variante como un item separado
@@ -295,9 +310,18 @@ const AdminPage: React.FC = () => {
                     <div className="detail-row">
                       <span className="detail-label">Stock:</span>
                       <span className={`detail-value ${item.stock <= 0 ? 'no-stock' : ''}`}>
-                        {item.isPaused ? '0 (Pausado)' : item.stock}
+                        {item.isPaused ? '0 (Pausado)' : item.stock + " (Total de variantes)" }
+                        
                       </span>
                     </div>
+                    {!item.esVariante && item.tieneVariantes && (
+                      <div className="detail-row">
+                        <span className="detail-label">Tipo:</span>
+                        <span className="detail-value product-base">
+                          Producto Base (con {item.productoPadre?.variantes?.length || 0} variantes)
+                        </span>
+                      </div>
+                    )}
                     <div className="detail-row">
                       <span className="detail-label">Status:</span>
                       <span className={`detail-value ${item.isPaused ? 'paused' : 'active'}`}>

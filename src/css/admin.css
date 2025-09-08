@@ -532,3 +532,19 @@
     grid-column: auto;
   }
 }
+
+/* Estilos para información de productos base */
+.product-base {
+
+  font-weight: 600;
+}
+
+.stock-info {
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+.detail-row .product-base {
+  padding: 2px 6px;
+  border-radius: 4px;
+}
