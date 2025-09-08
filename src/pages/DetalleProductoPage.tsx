@@ -32,6 +32,7 @@ const DetalleProductoPage: React.FC = () => {
       }
       
       const productoData = await response.json()
+      console.log('🔍 Producto cargado en detalle:', productoData)
       setProducto(productoData)
       
       // Seleccionar la primera variante por defecto
@@ -48,55 +49,45 @@ const DetalleProductoPage: React.FC = () => {
           setVarianteSeleccionada(variantesUnicas[0])
           
           // Seleccionar el primer talle disponible para este color
-          const talles = productoData.variantes.filter((v: Variante) => v.color === variantesUnicas[0].color);
-          if (talles.length > 0) {
-            setTalleSeleccionado(talles[0].size || '');
+          const tallesDisponibles = productoData.variantes
+            .filter((v: Variante) => v.color === variantesUnicas[0].color)
+            .map((v: Variante) => v.size)
+            .filter(Boolean);
+          
+          if (tallesDisponibles.length > 0) {
+            setTalleSeleccionado(tallesDisponibles[0])
           }
         }
       }
       
       setLoading(false)
     } catch (error) {
-      console.error('Error al cargar el producto:', error)
+      console.error('Error cargando producto:', error)
       setError('Error al cargar el producto')
       setLoading(false)
     }
-  }
-
-  // Obtener variantes únicas por color
-  const getVariantesUnicas = (): Variante[] => {
-    if (!producto || !producto.variantes) return [];
-    
-    return producto.variantes.reduce((unique: Variante[], variante: Variante) => {
-      if (!unique.some(v => v.color === variante.color)) {
-        unique.push(variante);
-      }
-      return unique;
-    }, []);
-  }
-
-  // Obtener talles disponibles para la variante seleccionada (color)
-  const getTallesDisponibles = (): Variante[] => {
-    if (!producto || !producto.variantes || !varianteSeleccionada) return [];
-    
-    return producto.variantes.filter((v: Variante) => v.color === varianteSeleccionada.color);
   }
 
   const handleVarianteChange = (variante: Variante) => {
     setVarianteSeleccionada(variante)
     
     // Seleccionar el primer talle disponible para este color
-    const talles = getTallesDisponibles();
-    if (talles.length > 0) {
-      setTalleSeleccionado(talles[0].size || '');
+    if (producto?.variantes) {
+      const tallesDisponibles = producto.variantes
+        .filter((v: Variante) => v.color === variante.color)
+        .map((v: Variante) => v.size)
+        .filter(Boolean);
+      
+      if (tallesDisponibles.length > 0) {
+        setTalleSeleccionado(tallesDisponibles[0])
+      } else {
+        setTalleSeleccionado('')
+      }
     }
-    
-    setCantidad(1) // Resetear cantidad al cambiar variante
   }
 
   const handleTalleChange = (talle: string) => {
-    setTalleSeleccionado(talle);
-    setCantidad(1); // Resetear cantidad al cambiar talle
+    setTalleSeleccionado(talle)
   }
 
   const handleCantidadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,6 +110,20 @@ const DetalleProductoPage: React.FC = () => {
   const handleAgregarAlCarrito = () => {
     if (!producto) {
       alert('Error: Producto no disponible')
+      return
+    }
+
+    // ✅ VALIDACIÓN: Verificar si el producto está pausado
+    const isPaused = producto.status === 'paused'
+    console.log('🔍 Verificando producto en detalle:', {
+      title: producto.title,
+      status: producto.status,
+      isPaused: isPaused
+    })
+
+    if (isPaused) {
+      console.log('🚫 Producto pausado detectado en detalle, bloqueando agregar al carrito')
+      alert('Este producto está pausado y no se puede agregar al carrito.')
       return
     }
 
@@ -145,10 +150,18 @@ const DetalleProductoPage: React.FC = () => {
     // Determinar el stock disponible
     const stockDisponible = varianteExacta?.stock || producto.available_quantity
     
+    // ✅ VALIDACIÓN: Verificar stock disponible
+    if (stockDisponible <= 0) {
+      alert('Este producto no tiene stock disponible.')
+      return
+    }
+    
     // Obtener la imagen correcta (usar images[0].url en lugar de image)
     const imagenVariante = varianteExacta?.images && varianteExacta.images.length > 0 
       ? varianteExacta.images[0].url 
       : producto.images[0]?.url || producto.main_image;
+
+    console.log('✅ Producto válido en detalle, agregando al carrito')
 
     // Convertir a formato compatible con el carrito
     const cartProduct = {
@@ -179,6 +192,9 @@ const DetalleProductoPage: React.FC = () => {
     return producto?.images[0]?.url || producto?.main_image || '';
   }
 
+  // Verificar si el producto está pausado
+  const isProductPaused = producto?.status === 'paused'
+
   if (loading) {
     return (
       <div className="container">
@@ -198,19 +214,9 @@ const DetalleProductoPage: React.FC = () => {
             <div className="info-producto">
               <div className="skeleton-title-large"></div>
               <div className="skeleton-price-large"></div>
-              <div className="skeleton-stock"></div>
-              <div className="skeleton-variants">
-                <div className="skeleton-variant"></div>
-                <div className="skeleton-variant"></div>
-                <div className="skeleton-variant"></div>
-              </div>
-              <div className="skeleton-talles">
-                <div className="skeleton-talle"></div>
-                <div className="skeleton-talle"></div>
-                <div className="skeleton-talle"></div>
-              </div>
-              <div className="skeleton-cantidad"></div>
-              <div className="skeleton-button-large"></div>
+              <div className="skeleton-description"></div>
+              <div className="skeleton-description"></div>
+              <div className="skeleton-description short"></div>
             </div>
           </div>
         </div>
@@ -218,33 +224,36 @@ const DetalleProductoPage: React.FC = () => {
     )
   }
 
-  if (error || !producto) {
+  if (error) {
     return (
       <div className="container">
-        <div className="centrar-texto">
-          <h2>Error al cargar el producto</h2>
-          <p>{error || 'Producto no encontrado'}</p>
-          <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
-            Volver a la tienda
-          </button>
+        <div className="detalle-producto">
+          <div className="error-message">
+            <h2>Error</h2>
+            <p>{error}</p>
+            <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
+              Volver a la tienda
+            </button>
+          </div>
         </div>
       </div>
     )
   }
 
-  // Obtener variantes únicas por color
-  const variantesUnicas = getVariantesUnicas();
-  
-  // Obtener talles disponibles para la variante seleccionada
-  const tallesDisponibles = getTallesDisponibles();
-  
-  // Determinar el stock disponible para mostrar
-  let stockDisponible = producto.available_quantity;
-  if (varianteSeleccionada && talleSeleccionado && producto.variantes) {
-    const varianteExacta = producto.variantes.find((v: Variante) => 
-      v.color === varianteSeleccionada.color && v.size === talleSeleccionado
-    );
-    stockDisponible = varianteExacta?.stock || 0;
+  if (!producto) {
+    return (
+      <div className="container">
+        <div className="detalle-producto">
+          <div className="error-message">
+            <h2>Producto no encontrado</h2>
+            <p>El producto que buscas no existe o ha sido eliminado.</p>
+            <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
+              Volver a la tienda
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -252,83 +261,77 @@ const DetalleProductoPage: React.FC = () => {
       <div className="detalle-producto">
         {/* Breadcrumb */}
         <nav className="breadcrumb">
-          <a href="/">Inicio</a> &gt; 
-          <a href="/tienda-ml">Tienda ML</a> &gt; 
-          <span id="nombre-producto-breadcrumb">{producto.title}</span>
+          <a href="/">Inicio</a> / 
+          <a href="/tienda-ml">Productos</a> / 
+          <span>{producto.title}</span>
         </nav>
 
         <div className="producto-detalle">
-          {/* Imagen principal */}
+          {/* Imagen del producto */}
           <div className="imagen-producto">
-            <img 
-              id="imagen-principal" 
-              src={getImagenPrincipal()} 
-              alt={producto.title}
-            />
+            <img src={getImagenPrincipal()} alt={producto.title} />
           </div>
 
           {/* Información del producto */}
           <div className="info-producto">
-            <h1 id="titulo-producto">{producto.title}</h1>
+            <h1>{producto.title}</h1>
+            
+            {/* Mostrar badge de estado si está pausado */}
+            {isProductPaused && (
+              <div className="product-status-badge paused">
+                <span>⚠️ Producto Pausado</span>
+              </div>
+            )}
             
             <div className="precio-disponibilidad">
-              <h2 id="precio-producto">${varianteSeleccionada?.price || producto.price}</h2>
-              <p 
-                id="disponibilidad-producto"
-                style={{ color: stockDisponible > 0 ? 'green' : 'red' }}
-              >
-                {stockDisponible > 0 
-                  ? `Disponible (${stockDisponible} unidades)` 
-                  : 'Agotado'
-                }
+              <h2>${varianteSeleccionada?.price || producto.price}</h2>
+              <p className={`disponibilidad ${isProductPaused ? 'paused' : 'available'}`}>
+                {isProductPaused ? 'Producto pausado' : 'Disponible'}
               </p>
             </div>
 
-            {/* Variantes (solo por color) */}
-            {variantesUnicas.length > 0 && (
+            {/* Variantes de color */}
+            {producto.variantes && producto.variantes.length > 0 && (
               <div className="variantes">
                 <h3>Colores disponibles:</h3>
-                <div id="opciones-variantes" className="opciones-variantes">
-                  {variantesUnicas.map((variante) => (
-                    <div 
-                      key={variante._id}
-                      className={`variante-opcion ${varianteSeleccionada?._id === variante._id ? 'seleccionada' : ''}`}
+                <div className="opciones-variantes">
+                  {producto.variantes.reduce((unique: Variante[], variante: Variante) => {
+                    if (!unique.some(v => v.color === variante.color)) {
+                      unique.push(variante);
+                    }
+                    return unique;
+                  }, []).map((variante: Variante) => (
+                    <div
+                      key={variante.color}
+                      className={`variante-opcion ${varianteSeleccionada?.color === variante.color ? 'seleccionada' : ''}`}
                       onClick={() => handleVarianteChange(variante)}
-                      style={{ 
-                        cursor: 'pointer',
-                        border: varianteSeleccionada?._id === variante._id ? '2px solid #4040b5' : '1px solid #ccc',
-                        padding: '10px',
-                        margin: '5px',
-                        borderRadius: '5px'
-                      }}
                     >
-                      <p>Color: {variante.color}</p>
+                      <p><strong>{variante.color}</strong></p>
+                      <p>${variante.price}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Talles (solo para la variante seleccionada) */}
-            {tallesDisponibles.length > 0 && (
-              <div className="talles flex gap-20">
+            {/* Talles disponibles para el color seleccionado */}
+            {varianteSeleccionada && producto.variantes && (
+              <div className="talles">
                 <h3>Talles disponibles:</h3>
-                <div id="opciones-talles" className="opciones-talles">
-                  {tallesDisponibles.map((variante) => (
-                    <span 
-                      key={variante._id}
-                      className={`talle-opcion ${talleSeleccionado === variante.size ? 'seleccionada' : ''}`}
-                      onClick={() => handleTalleChange(variante.size || '')}
-                      style={{ 
-                        cursor: 'pointer',
-                        border: talleSeleccionado === variante.size ? '2px solid #4040b5' : '1px solid #ccc',
-                        padding: '10px',
-                        borderRadius: '5px'
-                      }}
-                    >
-                      <span>Talle: {variante.size}</span>
-                    </span>
-                  ))}
+                <div className="opciones-talles">
+                  {producto.variantes
+                    .filter((v: Variante) => v.color === varianteSeleccionada.color)
+                    .map((variante: Variante) => (
+                      <button
+                        key={variante.size}
+                        className={`talle-opcion ${talleSeleccionado === variante.size ? 'seleccionado' : ''}`}
+                        onClick={() => handleTalleChange(variante.size || '')}
+                        disabled={isProductPaused || variante.stock <= 0}
+                      >
+                        {variante.size}
+                        <span className="stock-info">({variante.stock})</span>
+                      </button>
+                    ))}
                 </div>
               </div>
             )}
@@ -340,29 +343,52 @@ const DetalleProductoPage: React.FC = () => {
                 type="number"
                 id="cantidad"
                 min="1"
-                max={stockDisponible}
+                max={varianteSeleccionada && talleSeleccionado && producto.variantes 
+                  ? producto.variantes.find((v: Variante) => 
+                      v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+                    )?.stock || producto.available_quantity
+                  : producto.available_quantity
+                }
                 value={cantidad}
                 onChange={handleCantidadChange}
-                disabled={stockDisponible === 0}
+                disabled={isProductPaused}
               />
             </div>
 
             {/* Descripción */}
             {producto.description && (
               <div className="descripcion">
-                <h3>Descripción:</h3>
-                <p id="descripcion">{producto.description}</p>
+                <h3>Descripción</h3>
+                <p>{producto.description}</p>
               </div>
             )}
 
-            {/* Botón agregar al carrito */}
+            {/* Botón de agregar al carrito */}
             <button
-              id="agregar-carrito"
               className="btn-agregar-carrito"
               onClick={handleAgregarAlCarrito}
-              disabled={stockDisponible === 0}
+              disabled={isProductPaused || (varianteSeleccionada && talleSeleccionado && producto.variantes 
+                ? producto.variantes.find((v: Variante) => 
+                    v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+                  )?.stock <= 0
+                : producto.available_quantity <= 0
+              )}
             >
-              {stockDisponible === 0 ? 'Agotado' : 'Agregar al Carrito'}
+              {isProductPaused 
+                ? 'Producto Pausado' 
+                : (varianteSeleccionada && talleSeleccionado && producto.variantes 
+                  ? producto.variantes.find((v: Variante) => 
+                      v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+                    )?.stock <= 0
+                  : producto.available_quantity <= 0
+                ) 
+                  ? 'Sin Stock' 
+                  : 'Agregar al Carrito'
+              }
+            </button>
+
+            <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
+              Volver a la tienda
             </button>
           </div>
         </div>

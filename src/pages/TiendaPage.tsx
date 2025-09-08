@@ -49,7 +49,7 @@ const TiendaMLPage: React.FC = () => {
     try {
       const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos')
       const data = await response.json()
-      console.log(data)
+      console.log('🔍 Productos recibidos:', data)
       return data || []
     } catch (error) {
       console.error('Error fetching ML products:', error)
@@ -67,6 +67,9 @@ const TiendaMLPage: React.FC = () => {
       productList.forEach(producto => {
         const categoria = obtenerCategoria(producto.category_id)
         const isPaused = producto.status === 'paused'
+        
+        // 🔍 DEBUG: Log para verificar el status
+        console.log(`🔍 Producto: ${producto.title}, Status: "${producto.status}", isPaused: ${isPaused}`)
         
         // Si el producto tiene variantes, mostramos solo la primera variante de cada combinación única
         if (producto.variantes && producto.variantes.length > 0) {
@@ -119,6 +122,14 @@ const TiendaMLPage: React.FC = () => {
         }
       })
       
+      // 🔍 DEBUG: Log para verificar items procesados
+      console.log('🔍 Items procesados:', items.map(item => ({
+        title: item.title,
+        isPaused: item.isPaused,
+        stock: item.stock,
+        status: item.productoPadre?.status
+      })))
+      
       setItemsTienda(items)
       setFilteredItems(items)
       
@@ -162,6 +173,30 @@ const TiendaMLPage: React.FC = () => {
 
   const handleAddToCart = (e: React.MouseEvent, item: ItemTienda) => {
     e.stopPropagation()
+    
+    // 🔍 DEBUG: Log para verificar qué está pasando
+    console.log('�� Intentando agregar al carrito:', {
+      title: item.title,
+      isPaused: item.isPaused,
+      stock: item.stock,
+      status: item.productoPadre?.status
+    })
+    
+    // ✅ VALIDACIÓN: No permitir agregar productos pausados
+    if (item.isPaused) {
+      console.log('🚫 Producto pausado detectado, bloqueando agregar al carrito')
+      alert('Este producto está pausado y no se puede agregar al carrito.')
+      return
+    }
+    
+    // ✅ VALIDACIÓN: No permitir agregar productos sin stock
+    if (item.stock <= 0) {
+      console.log('🚫 Producto sin stock detectado, bloqueando agregar al carrito')
+      alert('Este producto no tiene stock disponible.')
+      return
+    }
+    
+    console.log('✅ Producto válido, agregando al carrito')
     
     const cartProduct = {
       id: item.id, // Ahora es string
@@ -292,10 +327,12 @@ const TiendaMLPage: React.FC = () => {
               <img src={item.image} alt={item.title} />
               <p>{item.title}</p>
               <p>${item.price}</p>
+              {/* 🔍 DEBUG: Mostrar información de debug en el botón */}
               <button 
                 className="add"
                 onClick={(e) => handleAddToCart(e, item)}
                 disabled={item.stock <= 0 || item.isPaused}
+                title={`Debug: isPaused=${item.isPaused}, stock=${item.stock}, status=${item.productoPadre?.status}`}
               >
                 {item.isPaused ? 'Pausado' : item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
               </button>
