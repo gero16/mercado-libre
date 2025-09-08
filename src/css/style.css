@@ -377,3 +377,31 @@ footer img {
   }
 }
 
+
+/* === ESTILOS PARA ENLACE DE ADMINISTRACIÓN === */
+.admin-link {
+  color: #e6edf3 !important;
+  transition: all 0.3s ease !important;
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+}
+
+.admin-link:hover {
+  color: #58a6ff !important;
+  background-color: rgba(88, 166, 255, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+.admin-link:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3) !important;
+}
+
+/* Responsive para el enlace de admin */
+@media (max-width: 768px) {
+  .admin-link {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+}
