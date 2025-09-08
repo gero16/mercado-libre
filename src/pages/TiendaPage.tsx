@@ -29,6 +29,7 @@ interface ItemTienda {
   variante?: Variante;
   productoPadre?: ProductoML;
   categoria?: string;
+  isPaused: boolean;
 }
 
 const TiendaMLPage: React.FC = () => {
@@ -65,6 +66,7 @@ const TiendaMLPage: React.FC = () => {
       
       productList.forEach(producto => {
         const categoria = obtenerCategoria(producto.category_id)
+        const isPaused = producto.status === 'paused'
         
         // Si el producto tiene variantes, mostramos solo la primera variante de cada combinación única
         if (producto.variantes && producto.variantes.length > 0) {
@@ -82,29 +84,37 @@ const TiendaMLPage: React.FC = () => {
               ? variante.images[0].url 
               : producto.images[0]?.url || producto.main_image;
             
+            // Si el producto está pausado, el stock efectivo es 0
+            const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
+            
             items.push({
               id: `${producto._id}_${variante.color}`,
               title: `${producto.title} - ${variante.color || ''}`.trim(),
               price: variante.price || producto.price,
               image: imagenVariante,
-              stock: producto.variantes.reduce((total, v) => total + v.stock, 0),
+              stock: effectiveStock,
               esVariante: true,
               variante: variante,
               productoPadre: producto,
-              categoria: categoria
+              categoria: categoria,
+              isPaused: isPaused
             })
           })
         } else {
           // Si no tiene variantes, mostramos el producto principal
+          // Si el producto está pausado, el stock efectivo es 0
+          const effectiveStock = isPaused ? 0 : producto.available_quantity;
+          
           items.push({
             id: producto._id,
             title: producto.title,
             price: producto.price,
             image: producto.images[0]?.url || producto.main_image,
-            stock: producto.available_quantity,
+            stock: effectiveStock,
             esVariante: false,
             productoPadre: producto,
-            categoria: categoria
+            categoria: categoria,
+            isPaused: isPaused
           })
         }
       })
@@ -285,9 +295,9 @@ const TiendaMLPage: React.FC = () => {
               <button 
                 className="add"
                 onClick={(e) => handleAddToCart(e, item)}
-                disabled={item.stock <= 0}
+                disabled={item.stock <= 0 || item.isPaused}
               >
-                {item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
+                {item.isPaused ? 'Pausado' : item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
               </button>
             </div>
           ))}

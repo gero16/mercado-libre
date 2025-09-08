@@ -15,6 +15,8 @@ interface AdminItem {
   categoria?: string;
   productId: string;
   variantId?: string;
+  status: string;
+  isPaused: boolean;
 }
 
 const AdminPage: React.FC = () => {
@@ -22,6 +24,7 @@ const AdminPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
@@ -46,17 +49,22 @@ const AdminPage: React.FC = () => {
       const items: AdminItem[] = []
       
       productList.forEach(producto => {
+        const isPaused = producto.status === 'paused'
+        const effectiveStock = isPaused ? 0 : producto.available_quantity
+        
         // Agregar el producto principal
         items.push({
           id: producto._id,
           title: producto.title,
           price: producto.price,
           image: producto.images[0]?.url || producto.main_image,
-          stock: producto.available_quantity,
+          stock: effectiveStock,
           esVariante: false,
           productoPadre: producto,
           categoria: producto.category_id,
-          productId: producto._id
+          productId: producto._id,
+          status: producto.status,
+          isPaused: isPaused
         })
         
         // Agregar cada variante como un item separado
@@ -66,18 +74,23 @@ const AdminPage: React.FC = () => {
               ? variante.images[0].url 
               : producto.images[0]?.url || producto.main_image;
             
+            // Si el producto padre está pausado, las variantes también se consideran sin stock
+            const variantStock = isPaused ? 0 : variante.stock
+            
             items.push({
               id: `${producto._id}_${variante._id}`,
               title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
               price: variante.price || producto.price,
               image: imagenVariante,
-              stock: variante.stock,
+              stock: variantStock,
               esVariante: true,
               variante: variante,
               productoPadre: producto,
               categoria: producto.category_id,
               productId: producto._id,
-              variantId: variante._id
+              variantId: variante._id,
+              status: producto.status,
+              isPaused: isPaused
             })
           })
         }
@@ -100,6 +113,10 @@ const AdminPage: React.FC = () => {
       // Filtro por tipo
       if (filterType === 'products' && item.esVariante) return false
       if (filterType === 'variants' && !item.esVariante) return false
+      
+      // Filtro por status
+      if (filterStatus === 'active' && item.isPaused) return false
+      if (filterStatus === 'paused' && !item.isPaused) return false
       
       return true
     })
@@ -184,6 +201,18 @@ const AdminPage: React.FC = () => {
             </select>
           </div>
           
+          <div className="status-section">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'paused')}
+              className="admin-select"
+            >
+              <option value="all">Todos los status</option>
+              <option value="active">Activos</option>
+              <option value="paused">Pausados</option>
+            </select>
+          </div>
+          
           <div className="sort-section">
             <select
               value={sortBy}
@@ -222,6 +251,10 @@ const AdminPage: React.FC = () => {
             <h3>Sin Stock</h3>
             <span className="stat-number">{adminItems.filter(item => item.stock <= 0).length}</span>
           </div>
+          <div className="stat-card">
+            <h3>Pausados</h3>
+            <span className="stat-number">{adminItems.filter(item => item.isPaused).length}</span>
+          </div>
         </div>
 
         {/* Lista de productos */}
@@ -246,9 +279,11 @@ const AdminPage: React.FC = () => {
                       ) : (
                         <span className="badge badge-product">Producto</span>
                       )}
-                      {item.stock <= 0 && (
+                      {item.isPaused ? (
+                        <span className="badge badge-paused">Pausado</span>
+                      ) : item.stock <= 0 ? (
                         <span className="badge badge-no-stock">Sin Stock</span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                   
@@ -260,7 +295,13 @@ const AdminPage: React.FC = () => {
                     <div className="detail-row">
                       <span className="detail-label">Stock:</span>
                       <span className={`detail-value ${item.stock <= 0 ? 'no-stock' : ''}`}>
-                        {item.stock}
+                        {item.isPaused ? '0 (Pausado)' : item.stock}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Status:</span>
+                      <span className={`detail-value ${item.isPaused ? 'paused' : 'active'}`}>
+                        {item.status}
                       </span>
                     </div>
                     <div className="detail-row">

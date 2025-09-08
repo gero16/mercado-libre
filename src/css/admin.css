@@ -120,7 +120,7 @@
 /* Estadísticas */
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
@@ -481,4 +481,54 @@
 
 .admin-products-list::-webkit-scrollbar-thumb:hover {
   background: #484f58;
+}
+
+/* === ESTILOS ADICIONALES PARA PRODUCTOS PAUSADOS === */
+.badge-paused {
+  background: linear-gradient(135deg, #d29922 0%, #f0883e 100%);
+  color: white;
+}
+
+.detail-value.paused {
+  color: #d29922;
+  font-weight: 600;
+}
+
+.detail-value.active {
+  color: #3fb950;
+  font-weight: 600;
+}
+
+/* Actualizar controles para incluir filtro de status */
+.admin-controls {
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 15px;
+}
+
+.status-section {
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive para los nuevos controles */
+@media (max-width: 1200px) {
+  .admin-controls {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .search-section {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-controls {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .search-section {
+    grid-column: auto;
+  }
 }
