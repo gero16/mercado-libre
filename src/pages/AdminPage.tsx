@@ -62,7 +62,7 @@ const AdminPage: React.FC = () => {
           esVariante: false,
           productoPadre: producto,
           categoria: producto.category_id,
-          productId: producto._id,
+          productId: producto.ml_id, // ✅ Cambiado a ml_id
           status: producto.status,
           isPaused: isPaused
         })
@@ -87,7 +87,7 @@ const AdminPage: React.FC = () => {
               variante: variante,
               productoPadre: producto,
               categoria: producto.category_id,
-              productId: producto._id,
+              productId: producto.ml_id, // ✅ Cambiado a ml_id
               variantId: variante._id,
               status: producto.status,
               isPaused: isPaused
