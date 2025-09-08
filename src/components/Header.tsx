@@ -17,6 +17,7 @@ const Header: React.FC = () => {
            { /*<li><Link to="/tienda">Tienda</Link></li> */ }
             <li><Link to="/tienda-ml">Productos </Link></li>
             <li><Link to="/contacto">Contacto</Link></li>
+            <li><Link to="/admin" className="admin-link">Admin</Link></li>
             
             <li>
               <button 
@@ -37,4 +38,4 @@ const Header: React.FC = () => {
   )
 }
 
-export default Header 
+export default Header

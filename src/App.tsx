@@ -13,6 +13,7 @@ import ContactoPage from './pages/ContactoPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailurePage from './pages/PaymentFailurePage'
 import PaymentPendingPage from './pages/PaymentPendingPage'
+import AdminPage from './pages/AdminPage'
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -21,6 +22,7 @@ import './css/contacto.css'
 import './css/cart.css'
 import './css/detalleProducto.css'
 import './css/react-styles.css'
+import './css/admin.css'
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -41,6 +43,9 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/contacto" element={<ContactoPage />} />
             
+            {/* Ruta de administración */}
+            <Route path="/admin" element={<AdminPage />} />
+            
             {/* Rutas de resultado de pago */}
             <Route path="/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/payment-failure" element={<PaymentFailurePage />} />
@@ -54,4 +59,4 @@ function App() {
   )
 }
 
-export default App 
+export default App
