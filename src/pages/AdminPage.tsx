@@ -372,21 +372,7 @@ const AdminPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                
-                <div className="product-actions">
-                  <button
-                    className="btn-edit"
-                    disabled
-                  >
-                    Editar (Próximamente)
-                  </button>
-                  <button
-                    className="btn-delete"
-                    disabled
-                  >
-                    Eliminar (Próximamente)
-                  </button>
-                </div>
+              
               </div>
             ))
           )}
