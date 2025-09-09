@@ -332,31 +332,6 @@ const AdminDropshippingPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="proveedor-section">
-            <select
-              value={filterProveedor}
-              onChange={(e) => setFilterProveedor(e.target.value)}
-              className="admin-select"
-            >
-              <option value="all">Todos los proveedores</option>
-              {proveedoresUnicos.map(proveedor => (
-                <option key={proveedor} value={proveedor}>{proveedor}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="pais-section">
-            <select
-              value={filterPais}
-              onChange={(e) => setFilterPais(e.target.value)}
-              className="admin-select"
-            >
-              <option value="all">Todos los países</option>
-              {paisesUnicos.map(pais => (
-                <option key={pais} value={pais}>{pais}</option>
-              ))}
-            </select>
-          </div>
           
           <div className="sort-section">
             <select
@@ -398,10 +373,7 @@ const AdminDropshippingPage: React.FC = () => {
             <h3>Proveedores</h3>
             <span className="stat-number">{proveedoresUnicos.length}</span>
           </div>
-          <div className="stat-card">
-            <h3>Países</h3>
-            <span className="stat-number">{paisesUnicos.length}</span>
-          </div>
+          
           <div className="stat-card">
             <h3>Requieren Confirmación</h3>
             <span className="stat-number">{adminItems.filter(item => item.requiere_confirmacion).length}</span>
@@ -429,25 +401,30 @@ const AdminDropshippingPage: React.FC = () => {
                 <div className="product-info">
                   <div className="product-main-info">
                     <h3 className="product-title">{item.title}</h3>
-                    <div className="product-badges">
-                      {item.esVariante ? (
-                        <span className="badge badge-variant">Variante</span>
-                      ) : (
-                        <span className="badge badge-product">Producto</span>
-                      )}
-                      {item.isPaused ? (
-                        <span className="badge badge-paused">Pausado</span>
-                      ) : item.stock <= 0 ? (
-                        <span className="badge badge-no-stock">Sin Stock</span>
-                      ) : null}
-                      <span className="badge badge-dropshipping">Dropshipping</span>
-                      {item.requiere_confirmacion && (
-                        <span className="badge badge-confirmation">Requiere Confirmación</span>
-                      )}
-                      {item.tiempo_configurado_en_ml && (
-                        <span className="badge badge-ml-configured">Configurado en ML</span>
-                      )}
-                    </div>
+                    {
+                      /* 
+                      
+                        <div className="product-badges">
+                          {item.esVariante ? (
+                            <span className="badge badge-variant">Variante</span>
+                          ) : (
+                            <span className="badge badge-product">Producto</span>
+                          )}
+                          {item.isPaused ? (
+                            <span className="badge badge-paused">Pausado</span>
+                          ) : item.stock <= 0 ? (
+                            <span className="badge badge-no-stock">Sin Stock</span>
+                          ) : null}
+                          <span className="badge badge-dropshipping">Dropshipping</span>
+                          {item.requiere_confirmacion && (
+                            <span className="badge badge-confirmation">Requiere Confirmación</span>
+                          )}
+                          {item.tiempo_configurado_en_ml && (
+                            <span className="badge badge-ml-configured">Configurado en ML</span>
+                          )}
+                        </div>
+                      */
+                    }
                   </div>
                   
                   <div className="product-details">
@@ -478,10 +455,7 @@ const AdminDropshippingPage: React.FC = () => {
                       <span className="detail-label">Proveedor:</span>
                       <span className="detail-value">{item.proveedor}</span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">País Origen:</span>
-                      <span className="detail-value">{item.pais_origen}</span>
-                    </div>
+              
                     <div className="detail-row">
                       <span className="detail-label">Costo Importación:</span>
                       <span className="detail-value">${item.costo_importacion}</span>
@@ -529,20 +503,7 @@ const AdminDropshippingPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="product-actions">
-                  <button
-                    onClick={() => handleEditProduct(item)}
-                    className="btn-edit"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeleteProduct(item)}
-                    className="btn-delete"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+               
               </div>
             ))
           )}

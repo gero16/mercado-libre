@@ -372,20 +372,7 @@ const AdminPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="product-actions">
-                  <button
-                    onClick={() => handleEditProduct(item)}
-                    className="btn-edit"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDeleteProduct(item)}
-                    className="btn-delete"
-                  >
-                    Eliminar
-                  </button>
-                </div>
+              
               </div>
             ))
           )}

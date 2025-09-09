@@ -273,7 +273,7 @@
 
 .detail-value {
   color: #f0f6fc;
-  font-size: 14px;
+  font-size: small;
   font-weight: 600;
 }
 
@@ -643,7 +643,7 @@
 /* Controles adicionales para dropshipping */
 .admin-controls {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap: 15px;
   margin-bottom: 30px;
   padding: 25px;
