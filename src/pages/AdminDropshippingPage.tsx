@@ -23,7 +23,6 @@ interface AdminDropshippingItem {
   dias_envio_estimado: number;
   proveedor: string;
   pais_origen: string;
-  requiere_confirmacion: boolean;
   costo_importacion: number;
   tiempo_configurado_en_ml: boolean;
   // Propiedades de variantes
@@ -118,7 +117,6 @@ const AdminDropshippingPage: React.FC = () => {
           dias_envio_estimado: producto.dropshipping?.dias_envio_estimado || 0,
           proveedor: producto.dropshipping?.proveedor || 'No especificado',
           pais_origen: producto.dropshipping?.pais_origen || 'No especificado',
-          requiere_confirmacion: producto.dropshipping?.requiere_confirmacion || false,
           costo_importacion: producto.dropshipping?.costo_importacion || 0,
           tiempo_configurado_en_ml: producto.dropshipping?.tiempo_configurado_en_ml || false
         })
@@ -151,7 +149,6 @@ const AdminDropshippingPage: React.FC = () => {
               dias_envio_estimado: producto.dropshipping?.dias_envio_estimado || 0,
               proveedor: producto.dropshipping?.proveedor || 'No especificado',
               pais_origen: producto.dropshipping?.pais_origen || 'No especificado',
-              requiere_confirmacion: producto.dropshipping?.requiere_confirmacion || false,
               costo_importacion: producto.dropshipping?.costo_importacion || 0,
               tiempo_configurado_en_ml: producto.dropshipping?.tiempo_configurado_en_ml || false
             })
@@ -354,7 +351,6 @@ const AdminDropshippingPage: React.FC = () => {
             <h3>Proveedores</h3>
             <span className="stat-number">{proveedoresUnicos.length}</span>
           </div>
-         
         </div>
 
         {/* Lista de productos */}
