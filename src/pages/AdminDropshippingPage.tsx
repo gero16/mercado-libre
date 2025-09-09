@@ -39,9 +39,6 @@ const AdminDropshippingPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
-  // Comentamos las variables no utilizadas
-  // const [filterProveedor, setFilterProveedor] = useState<string>('all')
-  // const [filterPais, setFilterPais] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'dias_preparacion' | 'proveedor'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
@@ -58,8 +55,8 @@ const AdminDropshippingPage: React.FC = () => {
       const data = await response.json()
       console.log('✅ Respuesta del servidor:', data)
       
-      // Extraer los productos del objeto de respuesta
-      const productos = data.productos || []
+      // Extraer los productos del objeto de respuesta - ahora están en productos_base
+      const productos = data.productos_base || []
       console.log('📊 Productos extraídos:', productos)
       console.log('📊 Cantidad de productos:', productos.length)
       
@@ -85,6 +82,9 @@ const AdminDropshippingPage: React.FC = () => {
       
       productList.forEach((producto, index) => {
         console.log(`🔄 Procesando producto ${index + 1}:`, producto.title)
+        console.log('🔍 Estructura completa del producto:', producto)
+        console.log('🔍 Dropshipping data:', producto.dropshipping)
+        console.log('🔍 Variantes:', producto.variantes)
         
         const isPaused = producto.status === 'paused'
         
@@ -168,8 +168,6 @@ const AdminDropshippingPage: React.FC = () => {
 
   // Obtener proveedores únicos para el filtro
   const proveedoresUnicos = Array.from(new Set(adminItems.map(item => item.proveedor)))
-  // Comentamos la variable no utilizada
-  // const paisesUnicos = Array.from(new Set(adminItems.map(item => item.pais_origen)))
 
   // Filtrar y ordenar items
   const filteredAndSortedItems = adminItems
@@ -186,13 +184,6 @@ const AdminDropshippingPage: React.FC = () => {
       // Filtro por status
       if (filterStatus === 'active' && item.isPaused) return false
       if (filterStatus === 'paused' && !item.isPaused) return false
-      
-      // Comentamos los filtros no utilizados
-      // Filtro por proveedor
-      // if (filterProveedor !== 'all' && item.proveedor !== filterProveedor) return false
-      
-      // Filtro por país
-      // if (filterPais !== 'all' && item.pais_origen !== filterPais) return false
       
       return true
     })
@@ -219,19 +210,6 @@ const AdminDropshippingPage: React.FC = () => {
       
       return sortOrder === 'asc' ? comparison : -comparison
     })
-
-  // Comentamos las funciones no utilizadas
-  // const handleEditProduct = (item: AdminDropshippingItem) => {
-  //   console.log('Editar producto dropshipping:', item)
-  //   alert(`Función de edición para: ${item.title}`)
-  // }
-
-  // const handleDeleteProduct = (item: AdminDropshippingItem) => {
-  //   console.log('Eliminar producto dropshipping:', item)
-  //   if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
-  //     alert(`Función de eliminación para: ${item.title}`)
-  //   }
-  // }
 
   if (loading) {
     return (
@@ -403,7 +381,6 @@ const AdminDropshippingPage: React.FC = () => {
                 <div className="product-info">
                   <div className="product-main-info">
                     <h3 className="product-title">{item.title}</h3>
-                 
                   </div>
                   
                   <div className="product-details">
@@ -505,8 +482,6 @@ const AdminDropshippingPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                
-               
               </div>
             ))
           )}
