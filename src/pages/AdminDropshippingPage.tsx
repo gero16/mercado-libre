@@ -39,8 +39,9 @@ const AdminDropshippingPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
-  const [filterProveedor, setFilterProveedor] = useState<string>('all')
-  const [filterPais, setFilterPais] = useState<string>('all')
+  // Comentamos las variables no utilizadas
+  // const [filterProveedor, setFilterProveedor] = useState<string>('all')
+  // const [filterPais, setFilterPais] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'dias_preparacion' | 'proveedor'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
@@ -167,7 +168,8 @@ const AdminDropshippingPage: React.FC = () => {
 
   // Obtener proveedores únicos para el filtro
   const proveedoresUnicos = Array.from(new Set(adminItems.map(item => item.proveedor)))
-  const paisesUnicos = Array.from(new Set(adminItems.map(item => item.pais_origen)))
+  // Comentamos la variable no utilizada
+  // const paisesUnicos = Array.from(new Set(adminItems.map(item => item.pais_origen)))
 
   // Filtrar y ordenar items
   const filteredAndSortedItems = adminItems
@@ -185,11 +187,12 @@ const AdminDropshippingPage: React.FC = () => {
       if (filterStatus === 'active' && item.isPaused) return false
       if (filterStatus === 'paused' && !item.isPaused) return false
       
+      // Comentamos los filtros no utilizados
       // Filtro por proveedor
-      if (filterProveedor !== 'all' && item.proveedor !== filterProveedor) return false
+      // if (filterProveedor !== 'all' && item.proveedor !== filterProveedor) return false
       
       // Filtro por país
-      if (filterPais !== 'all' && item.pais_origen !== filterPais) return false
+      // if (filterPais !== 'all' && item.pais_origen !== filterPais) return false
       
       return true
     })
@@ -217,17 +220,18 @@ const AdminDropshippingPage: React.FC = () => {
       return sortOrder === 'asc' ? comparison : -comparison
     })
 
-  const handleEditProduct = (item: AdminDropshippingItem) => {
-    console.log('Editar producto dropshipping:', item)
-    alert(`Función de edición para: ${item.title}`)
-  }
+  // Comentamos las funciones no utilizadas
+  // const handleEditProduct = (item: AdminDropshippingItem) => {
+  //   console.log('Editar producto dropshipping:', item)
+  //   alert(`Función de edición para: ${item.title}`)
+  // }
 
-  const handleDeleteProduct = (item: AdminDropshippingItem) => {
-    console.log('Eliminar producto dropshipping:', item)
-    if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
-      alert(`Función de eliminación para: ${item.title}`)
-    }
-  }
+  // const handleDeleteProduct = (item: AdminDropshippingItem) => {
+  //   console.log('Eliminar producto dropshipping:', item)
+  //   if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
+  //     alert(`Función de eliminación para: ${item.title}`)
+  //   }
+  // }
 
   if (loading) {
     return (
@@ -278,7 +282,7 @@ const AdminDropshippingPage: React.FC = () => {
       <div className="admin-container">
         {/* Header */}
         <div className="admin-header">
-          <h1>Panel de Productos a Pedido</h1>
+          <h1>Panel de Dropshipping</h1>
           <p>Gestiona productos con preparación mayor a 14 días</p>
           <p style={{ fontSize: '0.9rem', color: '#8b949e' }}>
             Total de productos cargados: {adminItems.length}
@@ -331,7 +335,6 @@ const AdminDropshippingPage: React.FC = () => {
               <option value="paused">Pausados</option>
             </select>
           </div>
-
           
           <div className="sort-section">
             <select
@@ -373,7 +376,6 @@ const AdminDropshippingPage: React.FC = () => {
             <h3>Proveedores</h3>
             <span className="stat-number">{proveedoresUnicos.length}</span>
           </div>
-          
           <div className="stat-card">
             <h3>Requieren Confirmación</h3>
             <span className="stat-number">{adminItems.filter(item => item.requiere_confirmacion).length}</span>
@@ -401,30 +403,25 @@ const AdminDropshippingPage: React.FC = () => {
                 <div className="product-info">
                   <div className="product-main-info">
                     <h3 className="product-title">{item.title}</h3>
-                    {
-                      /* 
-                      
-                        <div className="product-badges">
-                          {item.esVariante ? (
-                            <span className="badge badge-variant">Variante</span>
-                          ) : (
-                            <span className="badge badge-product">Producto</span>
-                          )}
-                          {item.isPaused ? (
-                            <span className="badge badge-paused">Pausado</span>
-                          ) : item.stock <= 0 ? (
-                            <span className="badge badge-no-stock">Sin Stock</span>
-                          ) : null}
-                          <span className="badge badge-dropshipping">Dropshipping</span>
-                          {item.requiere_confirmacion && (
-                            <span className="badge badge-confirmation">Requiere Confirmación</span>
-                          )}
-                          {item.tiempo_configurado_en_ml && (
-                            <span className="badge badge-ml-configured">Configurado en ML</span>
-                          )}
-                        </div>
-                      */
-                    }
+                    <div className="product-badges">
+                      {item.esVariante ? (
+                        <span className="badge badge-variant">Variante</span>
+                      ) : (
+                        <span className="badge badge-product">Producto</span>
+                      )}
+                      {item.isPaused ? (
+                        <span className="badge badge-paused">Pausado</span>
+                      ) : item.stock <= 0 ? (
+                        <span className="badge badge-no-stock">Sin Stock</span>
+                      ) : null}
+                      <span className="badge badge-dropshipping">Dropshipping</span>
+                      {item.requiere_confirmacion && (
+                        <span className="badge badge-confirmation">Requiere Confirmación</span>
+                      )}
+                      {item.tiempo_configurado_en_ml && (
+                        <span className="badge badge-ml-configured">Configurado en ML</span>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="product-details">
@@ -455,7 +452,10 @@ const AdminDropshippingPage: React.FC = () => {
                       <span className="detail-label">Proveedor:</span>
                       <span className="detail-value">{item.proveedor}</span>
                     </div>
-              
+                    <div className="detail-row">
+                      <span className="detail-label">País Origen:</span>
+                      <span className="detail-value">{item.pais_origen}</span>
+                    </div>
                     <div className="detail-row">
                       <span className="detail-label">Costo Importación:</span>
                       <span className="detail-value">${item.costo_importacion}</span>
@@ -503,7 +503,20 @@ const AdminDropshippingPage: React.FC = () => {
                   </div>
                 </div>
                 
-               
+                <div className="product-actions">
+                  <button
+                    className="btn-edit"
+                    disabled
+                  >
+                    Editar (Próximamente)
+                  </button>
+                  <button
+                    className="btn-delete"
+                    disabled
+                  >
+                    Eliminar (Próximamente)
+                  </button>
+                </div>
               </div>
             ))
           )}

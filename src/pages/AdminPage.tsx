@@ -154,17 +154,18 @@ const AdminPage: React.FC = () => {
       return sortOrder === 'asc' ? comparison : -comparison
     })
 
-  const handleEditProduct = (item: AdminItem) => {
-    console.log('Editar producto:', item)
-    alert(`Función de edición para: ${item.title}`)
-  }
+  // Comentamos las funciones no utilizadas
+  // const handleEditProduct = (item: AdminItem) => {
+  //   console.log('Editar producto:', item)
+  //   alert(`Función de edición para: ${item.title}`)
+  // }
 
-  const handleDeleteProduct = (item: AdminItem) => {
-    console.log('Eliminar producto:', item)
-    if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
-      alert(`Función de eliminación para: ${item.title}`)
-    }
-  }
+  // const handleDeleteProduct = (item: AdminItem) => {
+  //   console.log('Eliminar producto:', item)
+  //   if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
+  //     alert(`Función de eliminación para: ${item.title}`)
+  //   }
+  // }
 
   if (loading) {
     return (
@@ -372,7 +373,20 @@ const AdminPage: React.FC = () => {
                   </div>
                 </div>
                 
-              
+                <div className="product-actions">
+                  <button
+                    className="btn-edit"
+                    disabled
+                  >
+                    Editar (Próximamente)
+                  </button>
+                  <button
+                    className="btn-delete"
+                    disabled
+                  >
+                    Eliminar (Próximamente)
+                  </button>
+                </div>
               </div>
             ))
           )}
