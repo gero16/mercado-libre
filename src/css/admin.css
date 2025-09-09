@@ -548,3 +548,133 @@
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* Pestañas de navegación */
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  padding: 0 25px;
+}
+
+.admin-tab {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #8b949e;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.admin-tab:hover {
+  background: linear-gradient(135deg, #30363d 0%, #21262d 100%);
+  color: #f0f6fc;
+  border-color: #58a6ff;
+}
+
+.admin-tab.active {
+  background: linear-gradient(135deg, #1f6feb 0%, #0969da 100%);
+  color: #ffffff;
+  border-color: #1f6feb;
+  box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+}
+
+/* Badges para tipo de entrega */
+.badge-dropshipping {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+}
+
+.badge-stock-fisico {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+}
+
+/* Información de entrega */
+.dropshipping-info {
+  color: #f59e0b !important;
+  font-weight: 600;
+}
+
+.stock-fisico-info {
+  color: #10b981 !important;
+  font-weight: 600;
+}
+
+/* Responsive para pestañas */
+@media (max-width: 768px) {
+  .admin-tabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .admin-tab {
+    text-align: center;
+    padding: 10px 16px;
+  }
+}
+
+/* Estilos específicos para dropshipping */
+.badge-confirmation {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+}
+
+.badge-ml-configured {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  color: #ffffff;
+}
+
+/* Controles adicionales para dropshipping */
+.admin-controls {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
+  border-radius: 12px;
+  border: 1px solid #30363d;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.proveedor-section,
+.pais-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.proveedor-section label,
+.pais-section label {
+  color: #8b949e;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+/* Responsive para controles de dropshipping */
+@media (max-width: 1200px) {
+  .admin-controls {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+  }
+  
+  .proveedor-section,
+  .pais-section {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-controls {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .proveedor-section,
+  .pais-section {
+    grid-column: auto;
+  }
+}

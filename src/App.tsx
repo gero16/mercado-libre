@@ -14,6 +14,7 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailurePage from './pages/PaymentFailurePage'
 import PaymentPendingPage from './pages/PaymentPendingPage'
 import AdminPage from './pages/AdminPage'
+import AdminDropshippingPage from './pages/AdminDropshippingPage'
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -43,8 +44,9 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/contacto" element={<ContactoPage />} />
             
-            {/* Ruta de administración */}
+            {/* Rutas de administración */}
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/dropshipping" element={<AdminDropshippingPage />} />
             
             {/* Rutas de resultado de pago */}
             <Route path="/payment-success" element={<PaymentSuccessPage />} />

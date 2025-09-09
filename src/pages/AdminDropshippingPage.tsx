@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
 
-// Interfaz para items de administración
-interface AdminItem {
+// Interfaz para items de administración de dropshipping
+interface AdminDropshippingItem {
   id: string;
   title: string;
   price: number;
@@ -17,40 +17,53 @@ interface AdminItem {
   variantId?: string;
   status: string;
   isPaused: boolean;
-  // Nuevas propiedades
+  // Propiedades específicas de dropshipping
+  dias_preparacion: number;
+  dias_envio_estimado: number;
+  proveedor: string;
+  pais_origen: string;
+  requiere_confirmacion: boolean;
+  costo_importacion: number;
+  tiempo_configurado_en_ml: boolean;
+  // Propiedades de variantes
   tieneVariantes?: boolean;
   stockTotalVariantes?: number;
-  tipoEntrega?: 'dropshipping' | 'stock_fisico';
 }
 
-const AdminPage: React.FC = () => {
-  const [adminItems, setAdminItems] = useState<AdminItem[]>([])
+const AdminDropshippingPage: React.FC = () => {
+  const [adminItems, setAdminItems] = useState<AdminDropshippingItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
-  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock'>('name')
+  const [filterProveedor, setFilterProveedor] = useState<string>('all')
+  const [filterPais, setFilterPais] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'dias_preparacion' | 'proveedor'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  // Nueva pestaña activa
-  const [activeTab, setActiveTab] = useState<'all' | 'dropshipping' | 'stock_fisico'>('all')
 
-  // Fetch productos de Mercado Libre desde el backend
-  const fetchProducts = async (tipo?: 'dropshipping' | 'stock_fisico'): Promise<ProductoML[]> => {
+  // Fetch productos de dropshipping desde el backend
+  const fetchDropshippingProducts = async (): Promise<ProductoML[]> => {
     try {
-      let endpoint = 'https://tienda-virtual-ts-back-production.up.railway.app/ml/productos'
+      console.log(' Intentando obtener productos de dropshipping...')
+      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/tipo/dropshipping')
       
-      if (tipo === 'dropshipping') {
-        endpoint = 'https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/dropshipping'
-      } else if (tipo === 'stock_fisico') {
-        endpoint = 'https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/stock-fisico'
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`)
       }
       
-      const response = await fetch(endpoint)
       const data = await response.json()
-      console.log(`Productos ${tipo || 'todos'} para admin:`, data)
-      return data || []
+      console.log('✅ Respuesta del servidor:', data)
+      
+      // Extraer los productos del objeto de respuesta
+      const productos = data.productos || []
+      console.log('📊 Productos extraídos:', productos)
+      console.log('📊 Cantidad de productos:', productos.length)
+      
+      return productos
     } catch (error) {
-      console.error(`Error fetching ${tipo || 'all'} products for admin:`, error)
+      console.error('❌ Error fetching dropshipping products for admin:', error)
+      setError(`Error al cargar productos: ${error instanceof Error ? error.message : 'Error desconocido'}`)
       return []
     }
   }
@@ -58,12 +71,18 @@ const AdminPage: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true)
-      const productList = await fetchProducts(activeTab === 'all' ? undefined : activeTab)
+      setError(null)
+      console.log(' Iniciando carga de productos de dropshipping...')
+      
+      const productList = await fetchDropshippingProducts()
+      console.log(' Lista de productos procesada:', productList)
       
       // Procesar productos para crear items de administración
-      const items: AdminItem[] = []
+      const items: AdminDropshippingItem[] = []
       
-      productList.forEach(producto => {
+      productList.forEach((producto, index) => {
+        console.log(`🔄 Procesando producto ${index + 1}:`, producto.title)
+        
         const isPaused = producto.status === 'paused'
         
         // Calcular stock total de variantes si existen
@@ -91,7 +110,14 @@ const AdminPage: React.FC = () => {
           isPaused: isPaused,
           tieneVariantes: producto.variantes && producto.variantes.length > 0,
           stockTotalVariantes: totalVariantsStock,
-          tipoEntrega: activeTab === 'all' ? undefined : activeTab
+          // Propiedades de dropshipping (extraídas del objeto anidado)
+          dias_preparacion: producto.dropshipping?.dias_preparacion || 0,
+          dias_envio_estimado: producto.dropshipping?.dias_envio_estimado || 0,
+          proveedor: producto.dropshipping?.proveedor || 'No especificado',
+          pais_origen: producto.dropshipping?.pais_origen || 'No especificado',
+          requiere_confirmacion: producto.dropshipping?.requiere_confirmacion || false,
+          costo_importacion: producto.dropshipping?.costo_importacion || 0,
+          tiempo_configurado_en_ml: producto.dropshipping?.tiempo_configurado_en_ml || false
         })
         
         // Agregar cada variante como un item separado
@@ -117,17 +143,29 @@ const AdminPage: React.FC = () => {
               variantId: variante._id,
               status: producto.status,
               isPaused: isPaused,
-              tipoEntrega: activeTab === 'all' ? undefined : activeTab
+              // Propiedades de dropshipping (heredadas del producto padre)
+              dias_preparacion: producto.dropshipping?.dias_preparacion || 0,
+              dias_envio_estimado: producto.dropshipping?.dias_envio_estimado || 0,
+              proveedor: producto.dropshipping?.proveedor || 'No especificado',
+              pais_origen: producto.dropshipping?.pais_origen || 'No especificado',
+              requiere_confirmacion: producto.dropshipping?.requiere_confirmacion || false,
+              costo_importacion: producto.dropshipping?.costo_importacion || 0,
+              tiempo_configurado_en_ml: producto.dropshipping?.tiempo_configurado_en_ml || false
             })
           })
         }
       })
       
+      console.log('✅ Items procesados:', items.length)
       setAdminItems(items)
       setLoading(false)
     }
     loadProducts()
-  }, [activeTab])
+  }, [])
+
+  // Obtener proveedores únicos para el filtro
+  const proveedoresUnicos = Array.from(new Set(adminItems.map(item => item.proveedor)))
+  const paisesUnicos = Array.from(new Set(adminItems.map(item => item.pais_origen)))
 
   // Filtrar y ordenar items
   const filteredAndSortedItems = adminItems
@@ -145,6 +183,12 @@ const AdminPage: React.FC = () => {
       if (filterStatus === 'active' && item.isPaused) return false
       if (filterStatus === 'paused' && !item.isPaused) return false
       
+      // Filtro por proveedor
+      if (filterProveedor !== 'all' && item.proveedor !== filterProveedor) return false
+      
+      // Filtro por país
+      if (filterPais !== 'all' && item.pais_origen !== filterPais) return false
+      
       return true
     })
     .sort((a, b) => {
@@ -160,20 +204,24 @@ const AdminPage: React.FC = () => {
         case 'stock':
           comparison = a.stock - b.stock
           break
+        case 'dias_preparacion':
+          comparison = a.dias_preparacion - b.dias_preparacion
+          break
+        case 'proveedor':
+          comparison = a.proveedor.localeCompare(b.proveedor)
+          break
       }
       
       return sortOrder === 'asc' ? comparison : -comparison
     })
 
-  const handleEditProduct = (item: AdminItem) => {
-    // TODO: Implementar edición de producto
-    console.log('Editar producto:', item)
+  const handleEditProduct = (item: AdminDropshippingItem) => {
+    console.log('Editar producto dropshipping:', item)
     alert(`Función de edición para: ${item.title}`)
   }
 
-  const handleDeleteProduct = (item: AdminItem) => {
-    // TODO: Implementar eliminación de producto
-    console.log('Eliminar producto:', item)
+  const handleDeleteProduct = (item: AdminDropshippingItem) => {
+    console.log('Eliminar producto dropshipping:', item)
     if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
       alert(`Función de eliminación para: ${item.title}`)
     }
@@ -184,11 +232,39 @@ const AdminPage: React.FC = () => {
       <main className="container">
         <div className="admin-container">
           <div className="admin-header">
-            <h1>Panel de Administración</h1>
+            <h1>Panel de Dropshipping</h1>
             <p>Cargando productos...</p>
           </div>
           <div className="admin-products-list">
             <ProductSkeleton count={6} />
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="container">
+        <div className="admin-container">
+          <div className="admin-header">
+            <h1>Panel de Dropshipping</h1>
+            <p style={{ color: '#dc2626' }}>Error: {error}</p>
+          </div>
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#1f6feb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              Reintentar
+            </button>
           </div>
         </div>
       </main>
@@ -200,30 +276,11 @@ const AdminPage: React.FC = () => {
       <div className="admin-container">
         {/* Header */}
         <div className="admin-header">
-          <h1>Panel de Administración</h1>
-          <p>Gestiona todos los productos y variantes de tu tienda</p>
-        </div>
-
-        {/* Pestañas de navegación */}
-        <div className="admin-tabs">
-          <button 
-            className={`admin-tab ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
-          >
-            Todos los Productos
-          </button>
-          <button 
-            className={`admin-tab ${activeTab === 'stock_fisico' ? 'active' : ''}`}
-            onClick={() => setActiveTab('stock_fisico')}
-          >
-            Stock Físico (≤14 días)
-          </button>
-          <button 
-            className={`admin-tab ${activeTab === 'dropshipping' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dropshipping')}
-          >
-            Dropshipping (&gt;14 días)
-          </button>
+          <h1>Panel de Dropshipping</h1>
+          <p>Gestiona productos con preparación mayor a 14 días</p>
+          <p style={{ fontSize: '0.9rem', color: '#8b949e' }}>
+            Total de productos cargados: {adminItems.length}
+          </p>
         </div>
 
         {/* Controles de filtrado y búsqueda */}
@@ -261,16 +318,44 @@ const AdminPage: React.FC = () => {
               <option value="paused">Pausados</option>
             </select>
           </div>
+
+          <div className="proveedor-section">
+            <select
+              value={filterProveedor}
+              onChange={(e) => setFilterProveedor(e.target.value)}
+              className="admin-select"
+            >
+              <option value="all">Todos los proveedores</option>
+              {proveedoresUnicos.map(proveedor => (
+                <option key={proveedor} value={proveedor}>{proveedor}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="pais-section">
+            <select
+              value={filterPais}
+              onChange={(e) => setFilterPais(e.target.value)}
+              className="admin-select"
+            >
+              <option value="all">Todos los países</option>
+              {paisesUnicos.map(pais => (
+                <option key={pais} value={pais}>{pais}</option>
+              ))}
+            </select>
+          </div>
           
           <div className="sort-section">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'stock')}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'stock' | 'dias_preparacion' | 'proveedor')}
               className="admin-select"
             >
               <option value="name">Ordenar por nombre</option>
               <option value="price">Ordenar por precio</option>
               <option value="stock">Ordenar por stock</option>
+              <option value="dias_preparacion">Ordenar por días preparación</option>
+              <option value="proveedor">Ordenar por proveedor</option>
             </select>
             
             <button
@@ -297,21 +382,17 @@ const AdminPage: React.FC = () => {
             <span className="stat-number">{adminItems.filter(item => item.esVariante).length}</span>
           </div>
           <div className="stat-card">
-            <h3>Sin Stock</h3>
-            <span className="stat-number">{adminItems.filter(item => item.stock <= 0).length}</span>
+            <h3>Proveedores</h3>
+            <span className="stat-number">{proveedoresUnicos.length}</span>
           </div>
           <div className="stat-card">
-            <h3>Pausados</h3>
-            <span className="stat-number">{adminItems.filter(item => item.isPaused).length}</span>
+            <h3>Países</h3>
+            <span className="stat-number">{paisesUnicos.length}</span>
           </div>
-          {activeTab !== 'all' && (
-            <div className="stat-card">
-              <h3>Tipo Entrega</h3>
-              <span className="stat-number">
-                {activeTab === 'dropshipping' ? 'Dropshipping' : 'Stock Físico'}
-              </span>
-            </div>
-          )}
+          <div className="stat-card">
+            <h3>Requieren Confirmación</h3>
+            <span className="stat-number">{adminItems.filter(item => item.requiere_confirmacion).length}</span>
+          </div>
         </div>
 
         {/* Lista de productos */}
@@ -319,6 +400,11 @@ const AdminPage: React.FC = () => {
           {filteredAndSortedItems.length === 0 ? (
             <div className="no-products">
               <p>No se encontraron productos con los filtros seleccionados.</p>
+              {adminItems.length === 0 && (
+                <p style={{ color: '#8b949e', marginTop: '10px' }}>
+                  No hay productos de dropshipping disponibles en el sistema.
+                </p>
+              )}
             </div>
           ) : (
             filteredAndSortedItems.map(item => (
@@ -341,10 +427,12 @@ const AdminPage: React.FC = () => {
                       ) : item.stock <= 0 ? (
                         <span className="badge badge-no-stock">Sin Stock</span>
                       ) : null}
-                      {item.tipoEntrega && (
-                        <span className={`badge ${item.tipoEntrega === 'dropshipping' ? 'badge-dropshipping' : 'badge-stock-fisico'}`}>
-                          {item.tipoEntrega === 'dropshipping' ? 'Dropshipping' : 'Stock Físico'}
-                        </span>
+                      <span className="badge badge-dropshipping">Dropshipping</span>
+                      {item.requiere_confirmacion && (
+                        <span className="badge badge-confirmation">Requiere Confirmación</span>
+                      )}
+                      {item.tiempo_configurado_en_ml && (
+                        <span className="badge badge-ml-configured">Configurado en ML</span>
                       )}
                     </div>
                   </div>
@@ -365,6 +453,26 @@ const AdminPage: React.FC = () => {
                         )}
                       </span>
                     </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Días Preparación:</span>
+                      <span className="detail-value dropshipping-info">{item.dias_preparacion} días</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Días Envío:</span>
+                      <span className="detail-value dropshipping-info">{item.dias_envio_estimado} días</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Proveedor:</span>
+                      <span className="detail-value">{item.proveedor}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">País Origen:</span>
+                      <span className="detail-value">{item.pais_origen}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Costo Importación:</span>
+                      <span className="detail-value">${item.costo_importacion}</span>
+                    </div>
                     {!item.esVariante && item.tieneVariantes && (
                       <div className="detail-row">
                         <span className="detail-label">Tipo:</span>
@@ -379,14 +487,6 @@ const AdminPage: React.FC = () => {
                         {item.status}
                       </span>
                     </div>
-                    {item.tipoEntrega && (
-                      <div className="detail-row">
-                        <span className="detail-label">Entrega:</span>
-                        <span className={`detail-value ${item.tipoEntrega === 'dropshipping' ? 'dropshipping-info' : 'stock-fisico-info'}`}>
-                          {item.tipoEntrega === 'dropshipping' ? '&gt;14 días' : '≤14 días'}
-                        </span>
-                      </div>
-                    )}
                     <div className="detail-row">
                       <span className="detail-label">ID Producto:</span>
                       <span className="detail-value detail-id">{item.productId}</span>
@@ -439,4 +539,4 @@ const AdminPage: React.FC = () => {
   )
 }
 
-export default AdminPage
+export default AdminDropshippingPage 

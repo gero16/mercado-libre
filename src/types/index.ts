@@ -61,6 +61,24 @@ export interface ProductoML {
   categoria?: string;
   category_id?: string;
   images: Image[];
+  // Nuevas propiedades para dropshipping
+  dias_preparacion?: number;
+  dias_envio_estimado?: number;
+  proveedor?: string;
+  pais_origen?: string;
+  requiere_confirmacion?: boolean;
+  costo_importacion?: number;
+  tiempo_configurado_en_ml?: boolean;
+  // Objeto dropshipping anidado
+  dropshipping?: {
+    dias_preparacion: number;
+    dias_envio_estimado: number;
+    proveedor: string;
+    pais_origen: string;
+    requiere_confirmacion: boolean;
+    costo_importacion: number;
+    tiempo_configurado_en_ml: boolean;
+  };
 }
 
 export interface OrderML {
