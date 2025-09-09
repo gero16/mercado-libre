@@ -67,16 +67,32 @@ header {
   font-size: medium;
 }
 
+
 .flex-center-center {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.flex {
+  display: flex;
+  align-items: center;
+} 
+
+.flex-space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gap-20 {
+  gap: 20px;
 }
 .navbar ul {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 20px;
+  
   margin-right: 100px;
 }
 

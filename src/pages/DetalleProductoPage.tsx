@@ -341,12 +341,16 @@ const DetalleProductoPage: React.FC = () => {
               </div>
             )}
             
-            <div className="precio-disponibilidad">
-              <h2>${varianteSeleccionada?.price || producto.price}</h2>
-              <p className={`disponibilidad ${isProductPaused ? 'paused' : 'available'}`}>
-                {isProductPaused ? 'Producto pausado' : 'Disponible'}
-              </p>
-            </div>
+
+          
+
+              <div className="precio-disponibilidad">
+                <h2 className='h2-precio'>${varianteSeleccionada?.price || producto.price}</h2>
+                <p className={`disponibilidad p-precio-detalle ${isProductPaused ? 'paused' : 'available'}`}>
+                  {isProductPaused ? 'Producto pausado' : 'Disponible'}
+                </p>
+              </div>
+              
 
             {/* Variantes de color */}
             {producto.variantes && producto.variantes.length > 0 && (
@@ -394,19 +398,6 @@ const DetalleProductoPage: React.FC = () => {
               </div>
             )}
 
-            {/* Cantidad */}
-            <div className="cantidad">
-              <label htmlFor="cantidad">Cantidad:</label>
-              <input
-                type="number"
-                id="cantidad"
-                min="1"
-                max={getStockVariante()}
-                value={cantidad}
-                onChange={handleCantidadChange}
-                disabled={isProductPaused}
-              />
-            </div>
 
             {/* Descripción */}
             {producto.description && (
@@ -416,23 +407,41 @@ const DetalleProductoPage: React.FC = () => {
               </div>
             )}
 
-            {/* Botón de agregar al carrito */}
-            <button
-              className="btn-agregar-carrito"
-              onClick={handleAgregarAlCarrito}
-              disabled={isProductPaused || getStockVariante() <= 0}
-            >
-              {isProductPaused 
-                ? 'Producto Pausado' 
-                : getStockVariante() <= 0
-                  ? 'Sin Stock' 
-                  : 'Agregar al Carrito'
-              }
-            </button>
+              {/* Cantidad */}
+          
+              <div className="cantidad">
+                <label htmlFor="cantidad">Cantidad:</label>
+                <input
+                  type="number"
+                  id="cantidad"
+                  min="1"
+                  max={getStockVariante()}
+                  value={cantidad}
+                  onChange={handleCantidadChange}
+                  disabled={isProductPaused}
+                />
+              </div>
 
-            <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
-              Volver a la tienda
-            </button>
+            {/* Botón de agregar al carrito */}
+            <div className='flex gap-20'>
+              <button
+                className="btn-agregar-carrito"
+                onClick={handleAgregarAlCarrito}
+                disabled={isProductPaused || getStockVariante() <= 0}
+              >
+                {isProductPaused 
+                  ? 'Producto Pausado' 
+                  : getStockVariante() <= 0
+                    ? 'Sin Stock' 
+                    : 'Agregar al Carrito'
+                }
+              </button>
+
+              <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
+                Volver a la tienda
+              </button>
+
+            </div>
           </div>
         </div>
       </div>
