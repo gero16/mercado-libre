@@ -354,10 +354,7 @@ const AdminDropshippingPage: React.FC = () => {
             <h3>Proveedores</h3>
             <span className="stat-number">{proveedoresUnicos.length}</span>
           </div>
-          <div className="stat-card">
-            <h3>Requieren Confirmación</h3>
-            <span className="stat-number">{adminItems.filter(item => item.requiere_confirmacion).length}</span>
-          </div>
+         
         </div>
 
         {/* Lista de productos */}
@@ -417,12 +414,7 @@ const AdminDropshippingPage: React.FC = () => {
                       <span className="detail-label">País Origen:</span>
                       <span className="detail-value">{item.pais_origen}</span>
                     </div>
-                    {item.requiere_confirmacion && (
-                      <div className="detail-row">
-                        <span className="detail-label">Requiere Confirmación:</span>
-                        <span className="detail-value warning">Sí</span>
-                      </div>
-                    )}
+                    
                     {item.costo_importacion > 0 && (
                       <div className="detail-row">
                         <span className="detail-label">Costo Importación:</span>
