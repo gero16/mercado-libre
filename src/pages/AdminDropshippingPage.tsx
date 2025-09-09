@@ -238,7 +238,7 @@ const AdminDropshippingPage: React.FC = () => {
       <main className="container">
         <div className="admin-container">
           <div className="admin-header">
-            <h1>Panel de Dropshipping</h1>
+            <h1>Panel de productos a pedido</h1>
             <p>Cargando productos...</p>
           </div>
           <div className="admin-products-list">
@@ -254,7 +254,7 @@ const AdminDropshippingPage: React.FC = () => {
       <main className="container">
         <div className="admin-container">
           <div className="admin-header">
-            <h1>Panel de Dropshipping</h1>
+            <h1>Panel de productos a pedido</h1>
             <p style={{ color: '#dc2626' }}>Error: {error}</p>
           </div>
           <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -282,7 +282,7 @@ const AdminDropshippingPage: React.FC = () => {
       <div className="admin-container">
         {/* Header */}
         <div className="admin-header">
-          <h1>Panel de Dropshipping</h1>
+          <h1>Panel de productos a pedido</h1>
           <p>Gestiona productos con preparación mayor a 14 días</p>
           <p style={{ fontSize: '0.9rem', color: '#8b949e' }}>
             Total de productos cargados: {adminItems.length}
