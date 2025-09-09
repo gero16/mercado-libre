@@ -299,7 +299,9 @@ const AdminPage: React.FC = () => {
                 
                 <div className="product-info">
                   <div className="product-main-info">
-                    <h3 className="product-title">{item.title}</h3>
+                    <h3 className={`product-title ${!item.esVariante && item.tieneVariantes ? 'product-base-title' : ''}`}>
+                      {item.title}
+                    </h3>
                     <div className="product-badges">
                       {item.esVariante ? (
                         <span className="badge badge-variant">Variante</span>

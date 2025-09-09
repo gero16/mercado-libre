@@ -730,3 +730,58 @@
   color: #dc2626 !important;
   font-weight: 600;
 }
+
+/* Estilos para títulos de productos base */
+.product-base-title {
+  color: #f59e0b !important;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(245, 158, 11, 0.3);
+}
+
+/* Mejorar el estilo del badge de producto base */
+.product-base {
+
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Estilo para información de variantes */
+.variant-info {
+  color: #059669;
+  font-style: italic;
+  background-color: #f0fdf4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border-left: 3px solid #059669;
+}
+
+/* Estilos para badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+.badge-product {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-variant {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-paused {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-no-stock {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
