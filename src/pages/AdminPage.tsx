@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
 
@@ -24,6 +25,7 @@ interface AdminItem {
 }
 
 const AdminPage: React.FC = () => {
+  const navigate = useNavigate()
   const [adminItems, setAdminItems] = useState<AdminItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -31,34 +33,23 @@ const AdminPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  // Nueva pestaña activa
-  const [activeTab, setActiveTab] = useState<'all' | 'dropshipping' | 'stock_fisico'>('all')
 
   // Fetch productos de Mercado Libre desde el backend
-  const fetchProducts = async (tipo?: 'dropshipping' | 'stock_fisico'): Promise<ProductoML[]> => {
+  const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
-      let endpoint = 'https://tienda-virtual-ts-back-production.up.railway.app/ml/productos'
-      
-      if (tipo === 'dropshipping') {
-        endpoint = 'https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/dropshipping'
-      } else if (tipo === 'stock_fisico') {
-        endpoint = 'https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/stock-fisico'
-      }
-      
-      const response = await fetch(endpoint)
+      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos')
       const data = await response.json()
-      console.log(`Productos ${tipo || 'todos'} para admin:`, data)
+      console.log('Productos para admin:', data)
       return data || []
     } catch (error) {
-      console.error(`Error fetching ${tipo || 'all'} products for admin:`, error)
+      console.error('Error fetching ML products for admin:', error)
       return []
     }
   }
 
   useEffect(() => {
     const loadProducts = async () => {
-      setLoading(true)
-      const productList = await fetchProducts(activeTab === 'all' ? undefined : activeTab)
+      const productList = await fetchProducts()
       
       // Procesar productos para crear items de administración
       const items: AdminItem[] = []
@@ -90,8 +81,7 @@ const AdminPage: React.FC = () => {
           status: producto.status,
           isPaused: isPaused,
           tieneVariantes: producto.variantes && producto.variantes.length > 0,
-          stockTotalVariantes: totalVariantsStock,
-          tipoEntrega: activeTab === 'all' ? undefined : activeTab
+          stockTotalVariantes: totalVariantsStock
         })
         
         // Agregar cada variante como un item separado
@@ -116,8 +106,7 @@ const AdminPage: React.FC = () => {
               productId: producto.ml_id,
               variantId: variante._id,
               status: producto.status,
-              isPaused: isPaused,
-              tipoEntrega: activeTab === 'all' ? undefined : activeTab
+              isPaused: isPaused
             })
           })
         }
@@ -127,7 +116,7 @@ const AdminPage: React.FC = () => {
       setLoading(false)
     }
     loadProducts()
-  }, [activeTab])
+  }, [])
 
   // Filtrar y ordenar items
   const filteredAndSortedItems = adminItems
@@ -166,13 +155,11 @@ const AdminPage: React.FC = () => {
     })
 
   const handleEditProduct = (item: AdminItem) => {
-    // TODO: Implementar edición de producto
     console.log('Editar producto:', item)
     alert(`Función de edición para: ${item.title}`)
   }
 
   const handleDeleteProduct = (item: AdminItem) => {
-    // TODO: Implementar eliminación de producto
     console.log('Eliminar producto:', item)
     if (confirm(`¿Estás seguro de que quieres eliminar "${item.title}"?`)) {
       alert(`Función de eliminación para: ${item.title}`)
@@ -204,25 +191,15 @@ const AdminPage: React.FC = () => {
           <p>Gestiona todos los productos y variantes de tu tienda</p>
         </div>
 
-        {/* Pestañas de navegación */}
-        <div className="admin-tabs">
+        {/* Navegación a páginas especializadas */}
+        <div className="admin-quick-nav">
           <button 
-            className={`admin-tab ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveTab('all')}
+            className="quick-nav-btn dropshipping-btn"
+            onClick={() => navigate('/admin/dropshipping')}
           >
-            Todos los Productos
-          </button>
-          <button 
-            className={`admin-tab ${activeTab === 'stock_fisico' ? 'active' : ''}`}
-            onClick={() => setActiveTab('stock_fisico')}
-          >
-            Stock Físico (≤14 días)
-          </button>
-          <button 
-            className={`admin-tab ${activeTab === 'dropshipping' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dropshipping')}
-          >
-            Dropshipping (&gt;14 días)
+            <span className="btn-icon">📦</span>
+            <span className="btn-text">Gestionar Dropshipping</span>
+            <span className="btn-arrow">→</span>
           </button>
         </div>
 
@@ -304,14 +281,6 @@ const AdminPage: React.FC = () => {
             <h3>Pausados</h3>
             <span className="stat-number">{adminItems.filter(item => item.isPaused).length}</span>
           </div>
-          {activeTab !== 'all' && (
-            <div className="stat-card">
-              <h3>Tipo Entrega</h3>
-              <span className="stat-number">
-                {activeTab === 'dropshipping' ? 'Dropshipping' : 'Stock Físico'}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Lista de productos */}
@@ -341,11 +310,6 @@ const AdminPage: React.FC = () => {
                       ) : item.stock <= 0 ? (
                         <span className="badge badge-no-stock">Sin Stock</span>
                       ) : null}
-                      {item.tipoEntrega && (
-                        <span className={`badge ${item.tipoEntrega === 'dropshipping' ? 'badge-dropshipping' : 'badge-stock-fisico'}`}>
-                          {item.tipoEntrega === 'dropshipping' ? 'Dropshipping' : 'Stock Físico'}
-                        </span>
-                      )}
                     </div>
                   </div>
                   
@@ -379,14 +343,6 @@ const AdminPage: React.FC = () => {
                         {item.status}
                       </span>
                     </div>
-                    {item.tipoEntrega && (
-                      <div className="detail-row">
-                        <span className="detail-label">Entrega:</span>
-                        <span className={`detail-value ${item.tipoEntrega === 'dropshipping' ? 'dropshipping-info' : 'stock-fisico-info'}`}>
-                          {item.tipoEntrega === 'dropshipping' ? '&gt;14 días' : '≤14 días'}
-                        </span>
-                      </div>
-                    )}
                     <div className="detail-row">
                       <span className="detail-label">ID Producto:</span>
                       <span className="detail-value detail-id">{item.productId}</span>

@@ -52,7 +52,7 @@ const DetalleProductoPage: React.FC = () => {
           const tallesDisponibles = productoData.variantes
             .filter((v: Variante) => v.color === variantesUnicas[0].color)
             .map((v: Variante) => v.size)
-            .filter(Boolean);
+            .filter((size: string | null): size is string => size !== null && size !== undefined);
           
           if (tallesDisponibles.length > 0) {
             setTalleSeleccionado(tallesDisponibles[0])
@@ -76,7 +76,7 @@ const DetalleProductoPage: React.FC = () => {
       const tallesDisponibles = producto.variantes
         .filter((v: Variante) => v.color === variante.color)
         .map((v: Variante) => v.size)
-        .filter(Boolean);
+        .filter((size: string | null): size is string => size !== null && size !== undefined);
       
       if (tallesDisponibles.length > 0) {
         setTalleSeleccionado(tallesDisponibles[0])
@@ -195,6 +195,23 @@ const DetalleProductoPage: React.FC = () => {
   // Verificar si el producto está pausado
   const isProductPaused = producto?.status === 'paused'
 
+  // Verificar si es producto de dropshipping
+  const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 14
+  const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
+  const diasEnvio = producto?.dropshipping?.dias_envio_estimado || 0
+  const tiempoTotal = diasPreparacion + diasEnvio
+
+  // Función helper para obtener el stock de una variante específica
+  const getStockVariante = (): number => {
+    if (varianteSeleccionada && talleSeleccionado && producto?.variantes) {
+      const variante = producto.variantes.find((v: Variante) => 
+        v.color === varianteSeleccionada.color && v.size === talleSeleccionado
+      );
+      return variante?.stock || 0;
+    }
+    return producto?.available_quantity || 0;
+  }
+
   if (loading) {
     return (
       <div className="container">
@@ -282,6 +299,47 @@ const DetalleProductoPage: React.FC = () => {
                 <span>⚠️ Producto Pausado</span>
               </div>
             )}
+
+            {/* Mostrar información de dropshipping si aplica */}
+            {isDropshipping && (
+              <div className="dropshipping-info">
+                <div className="dropshipping-badge">
+                  <span>⚙️ Dropshipping</span>
+                </div>
+                <div className="tiempo-entrega">
+                  <h4>⏰ Tiempo de entrega estimado:</h4>
+                  <div className="tiempo-detalle">
+                    <div className="tiempo-item">
+                      <span className="tiempo-label">Preparación:</span>
+                      <span className="tiempo-value">{diasPreparacion} días</span>
+                    </div>
+                    <div className="tiempo-item">
+                      <span className="tiempo-label">Envío:</span>
+                      <span className="tiempo-value">{diasEnvio} días</span>
+                    </div>
+                    <div className="tiempo-item total">
+                      <span className="tiempo-label">Total:</span>
+                      <span className="tiempo-value">{tiempoTotal} días</span>
+                    </div>
+                  </div>
+                  {producto.dropshipping?.proveedor && (
+                    <p className="proveedor-info">
+                      <strong>Proveedor:</strong> {producto.dropshipping.proveedor}
+                    </p>
+                  )}
+                  {producto.dropshipping?.pais_origen && (
+                    <p className="pais-info">
+                      <strong>País de origen:</strong> {producto.dropshipping.pais_origen}
+                    </p>
+                  )}
+                  {producto.dropshipping?.requiere_confirmacion && (
+                    <div className="confirmacion-info">
+                      <span>⚠️ Este producto requiere confirmación antes del envío</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             
             <div className="precio-disponibilidad">
               <h2>${varianteSeleccionada?.price || producto.price}</h2>
@@ -343,12 +401,7 @@ const DetalleProductoPage: React.FC = () => {
                 type="number"
                 id="cantidad"
                 min="1"
-                max={varianteSeleccionada && talleSeleccionado && producto.variantes 
-                  ? producto.variantes.find((v: Variante) => 
-                      v.color === varianteSeleccionada.color && v.size === talleSeleccionado
-                    )?.stock || producto.available_quantity
-                  : producto.available_quantity
-                }
+                max={getStockVariante()}
                 value={cantidad}
                 onChange={handleCantidadChange}
                 disabled={isProductPaused}
@@ -367,21 +420,11 @@ const DetalleProductoPage: React.FC = () => {
             <button
               className="btn-agregar-carrito"
               onClick={handleAgregarAlCarrito}
-              disabled={isProductPaused || (varianteSeleccionada && talleSeleccionado && producto.variantes 
-                ? producto.variantes.find((v: Variante) => 
-                    v.color === varianteSeleccionada.color && v.size === talleSeleccionado
-                  )?.stock <= 0
-                : producto.available_quantity <= 0
-              )}
+              disabled={isProductPaused || getStockVariante() <= 0}
             >
               {isProductPaused 
                 ? 'Producto Pausado' 
-                : (varianteSeleccionada && talleSeleccionado && producto.variantes 
-                  ? producto.variantes.find((v: Variante) => 
-                      v.color === varianteSeleccionada.color && v.size === talleSeleccionado
-                    )?.stock <= 0
-                  : producto.available_quantity <= 0
-                ) 
+                : getStockVariante() <= 0
                   ? 'Sin Stock' 
                   : 'Agregar al Carrito'
               }

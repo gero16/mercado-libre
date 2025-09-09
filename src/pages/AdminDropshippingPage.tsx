@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
 
@@ -31,6 +32,7 @@ interface AdminDropshippingItem {
 }
 
 const AdminDropshippingPage: React.FC = () => {
+  const navigate = useNavigate()
   const [adminItems, setAdminItems] = useState<AdminDropshippingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -281,6 +283,17 @@ const AdminDropshippingPage: React.FC = () => {
           <p style={{ fontSize: '0.9rem', color: '#8b949e' }}>
             Total de productos cargados: {adminItems.length}
           </p>
+        </div>
+
+        {/* Navegación a página principal */}
+        <div className="admin-quick-nav">
+          <button 
+            className="quick-nav-btn back-btn"
+            onClick={() => navigate('/admin')}
+          >
+            <span className="btn-icon">←</span>
+            <span className="btn-text">Volver a Administración General</span>
+          </button>
         </div>
 
         {/* Controles de filtrado y búsqueda */}

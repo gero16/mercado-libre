@@ -549,37 +549,49 @@
   border-radius: 4px;
 }
 
-/* Pestañas de navegación */
-.admin-tabs {
-  display: flex;
-  gap: 10px;
+/* Navegación rápida */
+.admin-quick-nav {
   margin-bottom: 30px;
-  padding: 0 25px;
+  display: flex;
+  justify-content: center;
 }
 
-.admin-tab {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
-  border: 1px solid #30363d;
+.quick-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
   border-radius: 8px;
-  color: #8b949e;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
-.admin-tab:hover {
-  background: linear-gradient(135deg, #30363d 0%, #21262d 100%);
-  color: #f0f6fc;
-  border-color: #58a6ff;
+.quick-nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
-.admin-tab.active {
-  background: linear-gradient(135deg, #1f6feb 0%, #0969da 100%);
-  color: #ffffff;
-  border-color: #1f6feb;
-  box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.btn-text {
+  flex: 1;
+}
+
+.btn-arrow {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.quick-nav-btn:hover .btn-arrow {
+  transform: translateX(4px);
 }
 
 /* Badges para tipo de entrega */
@@ -677,4 +689,13 @@
   .pais-section {
     grid-column: auto;
   }
+}
+
+.back-btn {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.back-btn:hover {
+  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
 }
