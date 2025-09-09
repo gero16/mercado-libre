@@ -699,3 +699,34 @@
 .back-btn:hover {
   box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
 }
+
+/* Estilos para información de variantes */
+.variant-info {
+  color: #7c3aed !important;
+  font-weight: 600;
+}
+
+.detail-row .variant-info {
+  background-color: #f3e8ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border-left: 3px solid #7c3aed;
+}
+
+/* Estilos para información de dropshipping */
+.dropshipping-info {
+  color: #059669 !important;
+  font-weight: 600;
+}
+
+.detail-row .dropshipping-info {
+  background-color: #ecfdf5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border-left: 3px solid #059669;
+}
+
+.warning {
+  color: #dc2626 !important;
+  font-weight: 600;
+}

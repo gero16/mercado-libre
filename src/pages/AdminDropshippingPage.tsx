@@ -422,6 +422,8 @@ const AdminDropshippingPage: React.FC = () => {
                         )}
                       </span>
                     </div>
+                    
+                    {/* Mostrar información de dropshipping para TODOS los items (productos y variantes) */}
                     <div className="detail-row">
                       <span className="detail-label">Días Preparación:</span>
                       <span className="detail-value dropshipping-info">{item.dias_preparacion} días</span>
@@ -430,6 +432,26 @@ const AdminDropshippingPage: React.FC = () => {
                       <span className="detail-label">Días Envío:</span>
                       <span className="detail-value dropshipping-info">{item.dias_envio_estimado} días</span>
                     </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Proveedor:</span>
+                      <span className="detail-value">{item.proveedor}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">País Origen:</span>
+                      <span className="detail-value">{item.pais_origen}</span>
+                    </div>
+                    {item.requiere_confirmacion && (
+                      <div className="detail-row">
+                        <span className="detail-label">Requiere Confirmación:</span>
+                        <span className="detail-value warning">Sí</span>
+                      </div>
+                    )}
+                    {item.costo_importacion > 0 && (
+                      <div className="detail-row">
+                        <span className="detail-label">Costo Importación:</span>
+                        <span className="detail-value">${item.costo_importacion}</span>
+                      </div>
+                    )}
                    
                     {!item.esVariante && item.tieneVariantes && (
                       <div className="detail-row">
@@ -439,6 +461,16 @@ const AdminDropshippingPage: React.FC = () => {
                         </span>
                       </div>
                     )}
+                    
+                    {item.esVariante && (
+                      <div className="detail-row">
+                        <span className="detail-label">Tipo:</span>
+                        <span className="detail-value variant-info">
+                          Variante de {item.productoPadre?.title}
+                        </span>
+                      </div>
+                    )}
+                    
                     <div className="detail-row">
                       <span className="detail-label">Status:</span>
                       <span className={`detail-value ${item.isPaused ? 'paused' : 'active'}`}>
