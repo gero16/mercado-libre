@@ -35,15 +35,20 @@ export interface Image {
 
 export interface Variante {
   _id: string;
-  id: string;
-  __v: number;
-  attribute_combinations: any[];
-  color: string;
-  images: Image[];
-  price: number;
-  product_id: string;
-  size: string | null;
+  color?: string;
+  size?: string;
   stock: number;
+  price?: number;
+  images?: Image[];
+  // Agregar propiedades de dropshipping para variantes
+  dropshipping?: {
+    dias_preparacion?: number;
+    dias_envio_estimado?: number;
+    proveedor?: string;
+    pais_origen?: string;
+    costo_importacion?: number;
+    tiempo_configurado_en_ml?: boolean;
+  };
 }
 
 export interface ProductoML {

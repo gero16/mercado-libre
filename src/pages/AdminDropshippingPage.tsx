@@ -130,6 +130,9 @@ const AdminDropshippingPage: React.FC = () => {
             
             const variantStock = isPaused ? 0 : variante.stock
             
+            // Verificar si la variante tiene sus propias propiedades de dropshipping
+            const varianteDropshipping = variante.dropshipping || {}
+            
             items.push({
               id: `${producto._id}_${variante._id}`,
               title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
@@ -144,13 +147,13 @@ const AdminDropshippingPage: React.FC = () => {
               variantId: variante._id,
               status: producto.status,
               isPaused: isPaused,
-              // Propiedades de dropshipping (heredadas del producto padre)
-              dias_preparacion: producto.dropshipping?.dias_preparacion || 0,
-              dias_envio_estimado: producto.dropshipping?.dias_envio_estimado || 0,
-              proveedor: producto.dropshipping?.proveedor || 'No especificado',
-              pais_origen: producto.dropshipping?.pais_origen || 'No especificado',
-              costo_importacion: producto.dropshipping?.costo_importacion || 0,
-              tiempo_configurado_en_ml: producto.dropshipping?.tiempo_configurado_en_ml || false
+              // Propiedades de dropshipping de la variante (si las tiene) o heredadas del producto padre
+              dias_preparacion: varianteDropshipping.dias_preparacion || producto.dropshipping?.dias_preparacion || 0,
+              dias_envio_estimado: varianteDropshipping.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 0,
+              proveedor: varianteDropshipping.proveedor || producto.dropshipping?.proveedor || 'No especificado',
+              pais_origen: varianteDropshipping.pais_origen || producto.dropshipping?.pais_origen || 'No especificado',
+              costo_importacion: varianteDropshipping.costo_importacion || producto.dropshipping?.costo_importacion || 0,
+              tiempo_configurado_en_ml: varianteDropshipping.tiempo_configurado_en_ml || producto.dropshipping?.tiempo_configurado_en_ml || false
             })
           })
         }
@@ -434,6 +437,11 @@ const AdminDropshippingPage: React.FC = () => {
                         <span className="detail-label">Tipo:</span>
                         <span className="detail-value variant-info">
                           Variante de {item.productoPadre?.title}
+                          {item.variante?.dropshipping && (
+                            <span className="custom-dropshipping-badge">
+                              {' '}(Configuración personalizada)
+                            </span>
+                          )}
                         </span>
                       </div>
                     )}
