@@ -55,14 +55,23 @@ export class MercadoPagoService {
   /**
    * Procesa el pago usando el formulario del Payment Brick
    */
-  static async processPayment(formData: any): Promise<any> {
+  static async processPayment(formData: any, cartItems?: any[], customerData?: any): Promise<any> {
     try {
+      // Preparar los datos para enviar al backend
+      const paymentData = {
+        ...formData,
+        // Agregar información del carrito y cliente
+        items: cartItems ? this.formatCartItemsForMP(cartItems) : [],
+        customer: customerData ? this.formatCustomerDataForMP(customerData) : null,
+        external_reference: `ORDER-${Date.now()}`
+      };
+
       const response = await fetch(MERCADOPAGO_CONFIG.BACKEND_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(paymentData)
       })
 
       if (!response.ok) {

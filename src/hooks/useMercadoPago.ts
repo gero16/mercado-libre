@@ -62,22 +62,20 @@ export const useMercadoPago = () => {
   /**
    * Callback para cuando se envía el formulario de pago
    */
-  const onSubmit = useCallback(async ({ formData }: PaymentFormData) => {
+  const onSubmit = useCallback(async ({ formData }: PaymentFormData, cartItems?: any[], customerData?: any) => {
     setIsLoading(true)
     setError(null)
 
     return new Promise((resolve, reject) => {
-      MercadoPagoService.processPayment(formData)
+      MercadoPagoService.processPayment(formData, cartItems, customerData)
         .then((response) => {
           console.log('Payment processed successfully:', response)
-          // Navegar a página de éxito
           navigate(MERCADOPAGO_CONFIG.SUCCESS_URL)
           resolve(response)
         })
         .catch((error) => {
           console.error('Payment processing failed:', error)
           setError('Error procesando el pago')
-          // Navegar a página de error
           navigate(MERCADOPAGO_CONFIG.FAILURE_URL)
           reject(error)
         })
