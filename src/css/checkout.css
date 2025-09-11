@@ -48,6 +48,20 @@
     border: none;
     transition: transform 0.15s ease, box-shadow 0.2s ease;
   }
+
+  .admin-nav { 
+   margin: 0px 0px 20px 0px;
+
+  }
+
+  .btn-dropshipping { 
+    background: linear-gradient(135deg, #f7971e, #ffc400);
+
+  }
+  .btn-orders { 
+    background: linear-gradient(135deg, #7c1ef7, #00aeff);
+
+  }
   
   .confirmar {
     background: linear-gradient(135deg, #007bff 0%, #0062cc 100%);

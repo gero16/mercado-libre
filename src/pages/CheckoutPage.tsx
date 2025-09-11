@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 import { Payment } from '@mercadopago/sdk-react'
 import { useMercadoPago } from '../hooks/useMercadoPago'
+import { PaymentFormData } from '../types/mercadopago'
 
 interface CustomerData {
   name: string
@@ -83,7 +84,7 @@ const CheckoutPage: React.FC = () => {
     console.log('👤 Datos del cliente:', customerData)
     
     // Llamar al onSubmit original pasando los datos adicionales
-    return originalOnSubmit({ formData, selectedPaymentMethod }, cartItems, customerData)
+    return originalOnSubmit({ formData, selectedPaymentMethod } as PaymentFormData, cartItems, customerData)
   }, [originalOnSubmit, cartItems, customerData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

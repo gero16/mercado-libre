@@ -193,18 +193,18 @@ const AdminPage: React.FC = () => {
         </div>
 
         {/* Navegación de administración */}
-        <div className="admin-nav">
+        <div className="admin-nav flex gap-20">
           <button 
             onClick={() => navigate('/admin/dropshipping')}
-            className="btn-orden"
+            className="btn-orden btn-dropshipping"
           >
-            Configurar Dropshipping
+            ↳ Configurar Dropshipping
           </button>
           <button 
             onClick={() => navigate('/admin/orders')} // 🆕 Agregar enlace a órdenes
-            className="btn-orden"
+            className="btn-orden btn-orders"
           >
-            Ver Órdenes de Compra
+           ↳ Ver Órdenes de Compra
           </button>
         </div>
 
