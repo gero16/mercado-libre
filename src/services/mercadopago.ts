@@ -66,6 +66,8 @@ export class MercadoPagoService {
         external_reference: `ORDER-${Date.now()}`
       };
 
+      console.log('📤 Enviando datos al backend:', paymentData)
+
       const response = await fetch(MERCADOPAGO_CONFIG.BACKEND_URL, {
         method: 'POST',
         headers: {

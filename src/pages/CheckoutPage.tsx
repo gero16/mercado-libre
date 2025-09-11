@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 import { Payment } from '@mercadopago/sdk-react'
@@ -33,7 +33,7 @@ const CheckoutPage: React.FC = () => {
     createPreference,
     getInitialization,
     getCustomization,
-    onSubmit,
+    onSubmit: originalOnSubmit,
     onError,
     onReady,
     preferenceId,
@@ -76,6 +76,15 @@ const CheckoutPage: React.FC = () => {
     setCartOpen(false)
   }, [])
 
+  // 🆕 Crear un wrapper para onSubmit que pase los datos del carrito y cliente
+  const handlePaymentSubmit = useCallback(async ({ formData, selectedPaymentMethod }: any) => {
+    console.log('💳 Datos del pago recibidos:', formData)
+    console.log('🛒 Items del carrito:', cartItems)
+    console.log('👤 Datos del cliente:', customerData)
+    
+    // Llamar al onSubmit original pasando los datos adicionales
+    return originalOnSubmit({ formData, selectedPaymentMethod }, cartItems, customerData)
+  }, [originalOnSubmit, cartItems, customerData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -141,99 +150,106 @@ const CheckoutPage: React.FC = () => {
   return (
     <div className="container">
       <div className="principal">
-        <div className="order-page" id="order">
-          {/* Datos del Comprador */}
-          <h1 className="titulo-envio">Detalles del Cliente</h1>
-          <form onSubmit={handleSubmit}>
-            <div id="order-shipping" className="order-shipping">
+        <div className="checkout-form">
+          <div className="form-header">
+            <h2>Datos del Cliente</h2>
+            <button 
+              className="btn-orden volver"
+              onClick={handleGoBack}
+            >
+              ← Volver a la Tienda
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="checkout-form-content">
+            <div className="form-group">
+              <label htmlFor="name">Nombre completo *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={customerData.name}
+                onChange={handleInputChange}
+                required
+                placeholder="Tu nombre completo"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email">Email *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={customerData.email}
+                onChange={handleInputChange}
+                required
+                placeholder="tu@email.com"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone">Teléfono *</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={customerData.phone}
+                onChange={handleInputChange}
+                required
+                placeholder="099 123 456"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="address">Dirección *</label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={customerData.address}
+                onChange={handleInputChange}
+                required
+                placeholder="Calle, número, apartamento"
+              />
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
-                <label htmlFor="name">Nombre Completo:</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  id="name" 
-                  value={customerData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">Email:</label>
-                <input 
-                  type="email" 
-                  name="email" 
-                  id="email" 
-                  value={customerData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="phone">Telefono:</label>
-                <input 
-                  type="tel" 
-                  name="phone" 
-                  id="phone" 
-                  value={customerData.phone}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="address">Direccion:</label>
-                <input 
-                  type="text" 
-                  name="address" 
-                  id="address" 
-                  value={customerData.address}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="city">Ciudad:</label>
-                <input 
-                  type="text" 
-                  name="city" 
-                  id="city" 
+                <label htmlFor="city">Ciudad</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
                   value={customerData.city}
                   onChange={handleInputChange}
+                  placeholder="Montevideo"
                 />
               </div>
+
               <div className="form-group">
-                <label htmlFor="state">Departamento:</label>
-                <input 
-                  type="text" 
-                  name="state" 
-                  id="state" 
+                <label htmlFor="state">Departamento</label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
                   value={customerData.state}
                   onChange={handleInputChange}
+                  placeholder="Montevideo"
                 />
               </div>
             </div>
 
-            <div id="order-actions" className="order-actions">
-              <button type="button" className="btn-orden volver" onClick={handleGoBack}>
-                Volver
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="btn-orden"
+                disabled={isCreatingPreference}
+              >
+                {isCreatingPreference ? 'Creando preferencia...' : 'Proceder al Pago'}
               </button>
-              {!showPaymentBrick && (
-                <button 
-                  type="submit" 
-                  className="btn-orden confirmar"
-                  disabled={isCreatingPreference}
-                >
-                  {isCreatingPreference ? 'Creando orden...' : 'Proceder al Pago'}
-                </button>
-              )}
             </div>
           </form>
-
-          {/* Mostrar errores si los hay */}
-          {mpError && (
-            <div className="alert alert-error">
-              <strong>Error:</strong> {mpError}
-            </div>
-          )}
           
           {/* Modal de Payment Brick de MercadoPago */}
           {showPaymentBrick && preferenceId && (
@@ -254,7 +270,7 @@ const CheckoutPage: React.FC = () => {
                   <Payment
                     initialization={getInitialization(cartTotal, preferenceId)}
                     customization={getCustomization()}
-                    onSubmit={onSubmit}
+                    onSubmit={handlePaymentSubmit}
                     onReady={onReady}
                     onError={onError}
                   />

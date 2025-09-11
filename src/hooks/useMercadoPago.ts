@@ -46,7 +46,7 @@ export const useMercadoPago = () => {
     return {
       amount,
       preferenceId: prefId || preferenceId || undefined,
-      locale: 'es-AR' // Agregar esta línea para español
+      locale: 'es-AR'
     }
   }, [preferenceId])
 
@@ -62,12 +62,17 @@ export const useMercadoPago = () => {
   /**
    * Callback para cuando se envía el formulario de pago
    */
-  const onSubmit = useCallback(async ({ formData }: PaymentFormData, cartItems?: any[], customerData?: any) => {
+  const onSubmit = useCallback(async (paymentData: PaymentFormData, cartItems?: any[], customerData?: any) => {
     setIsLoading(true)
     setError(null)
 
+    console.log('🔄 Procesando pago con datos:')
+    console.log('  - PaymentData:', paymentData)
+    console.log('  - CartItems:', cartItems)
+    console.log('  - CustomerData:', customerData)
+
     return new Promise((resolve, reject) => {
-      MercadoPagoService.processPayment(formData, cartItems, customerData)
+      MercadoPagoService.processPayment(paymentData.formData, cartItems, customerData)
         .then((response) => {
           console.log('Payment processed successfully:', response)
           navigate(MERCADOPAGO_CONFIG.SUCCESS_URL)
