@@ -52,7 +52,7 @@ const DetalleProductoPage: React.FC = () => {
           const tallesDisponibles = productoData.variantes
             .filter((v: Variante) => v.color === variantesUnicas[0].color)
             .map((v: Variante) => v.size)
-            .filter((size: string | null): size is string => size !== null && size !== undefined);
+            .filter((size: string | undefined): size is string => size !== undefined);
           
           if (tallesDisponibles.length > 0) {
             setTalleSeleccionado(tallesDisponibles[0])
@@ -76,7 +76,7 @@ const DetalleProductoPage: React.FC = () => {
       const tallesDisponibles = producto.variantes
         .filter((v: Variante) => v.color === variante.color)
         .map((v: Variante) => v.size)
-        .filter((size: string | null): size is string => size !== null && size !== undefined);
+        .filter((size: string | undefined): size is string => size !== undefined);
       
       if (tallesDisponibles.length > 0) {
         setTalleSeleccionado(tallesDisponibles[0])
