@@ -38,7 +38,7 @@ const CheckoutPage: React.FC = () => {
     onReady,
     preferenceId,
     isLoading: _mpLoading,
-    error: mpError
+    error: _mpError
   } = useMercadoPago()
 
   // Efecto para controlar el scroll del body cuando el modal está abierto
@@ -162,65 +162,65 @@ const CheckoutPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="checkout-form-content">
-            <div className="form-group">
+              <div className="form-group">
               <label htmlFor="name">Nombre completo *</label>
-              <input
-                type="text"
+                <input 
+                  type="text" 
                 id="name"
-                name="name"
-                value={customerData.name}
-                onChange={handleInputChange}
-                required
+                  name="name" 
+                  value={customerData.name}
+                  onChange={handleInputChange}
+                  required
                 placeholder="Tu nombre completo"
-              />
-            </div>
+                />
+              </div>
 
-            <div className="form-group">
+              <div className="form-group">
               <label htmlFor="email">Email *</label>
-              <input
-                type="email"
+                <input 
+                  type="email" 
                 id="email"
-                name="email"
-                value={customerData.email}
-                onChange={handleInputChange}
-                required
+                  name="email" 
+                  value={customerData.email}
+                  onChange={handleInputChange}
+                  required
                 placeholder="tu@email.com"
-              />
-            </div>
+                />
+              </div>
 
-            <div className="form-group">
+              <div className="form-group">
               <label htmlFor="phone">Teléfono *</label>
-              <input
-                type="tel"
+                <input 
+                  type="tel" 
                 id="phone"
-                name="phone"
-                value={customerData.phone}
-                onChange={handleInputChange}
-                required
+                  name="phone" 
+                  value={customerData.phone}
+                  onChange={handleInputChange}
+                  required
                 placeholder="099 123 456"
-              />
-            </div>
+                />
+              </div>
 
-            <div className="form-group">
+              <div className="form-group">
               <label htmlFor="address">Dirección *</label>
-              <input
-                type="text"
+                <input 
+                  type="text" 
                 id="address"
-                name="address"
-                value={customerData.address}
-                onChange={handleInputChange}
-                required
+                  name="address" 
+                  value={customerData.address}
+                  onChange={handleInputChange}
+                  required
                 placeholder="Calle, número, apartamento"
-              />
-            </div>
+                />
+              </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="city">Ciudad</label>
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   id="city"
-                  name="city"
+                  name="city" 
                   value={customerData.city}
                   onChange={handleInputChange}
                   placeholder="Montevideo"
@@ -229,10 +229,10 @@ const CheckoutPage: React.FC = () => {
 
               <div className="form-group">
                 <label htmlFor="state">Departamento</label>
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   id="state"
-                  name="state"
+                  name="state" 
                   value={customerData.state}
                   onChange={handleInputChange}
                   placeholder="Montevideo"
@@ -241,13 +241,13 @@ const CheckoutPage: React.FC = () => {
             </div>
 
             <div className="form-actions">
-              <button 
-                type="submit" 
+                <button 
+                  type="submit" 
                 className="btn-orden"
-                disabled={isCreatingPreference}
-              >
+                  disabled={isCreatingPreference}
+                >
                 {isCreatingPreference ? 'Creando preferencia...' : 'Proceder al Pago'}
-              </button>
+                </button>
             </div>
           </form>
           

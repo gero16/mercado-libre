@@ -192,15 +192,19 @@ const AdminPage: React.FC = () => {
           <p>Gestiona todos los productos y variantes de tu tienda</p>
         </div>
 
-        {/* Navegación a páginas especializadas */}
-        <div className="admin-quick-nav">
+        {/* Navegación de administración */}
+        <div className="admin-nav">
           <button 
-            className="quick-nav-btn dropshipping-btn"
             onClick={() => navigate('/admin/dropshipping')}
+            className="btn-orden"
           >
-            <span className="btn-icon">📦</span>
-            <span className="btn-text">Gestionar Dropshipping</span>
-            <span className="btn-arrow">→</span>
+            Configurar Dropshipping
+          </button>
+          <button 
+            onClick={() => navigate('/admin/orders')} // 🆕 Agregar enlace a órdenes
+            className="btn-orden"
+          >
+            Ver Órdenes de Compra
           </button>
         </div>
 
