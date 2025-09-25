@@ -92,7 +92,7 @@ export class MercadoPagoService {
    */
   static formatCartItemsForMP(cartItems: any[]): PreferenceItem[] {
     return cartItems.map((item, index) => ({
-      id: item.id?.toString() || index.toString(),
+      id: item.ml_id?.toString() || item.id?.toString() || index.toString(),
       title: item.name || item.title,
       quantity: item.cantidad || item.quantity || 1,
       currency_id: 'UYU', // Pesos uruguayos - cambia según tu país

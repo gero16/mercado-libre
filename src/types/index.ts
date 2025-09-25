@@ -11,6 +11,7 @@ export interface Producto {
 }
 
 export interface CartItem extends Producto {
+  ml_id?: string;
   // CartItem hereda de Producto con size que acepta null
 }
 

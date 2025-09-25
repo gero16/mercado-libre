@@ -21,6 +21,7 @@ const obtenerCategoria = (categoryId: string | undefined): string => {
 // Interfaz para items a mostrar
 interface ItemTienda {
   id: string;
+  ml_id?: string;
   title: string;
   price: number;
   image: string;
@@ -91,7 +92,8 @@ const TiendaMLPage: React.FC = () => {
             const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
             
             items.push({
-              id: `${producto._id}_${variante.color}`,
+              id: `${producto.ml_id || producto._id}_${variante.color}`,
+              ml_id: producto.ml_id,
               title: `${producto.title} - ${variante.color || ''}`.trim(),
               price: variante.price || producto.price,
               image: imagenVariante,
@@ -109,7 +111,8 @@ const TiendaMLPage: React.FC = () => {
           const effectiveStock = isPaused ? 0 : producto.available_quantity;
           
           items.push({
-            id: producto._id,
+            id: producto.ml_id || producto._id,
+              ml_id: producto.ml_id,
             title: producto.title,
             price: producto.price,
             image: producto.images[0]?.url || producto.main_image,

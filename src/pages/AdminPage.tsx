@@ -280,7 +280,7 @@ const AdminPage: React.FC = () => {
           </div>
           <div className="stat-card">
             <h3>Sin Stock</h3>
-            <span className="stat-number">{adminItems.filter(item => item.stock <= 0).length}</span>
+            <span className="stat-number">{adminItems.filter(item => !item.isPaused && item.stock <= 0).length}</span>
           </div>
           <div className="stat-card">
             <h3>Pausados</h3>
@@ -314,7 +314,7 @@ const AdminPage: React.FC = () => {
                       )}
                       {item.isPaused ? (
                         <span className="badge badge-paused">Pausado</span>
-                      ) : item.stock <= 0 ? (
+                      ) : !item.isPaused && item.stock <= 0 ? (
                         <span className="badge badge-no-stock">Sin Stock</span>
                       ) : null}
                     </div>
