@@ -91,11 +91,13 @@ const AdminDropshippingPage: React.FC = () => {
         let totalVariantsStock = 0
         if (producto.variantes && producto.variantes.length > 0) {
           totalVariantsStock = producto.variantes.reduce((sum, variante) => {
-            return sum + (isPaused ? 0 : variante.stock)
+            return sum + variante.stock
           }, 0)
         }
         
-        const effectiveStock = isPaused ? 0 : producto.available_quantity
+        const effectiveStock = (producto.variantes && producto.variantes.length > 0)
+          ? totalVariantsStock
+          : producto.available_quantity
         
         // Agregar el producto principal
         items.push({
@@ -128,7 +130,7 @@ const AdminDropshippingPage: React.FC = () => {
               ? variante.images[0].url 
               : producto.images[0]?.url || producto.main_image;
             
-            const variantStock = isPaused ? 0 : variante.stock
+            const variantStock = variante.stock
             
             // Verificar si la variante tiene sus propias propiedades de dropshipping
             const varianteDropshipping = variante.dropshipping || {}
@@ -401,7 +403,7 @@ const AdminDropshippingPage: React.FC = () => {
                     <div className="detail-row">
                       <span className="detail-label">Stock:</span>
                       <span className={`detail-value ${item.stock <= 0 ? 'no-stock' : ''}`}>
-                        {item.isPaused ? '0 (Pausado)' : item.stock}
+                        {item.stock}{item.isPaused ? ' (Pausado)' : ''}
                         {!item.esVariante && item.tieneVariantes && (
                           <span className="stock-info">
                             {' '}(Total de variantes: {item.stockTotalVariantes})

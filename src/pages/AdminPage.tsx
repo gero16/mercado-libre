@@ -69,11 +69,13 @@ const AdminPage: React.FC = () => {
         let totalVariantsStock = 0
         if (producto.variantes && producto.variantes.length > 0) {
           totalVariantsStock = producto.variantes.reduce((sum, variante) => {
-            return sum + (isPaused ? 0 : variante.stock)
+            return sum + variante.stock
           }, 0)
         }
         
-        const effectiveStock = isPaused ? 0 : producto.available_quantity
+        const effectiveStock = (producto.variantes && producto.variantes.length > 0)
+          ? totalVariantsStock
+          : producto.available_quantity
         
         // Calcular tiempo de entrega
         const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
@@ -112,7 +114,7 @@ const AdminPage: React.FC = () => {
               ? variante.images[0].url 
               : producto.images[0]?.url || producto.main_image;
             
-            const variantStock = isPaused ? 0 : variante.stock
+            const variantStock = variante.stock
             
             // Calcular tiempo de entrega para variantes (priorizar configuración de variante)
             const variantDiasPreparacion = variante.dropshipping?.dias_preparacion || diasPreparacion
@@ -407,7 +409,7 @@ const AdminPage: React.FC = () => {
                     <div className="detail-row">
                       <span className="detail-label">Stock:</span>
                       <span className={`detail-value ${item.stock <= 0 ? 'no-stock' : ''}`}>
-                        {item.isPaused ? '0 (Pausado)' : item.stock}
+                        {item.stock}{item.isPaused ? ' (Pausado)' : ''}
                         {!item.esVariante && item.tieneVariantes && (
                           <span className="stock-info">
                             {' '}(Total de variantes: {item.stockTotalVariantes})
