@@ -22,6 +22,13 @@ interface AdminItem {
   tieneVariantes?: boolean;
   stockTotalVariantes?: number;
   tipoEntrega?: 'dropshipping' | 'stock_fisico';
+  // Propiedades de tiempo de entrega
+  dias_preparacion?: number;
+  dias_envio_estimado?: number;
+  tiempo_total_entrega?: number;
+  es_entrega_larga?: boolean; // > 14 días
+  proveedor?: string;
+  pais_origen?: string;
 }
 
 const AdminPage: React.FC = () => {
@@ -31,7 +38,8 @@ const AdminPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
-  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock'>('name')
+  const [filterDelivery, setFilterDelivery] = useState<'all' | 'fast' | 'slow'>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'delivery'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   // Fetch productos de Mercado Libre desde el backend
@@ -67,6 +75,12 @@ const AdminPage: React.FC = () => {
         
         const effectiveStock = isPaused ? 0 : producto.available_quantity
         
+        // Calcular tiempo de entrega
+        const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
+        const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
+        const tiempoTotalEntrega = diasPreparacion + diasEnvio
+        const esEntregaLarga = tiempoTotalEntrega > 14
+        
         // Agregar el producto principal
         items.push({
           id: producto._id,
@@ -81,7 +95,14 @@ const AdminPage: React.FC = () => {
           status: producto.status,
           isPaused: isPaused,
           tieneVariantes: producto.variantes && producto.variantes.length > 0,
-          stockTotalVariantes: totalVariantsStock
+          stockTotalVariantes: totalVariantsStock,
+          // Propiedades de tiempo de entrega
+          dias_preparacion: diasPreparacion,
+          dias_envio_estimado: diasEnvio,
+          tiempo_total_entrega: tiempoTotalEntrega,
+          es_entrega_larga: esEntregaLarga,
+          proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
+          pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado'
         })
         
         // Agregar cada variante como un item separado
@@ -92,6 +113,12 @@ const AdminPage: React.FC = () => {
               : producto.images[0]?.url || producto.main_image;
             
             const variantStock = isPaused ? 0 : variante.stock
+            
+            // Calcular tiempo de entrega para variantes (priorizar configuración de variante)
+            const variantDiasPreparacion = variante.dropshipping?.dias_preparacion || diasPreparacion
+            const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
+            const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
+            const variantEsEntregaLarga = variantTiempoTotal > 14
             
             items.push({
               id: `${producto._id}_${variante._id}`,
@@ -106,7 +133,14 @@ const AdminPage: React.FC = () => {
               productId: producto.ml_id,
               variantId: variante._id,
               status: producto.status,
-              isPaused: isPaused
+              isPaused: isPaused,
+              // Propiedades de tiempo de entrega para variantes
+              dias_preparacion: variantDiasPreparacion,
+              dias_envio_estimado: variantDiasEnvio,
+              tiempo_total_entrega: variantTiempoTotal,
+              es_entrega_larga: variantEsEntregaLarga,
+              proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
+              pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado'
             })
           })
         }
@@ -134,6 +168,10 @@ const AdminPage: React.FC = () => {
       if (filterStatus === 'active' && item.isPaused) return false
       if (filterStatus === 'paused' && !item.isPaused) return false
       
+      // Filtro por tiempo de entrega
+      if (filterDelivery === 'fast' && item.es_entrega_larga) return false
+      if (filterDelivery === 'slow' && !item.es_entrega_larga) return false
+      
       return true
     })
     .sort((a, b) => {
@@ -148,6 +186,9 @@ const AdminPage: React.FC = () => {
           break
         case 'stock':
           comparison = a.stock - b.stock
+          break
+        case 'delivery':
+          comparison = (a.tiempo_total_entrega || 0) - (b.tiempo_total_entrega || 0)
           break
       }
       
@@ -244,15 +285,28 @@ const AdminPage: React.FC = () => {
             </select>
           </div>
           
+          <div className="delivery-section">
+            <select
+              value={filterDelivery}
+              onChange={(e) => setFilterDelivery(e.target.value as 'all' | 'fast' | 'slow')}
+              className="admin-select"
+            >
+              <option value="all">Todos los tiempos</option>
+              <option value="fast">Stock físico (&le;14 días)</option>
+              <option value="slow">A pedido (&gt;14 días)</option>
+            </select>
+          </div>
+          
           <div className="sort-section">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'stock')}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'stock' | 'delivery')}
               className="admin-select"
             >
               <option value="name">Ordenar por nombre</option>
               <option value="price">Ordenar por precio</option>
               <option value="stock">Ordenar por stock</option>
+              <option value="delivery">Ordenar por entrega</option>
             </select>
             
             <button
@@ -286,6 +340,14 @@ const AdminPage: React.FC = () => {
             <h3>Pausados</h3>
             <span className="stat-number">{adminItems.filter(item => item.isPaused).length}</span>
           </div>
+          <div className="stat-card">
+            <h3>A Pedido</h3>
+            <span className="stat-number">{adminItems.filter(item => item.es_entrega_larga).length}</span>
+          </div>
+          <div className="stat-card">
+            <h3>Stock Físico</h3>
+            <span className="stat-number">{adminItems.filter(item => !item.es_entrega_larga && (item.tiempo_total_entrega || 0) > 0).length}</span>
+          </div>
         </div>
 
         {/* Lista de productos */}
@@ -296,19 +358,33 @@ const AdminPage: React.FC = () => {
             </div>
           ) : (
             filteredAndSortedItems.map(item => (
-              <div key={item.id} className="admin-product-item">
+              <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
                 <div className="product-image">
-                  <img src={item.image} alt={item.title} />
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className={
+                      item.isPaused 
+                        ? 'paused-image' 
+                        : item.esVariante 
+                          ? 'variant-image' 
+                          : (!item.esVariante && item.tieneVariantes) 
+                            ? 'base-product-image' 
+                            : 'product-image'
+                    }
+                  />
                 </div>
                 
                 <div className="product-info">
                   <div className="product-main-info">
                     <h3 className={`product-title ${!item.esVariante && item.tieneVariantes ? 'product-base-title' : ''}`}>
-                      {item.title}
+                      {item.title} 
                     </h3>
                     <div className="product-badges">
                       {item.esVariante ? (
                         <span className="badge badge-variant">Variante</span>
+                      ) : (!item.esVariante && item.tieneVariantes) ? (
+                        <span className="badge badge-product-base">Producto Base</span>
                       ) : (
                         <span className="badge badge-product">Producto</span>
                       )}
@@ -317,6 +393,9 @@ const AdminPage: React.FC = () => {
                       ) : !item.isPaused && item.stock <= 0 ? (
                         <span className="badge badge-no-stock">Sin Stock</span>
                       ) : null}
+                      {item.es_entrega_larga && (
+                        <span className="badge badge-slow-delivery">A Pedido</span>
+                      )}
                     </div>
                   </div>
                   
@@ -350,6 +429,25 @@ const AdminPage: React.FC = () => {
                         {item.status}
                       </span>
                     </div>
+                    {(item.tiempo_total_entrega && item.tiempo_total_entrega > 0) && (
+                      <div className="detail-row">
+                        <span className="detail-label">Tiempo Entrega:</span>
+                        <span className={`detail-value ${item.es_entrega_larga ? 'slow-delivery' : 'fast-delivery'}`}>
+                          {item.tiempo_total_entrega} días
+                          {(item.dias_preparacion || 0) > 0 && (item.dias_envio_estimado || 0) > 0 && (
+                            <span className="delivery-breakdown">
+                              {' '}(Prep: {item.dias_preparacion}d + Envío: {item.dias_envio_estimado}d)
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    {item.proveedor && item.proveedor !== 'No especificado' && (
+                      <div className="detail-row">
+                        <span className="detail-label">Proveedor:</span>
+                        <span className="detail-value">{item.proveedor}</span>
+                      </div>
+                    )}
                     <div className="detail-row">
                       <span className="detail-label">ID Producto:</span>
                       <span className="detail-value detail-id">{item.productId}</span>

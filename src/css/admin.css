@@ -196,9 +196,51 @@
   transition: all 0.3s ease;
 }
 
+/* 🎨 BORDES DE COLORES PARA DIFERENTES TIPOS DE PRODUCTOS */
+.product-image img.product-image {
+  border: 2px solid #58a6ff !important; /* Azul para productos simples (sin variantes) */
+}
+
+.product-image img.base-product-image {
+  border: 2px solid #fbbf24 !important; /* Amarillo para productos base (con variantes) */
+}
+
+.product-image img.variant-image {
+  border: 2px solid #8b5cf6 !important; /* Púrpura para variantes individuales */
+}
+
+.product-image img.paused-image {
+  border: 2px solid #dc2626 !important; /* Rojo para productos pausados */
+}
+
+/* Efectos hover específicos para cada tipo */
+.admin-product-item:hover .product-image img.product-image {
+  transform: scale(1.05);
+  border-color: #58a6ff !important;
+  box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+}
+
+.admin-product-item:hover .product-image img.base-product-image {
+  transform: scale(1.05);
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+.admin-product-item:hover .product-image img.variant-image {
+  transform: scale(1.05);
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+.admin-product-item:hover .product-image img.paused-image {
+  transform: scale(1.05);
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+}
+
+/* Mantener el hover general como fallback */
 .admin-product-item:hover .product-image img {
   transform: scale(1.05);
-  border-color: #58a6ff;
 }
 
 .product-info {
@@ -241,8 +283,13 @@
   color: white;
 }
 
+.badge-product-base {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
 .badge-variant {
-  background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
 }
 
@@ -485,17 +532,17 @@
 
 /* === ESTILOS ADICIONALES PARA PRODUCTOS PAUSADOS === */
 .badge-paused {
-  background: linear-gradient(135deg, #d29922 0%, #f0883e 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: white;
 }
 
 .detail-value.paused {
-  color: #d29922;
+  color: #dc2626;
   font-weight: 600;
 }
 
 .detail-value.active {
-  color: #3fb950;
+  color: #f0f6fc;
   font-weight: 600;
 }
 
@@ -612,7 +659,7 @@
 }
 
 .stock-fisico-info {
-  color: #10b981 !important;
+  color: #f0f6fc !important;
   font-weight: 600;
 }
 
@@ -772,23 +819,23 @@
 }
 
 .badge-variant {
-  background-color: #dcfce7;
-  color: #166534;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
 }
 
 .badge-paused {
-  background-color: #fef3c7;
-  color: #92400e;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
 }
 
 .badge-no-stock {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background: linear-gradient(135deg, #f85149 0%, #da3633 100%);
+  color: white;
 }
 
 /* Badge para variantes con configuración personalizada de dropshipping */
 .custom-dropshipping-badge {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
   padding: 2px 6px;
   border-radius: 8px;
@@ -1173,4 +1220,136 @@
     text-align: left;
     margin-top: 10px;
   }
+}
+
+
+/* === ESTILOS PARA PRODUCTOS A PEDIDO === */
+
+/* Badge de productos a pedido */
+.badge-slow-delivery {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  animation: pulse-slow 2s infinite;
+}
+
+/* Animación de pulso para productos a pedido */
+@keyframes pulse-slow {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Colores para tiempo de entrega */
+.detail-value.slow-delivery {
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+.detail-value.fast-delivery {
+  color: #f0f6fc !important;
+  font-weight: 600;
+}
+
+/* Información desglosada de entrega */
+.delivery-breakdown {
+  font-size: 0.85em;
+  color: #8b949e;
+  font-style: italic;
+}
+
+/* Actualizar grid de controles para incluir filtro de entrega */
+.admin-controls {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
+  border-radius: 12px;
+  border: 1px solid #30363d;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive para controles con filtro de entrega */
+@media (max-width: 1200px) {
+  .admin-controls {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+  }
+  
+  .delivery-section {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-controls {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .delivery-section {
+    grid-column: auto;
+  }
+}
+
+/* Estilo para sección de entrega */
+.delivery-section {
+  display: flex;
+  align-items: center;
+}
+
+.delivery-section label {
+  color: #8b949e;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+/* Destacar productos a pedido */
+.admin-product-item.slow-delivery-item {
+  border-left: 4px solid #3226dc;
+  background: linear-gradient(135deg, #181f3f 0%, #030213 100%);
+}
+
+.admin-product-item.slow-delivery-item:hover {
+  border-left-color: #f87171;
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.2);
+}
+
+/* Estilo para estadísticas de entrega */
+.stat-card.slow-delivery {
+  border-left: 4px solid #dc2626;
+}
+
+.stat-card.fast-delivery {
+  border-left: 4px solid #10b981;
+}
+
+/* Indicador visual en la imagen para productos a pedido */
+.product-image img.slow-delivery-image {
+  border: 2px solid #dc2626 !important;
+  position: relative;
+}
+
+.product-image img.slow-delivery-image::after {
+  content: "⏰";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+/* Hover effect para imágenes de productos a pedido */
+.admin-product-item:hover .product-image img.slow-delivery-image {
+  transform: scale(1.05);
+  border-color: #f87171 !important;
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
 }

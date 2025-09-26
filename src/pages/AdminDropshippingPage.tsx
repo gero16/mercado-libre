@@ -371,7 +371,19 @@ const AdminDropshippingPage: React.FC = () => {
             filteredAndSortedItems.map(item => (
               <div key={item.id} className="admin-product-item">
                 <div className="product-image">
-                  <img src={item.image} alt={item.title} />
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className={
+                      item.isPaused 
+                        ? 'paused-image' 
+                        : item.esVariante 
+                          ? 'variant-image' 
+                          : (!item.esVariante && item.tieneVariantes) 
+                            ? 'base-product-image' 
+                            : 'product-image'
+                    }
+                  />
                 </div>
                 
                 <div className="product-info">
