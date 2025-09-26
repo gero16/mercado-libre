@@ -292,8 +292,8 @@ const AdminPage: React.FC = () => {
               className="admin-select"
             >
               <option value="all">Todos los tiempos</option>
-              <option value="fast">Stock físico (&le;14 días)</option>
-              <option value="slow">A pedido (&gt;14 días)</option>
+              <option value="fast">Stock físico </option>
+              <option value="slow">A pedido </option>
             </select>
           </div>
           
