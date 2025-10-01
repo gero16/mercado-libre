@@ -1,5 +1,6 @@
-/* Estilos adicionales para React */
+/* Estilos específicos para React - SIN CONFLICTOS */
 
+/* === BOTONES GENERALES === */
 .btn-enviar {
   background: #007bff;
   color: white;
@@ -13,6 +14,25 @@
 
 .btn-enviar:hover {
   background: #0056b3;
+}
+
+/* === CARRITO === */
+.carritoHTML {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+.carritoHTML[style*="block"] {
+  right: 0;
 }
 
 .item-pedido {
@@ -43,31 +63,12 @@
   font-size: 24px;
 }
 
-/* Mejoras para el carrito */
-.carritoHTML {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 400px;
-  height: 100vh;
-  background: white;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-  transition: right 0.3s ease;
-  z-index: 1000;
-  overflow-y: auto;
-  border-radius: 10px;
-}
-
-.carritoHTML[style*="block"] {
-  right: 0;
-}
-
+/* === CONTROLES DE CARRITO === */
 .stock {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-top: 10px;
-  
 }
 
 .sumar, .restar {
@@ -91,7 +92,6 @@
   padding: 5px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  
 }
 
 .btn-borrar {
@@ -118,153 +118,7 @@
   background: #6c757d !important;
 }
 
-/* Estilos para detalle de producto */
-.detalle-producto {
-  padding: 20px;
-}
-
-.breadcrumb {
-  margin-bottom: 20px;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.breadcrumb a {
-  color: #007bff;
-  text-decoration: none;
-  margin-right: 10px;
-}
-
-.breadcrumb a:hover {
-  text-decoration: underline;
-}
-
-.producto-detalle {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-top: 20px;
-}
-
-.imagen-producto img {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.info-producto h1 {
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.precio-disponibilidad {
-  margin-bottom: 10px;
-}
-
-.precio-disponibilidad h2 {
-  color: #007bff;
-  font-size: 28px;
-  margin-bottom: 10px;
-}
-
-.variantes {
-  margin-bottom: 30px;
-}
-
-.opciones-variantes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.variante-opcion {
-  padding: 15px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.variante-opcion:hover {
-  border-color: #007bff;
-  background-color: #f8f9fa;
-}
-
-.variante-opcion.seleccionada {
-  border-color: #007bff;
-  background-color: #e3f2fd;
-}
-
-.variante-opcion p {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-.cantidad {
-  margin-bottom: 10px;
-}
-
-.cantidad label {
-  display: block;
-  font-weight: bold;
-}
-
-.cantidad input {
-  width: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.descripcion {
-  margin-bottom: 30px;
-}
-
-.descripcion h3 {
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.btn-agregar-carrito {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 15px 30px;
-  border-radius: 8px;
-  margin-right: 10px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-agregar-carrito:hover:not(:disabled) {
-  background: #218838;
-}
-
-.btn-agregar-carrito:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
-}
-
-.btn-volver {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-}
-
-.btn-volver:hover {
-  background: #5a6268;
-}
-
-/* Mejoras específicas para tienda ML */
+/* === TIENDA ML === */
 .tienda-ml-titulo {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -282,7 +136,7 @@
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Mejoras para los filtros */
+/* === FILTROS === */
 .div-filtros {
   background: #f8f9fa;
   border-radius: 15px;
@@ -314,12 +168,12 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* Mejoras para los productos */
+/* === PRODUCTOS GRID === */
 .productos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
-  justify-items: center; /* centra las tarjetas */
+  justify-items: center;
   padding: 20px;
 }
 
@@ -329,31 +183,17 @@
   padding: 15px;
   text-align: center;
   width: 100%;
-  max-width: 220px; /* evita que se agranden demasiado */
+  max-width: 220px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: transform 0.2s;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 10px;
 }
 
 .producto:hover {
   transform: scale(1.02);
-}
-
-@media (max-width: 768px) {
-  .productos {
-    grid-template-columns: repeat(2, 1fr); /* tablets → 2 productos */
-  }
-}
-
-@media (max-width: 480px) {
-  .productos {
-    grid-template-columns: 1fr; /* celulares → 1 producto */
-  }
 }
 
 .producto img {
@@ -365,20 +205,7 @@
   transform: scale(1.05) !important;
 }
 
-/* Estilos para productos clickeables */
-.producto[style*="cursor: pointer"] {
-  transition: all 0.3s ease;
-}
-
-.producto[style*="cursor: pointer"]:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-.producto[style*="cursor: pointer"]:active {
-  transform: translateY(-2px) scale(1.01);
-}
-
+/* === BOTÓN AGREGAR === */
 .add {
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
   color: white !important;
@@ -404,49 +231,21 @@
   box-shadow: none;
 }
 
-/* Indicador visual de que el producto es clickeable */
-.producto[style*="cursor: pointer"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.producto[style*="cursor: pointer"]:hover::before {
-  opacity: 1;
-}
-
-/* Asegurar que el contenido del producto esté por encima del overlay */
-.producto > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* Responsive */
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
-  .producto-detalle {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .opciones-variantes {
-    grid-template-columns: 1fr;
-  }
-  
   .productos {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     padding: 15px;
   }
   
   .tienda-ml-titulo h1 {
     font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .productos {
+    grid-template-columns: 1fr;
   }
 } 

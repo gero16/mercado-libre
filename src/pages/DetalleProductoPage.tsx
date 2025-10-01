@@ -186,10 +186,21 @@ const DetalleProductoPage: React.FC = () => {
 
   // Obtener la imagen principal a mostrar
   const getImagenPrincipal = (): string => {
+    let imagenUrl = '';
+    
     if (varianteSeleccionada && varianteSeleccionada.images && varianteSeleccionada.images.length > 0) {
-      return varianteSeleccionada.images[0].url;
+      imagenUrl = varianteSeleccionada.images[0].url;
+    } else {
+      imagenUrl = producto?.images[0]?.url || producto?.main_image || '';
     }
-    return producto?.images[0]?.url || producto?.main_image || '';
+    
+    // Redimensionar imagen de Mercado Libre a 250x250 (un poco más grande)
+    if (imagenUrl.includes('mlb-s1-p.mlstatic.com') || imagenUrl.includes('mlb-s2-p.mlstatic.com')) {
+      // Reemplazar el tamaño en la URL (ML usa -I- para el tamaño)
+      imagenUrl = imagenUrl.replace(/-I-[^-]*\./, '-I-250x250.');
+    }
+    
+    return imagenUrl;
   }
 
   // Verificar si el producto está pausado
@@ -303,40 +314,8 @@ const DetalleProductoPage: React.FC = () => {
             {/* Mostrar información de dropshipping si aplica */}
             {isDropshipping && (
               <div className="dropshipping-info">
-                <div className="dropshipping-badge">
-                  <span>⚙️ Dropshipping</span>
-                </div>
                 <div className="tiempo-entrega">
-                  <h4>⏰ Tiempo de entrega estimado:</h4>
-                  <div className="tiempo-detalle">
-                    <div className="tiempo-item">
-                      <span className="tiempo-label">Preparación:</span>
-                      <span className="tiempo-value">{diasPreparacion} días</span>
-                    </div>
-                    <div className="tiempo-item">
-                      <span className="tiempo-label">Envío:</span>
-                      <span className="tiempo-value">{diasEnvio} días</span>
-                    </div>
-                    <div className="tiempo-item total">
-                      <span className="tiempo-label">Total:</span>
-                      <span className="tiempo-value">{tiempoTotal} días</span>
-                    </div>
-                  </div>
-                  {producto.dropshipping?.proveedor && (
-                    <p className="proveedor-info">
-                      <strong>Proveedor:</strong> {producto.dropshipping.proveedor}
-                    </p>
-                  )}
-                  {producto.dropshipping?.pais_origen && (
-                    <p className="pais-info">
-                      <strong>País de origen:</strong> {producto.dropshipping.pais_origen}
-                    </p>
-                  )}
-                  {producto.dropshipping?.requiere_confirmacion && (
-                    <div className="confirmacion-info">
-                      <span>⚠️ Este producto requiere confirmación antes del envío</span>
-                    </div>
-                  )}
+                  <h4>🚚 Tiempo de envío: {diasPreparacion} días</h4>
                 </div>
               </div>
             )}
