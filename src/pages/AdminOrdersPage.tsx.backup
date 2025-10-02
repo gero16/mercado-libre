@@ -1,0 +1,392 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import '../css/admin.css'
+
+// Interfaz para las órdenes
+interface Orden {
+  _id: string;
+  orden_id: string;
+  external_reference: string;
+  numero_orden?: string;
+  payment_id: string;
+  payment_status: string;
+  payment_status_detail: string;
+  transaction_amount: number;
+  payment_method_id: string;
+  installments: number;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+  };
+  items: Array<{
+    product_id: string;
+    product_name: string;
+    variant_id?: string;
+    color?: string;
+    size?: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+  }>;
+  subtotal: number;
+  total: number;
+  currency: string;
+  date_created: string;
+  date_approved?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  notes?: string;
+}
+
+const AdminOrdersPage: React.FC = () => {
+  const navigate = useNavigate()
+  const [orders, setOrders] = useState<Orden[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<Orden | null>(null)
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/api/orders')
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar las órdenes')
+      }
+
+      const data = await response.json()
+      setOrders(data.orders || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'status-approved'
+      case 'pending':
+        return 'status-pending'
+      case 'rejected':
+        return 'status-rejected'
+      case 'cancelled':
+        return 'status-cancelled'
+      default:
+        return 'status-pending'
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'Aprobada'
+      case 'pending':
+        return 'Pendiente'
+      case 'rejected':
+        return 'Rechazada'
+      case 'cancelled':
+        return 'Cancelada'
+      default:
+        return 'Desconocido'
+    }
+  }
+
+  const getPaymentStatusColor = (paymentStatus: string) => {
+    switch (paymentStatus) {
+      case 'approved':
+        return 'payment-approved'
+      case 'pending':
+        return 'payment-pending'
+      case 'rejected':
+        return 'payment-rejected'
+      default:
+        return 'payment-pending'
+    }
+  }
+
+  const filteredOrders = orders.filter(order => {
+    const matchesStatus = filterStatus === 'all' || order.status === filterStatus
+    const matchesSearch = searchTerm === '' || 
+      order.orden_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    return matchesStatus && matchesSearch
+  })
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const formatCurrency = (amount: number, currency: string = 'UYU') => {
+    return new Intl.NumberFormat('es-UY', {
+      style: 'currency',
+      currency: currency
+    }).format(amount)
+  }
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="admin-container">
+          <div className="admin-header">
+            <h1>Administración de Órdenes</h1>
+            <button onClick={() => navigate('/admin')} className="btn-orden">
+              ← Volver al Admin
+            </button>
+          </div>
+          <div className="loading">
+            <p>Cargando órdenes...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container">
+        <div className="admin-container">
+          <div className="admin-header">
+            <h1>Administración de Órdenes</h1>
+            <button onClick={() => navigate('/admin')} className="btn-orden">
+              ← Volver al Admin
+            </button>
+          </div>
+          <div className="error">
+            <p>Error: {error}</p>
+            <button onClick={fetchOrders} className="btn-orden">
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container">
+      <div className="admin-container">
+        <div className="admin-header">
+          <h1>Administración de Órdenes</h1>
+          <div className="admin-actions">
+            <button onClick={() => navigate('/admin')} className="btn-orden">
+              ← Volver al Admin
+            </button>
+            <button onClick={fetchOrders} className="btn-orden">
+              �� Actualizar
+            </button>
+          </div>
+        </div>
+
+        {/* Filtros y búsqueda */}
+        <div className="admin-filters">
+          <div className="filter-group">
+            <label htmlFor="status-filter">Filtrar por estado:</label>
+            <select
+              id="status-filter"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">Todas las órdenes</option>
+              <option value="approved">Aprobadas</option>
+              <option value="pending">Pendientes</option>
+              <option value="rejected">Rechazadas</option>
+              <option value="cancelled">Canceladas</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="search">Buscar:</label>
+            <input
+              id="search"
+              type="text"
+              placeholder="ID, nombre o email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="filter-input"
+            />
+          </div>
+        </div>
+
+        {/* Estadísticas */}
+        <div className="orders-stats">
+          <div className="stat-card">
+            <h3>Total de Órdenes</h3>
+            <span className="stat-number">{orders.length}</span>
+          </div>
+          <div className="stat-card">
+            <h3>Aprobadas</h3>
+            <span className="stat-number approved">{orders.filter(o => o.status === 'approved').length}</span>
+          </div>
+          <div className="stat-card">
+            <h3>Pendientes</h3>
+            <span className="stat-number pending">{orders.filter(o => o.status === 'pending').length}</span>
+          </div>
+          <div className="stat-card">
+            <h3>Rechazadas</h3>
+            <span className="stat-number rejected">{orders.filter(o => o.status === 'rejected').length}</span>
+          </div>
+        </div>
+
+        {/* Lista de órdenes */}
+        <div className="orders-list">
+          {filteredOrders.length === 0 ? (
+            <div className="no-orders">
+              <p>No se encontraron órdenes</p>
+            </div>
+          ) : (
+            filteredOrders.map(order => (
+              <div key={order._id} className="order-card">
+                <div className="order-header">
+                  <div className="order-info">
+                    <h3>Orden #{order.orden_id}</h3>
+                    <p className="order-date">{formatDate(order.date_created)}</p>
+                  </div>
+                  <div className="order-status">
+                    <span className={`status-badge ${getStatusColor(order.status)}`}>
+                      {getStatusText(order.status)}
+                    </span>
+                    <span className={`payment-badge ${getPaymentStatusColor(order.payment_status)}`}>
+                      {order.payment_status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="order-details">
+                  <div className="customer-info">
+                    <h4>Cliente</h4>
+                    <p><strong>Nombre:</strong> {order.customer.name}</p>
+                    <p><strong>Email:</strong> {order.customer.email}</p>
+                    <p><strong>Teléfono:</strong> {order.customer.phone}</p>
+                    <p><strong>Dirección:</strong> {order.customer.address}, {order.customer.city}</p>
+                  </div>
+
+                  <div className="order-items">
+                    <h4>Productos ({order.items.length})</h4>
+                    {order.items.map((item, index) => (
+                      <div key={index} className="item-detail">
+                        <span className="item-name">{item.product_name}</span>
+                        <span className="item-qty">x{item.quantity}</span>
+                        <span className="item-price">{formatCurrency(item.total_price)}</span>
+                        {item.color && <span className="item-variant">Color: {item.color}</span>}
+                        {item.size && <span className="item-variant">Talle: {item.size}</span>}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-totals">
+                    <div className="total-line">
+                      <span>Subtotal:</span>
+                      <span>{formatCurrency(order.subtotal)}</span>
+                    </div>
+                    <div className="total-line total">
+                      <span><strong>Total:</strong></span>
+                      <span><strong>{formatCurrency(order.total)}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="order-actions">
+                  <button 
+                    onClick={() => setSelectedOrder(order)}
+                    className="btn-orden small"
+                  >
+                    Ver Detalles
+                  </button>
+                  <button 
+                    onClick={() => window.open(`https://www.mercadopago.com.ar/activities/payments/${order.payment_id}`, '_blank')}
+                    className="btn-orden small secondary"
+                  >
+                    Ver en MercadoPago
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Modal de detalles */}
+        {selectedOrder && (
+          <div className="modal-overlay" onClick={() => setSelectedOrder(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Detalles de la Orden #{selectedOrder.orden_id}</h2>
+                <button 
+                  className="modal-close"
+                  onClick={() => setSelectedOrder(null)}
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="modal-body">
+                <div className="detail-section">
+                  <h3>Información del Pago</h3>
+                  <p><strong>Payment ID:</strong> {selectedOrder.payment_id}</p>
+                  <p><strong>Estado:</strong> {selectedOrder.payment_status}</p>
+                  <p><strong>Detalle:</strong> {selectedOrder.payment_status_detail}</p>
+                  <p><strong>Método:</strong> {selectedOrder.payment_method_id}</p>
+                  <p><strong>Cuotas:</strong> {selectedOrder.installments}</p>
+                  {selectedOrder.date_approved && (
+                    <p><strong>Fecha de aprobación:</strong> {formatDate(selectedOrder.date_approved)}</p>
+                  )}
+                </div>
+
+                <div className="detail-section">
+                  <h3>Información del Cliente</h3>
+                  <p><strong>Nombre:</strong> {selectedOrder.customer.name}</p>
+                  <p><strong>Email:</strong> {selectedOrder.customer.email}</p>
+                  <p><strong>Teléfono:</strong> {selectedOrder.customer.phone}</p>
+                  <p><strong>Dirección:</strong> {selectedOrder.customer.address}</p>
+                  <p><strong>Ciudad:</strong> {selectedOrder.customer.city}</p>
+                  <p><strong>Estado:</strong> {selectedOrder.customer.state}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h3>Productos</h3>
+                  {selectedOrder.items.map((item, index) => (
+                    <div key={index} className="item-detail-full">
+                      <div className="item-info">
+                        <h4>{item.product_name}</h4>
+                        <p><strong>ID:</strong> {item.product_id}</p>
+                        {item.variant_id && <p><strong>Variante ID:</strong> {item.variant_id}</p>}
+                        {item.color && <p><strong>Color:</strong> {item.color}</p>}
+                        {item.size && <p><strong>Talle:</strong> {item.size}</p>}
+                      </div>
+                      <div className="item-pricing">
+                        <p><strong>Cantidad:</strong> {item.quantity}</p>
+                        <p><strong>Precio unitario:</strong> {formatCurrency(item.unit_price)}</p>
+                        <p><strong>Total:</strong> {formatCurrency(item.total_price)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default AdminOrdersPage 

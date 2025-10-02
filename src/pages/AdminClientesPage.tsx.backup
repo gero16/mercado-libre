@@ -33,29 +33,34 @@ interface Cliente {
 }
 
 interface ClientesResponse {
-  clientes: Cliente[];
-  total: number;
-  paginas: number;
+  success: boolean;
+  data: {
+    clientes: Cliente[];
+    total: number;
+    paginas: number;
+  };
 }
 
-interface Estadisticas {
-  totalClientes: number;
-  clientesActivos: number;
-  clientesInactivos: number;
-  totalGastado: number;
-  promedioGasto: number;
+interface EstadisticasResponse {
+  success: boolean;
+  data: {
+    totalClientes: number;
+    clientesActivos: number;
+    clientesInactivos: number;
+    totalGastado: number;
+    promedioGasto: number;
+  };
 }
 
 const AdminClientesPage: React.FC = () => {
   const navigate = useNavigate()
   const [clientes, setClientes] = useState<Cliente[]>([])
-  const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null)
+  const [estadisticas, setEstadisticas] = useState<EstadisticasResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterActivo, setFilterActivo] = useState<'all' | 'active' | 'inactive'>('all')
   const [filterCiudad, setFilterCiudad] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'email' | 'fecha_registro' | 'total_gastado'>('fecha_registro')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalClientes, setTotalClientes] = useState(0)
@@ -93,7 +98,7 @@ const AdminClientesPage: React.FC = () => {
   const fetchEstadisticas = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/clientes/estadisticas`)
-      const data = await response.json()
+      const data: EstadisticasResponse = await response.json()
       
       if (data.success) {
         setEstadisticas(data.data)

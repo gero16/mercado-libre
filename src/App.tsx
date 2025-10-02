@@ -26,7 +26,7 @@ import './css/cart.css'
 import './css/detalleProducto.css'
 import './css/react-styles.css'
 import './css/admin.css'
-import './css/admin-clientes.css' // 🆕 Importar estilos de clientes
+import './css/admin-unified.css' // 🆕 Importar estilos unificados
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })

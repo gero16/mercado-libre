@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductSkeleton from '../components/ProductSkeleton'
+import '../css/admin.css'
+import '../css/admin-unified.css'
 
 // Interfaz para cliente
 interface Cliente {
@@ -181,23 +183,23 @@ const AdminClientesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Filtros y búsqueda */}
-      <div className="admin-filters">
-        <div className="search-container">
+      {/* Controles de filtrado y búsqueda */}
+      <div className="admin-controls">
+        <div className="search-section">
           <input
             type="text"
             placeholder="Buscar por nombre, email o teléfono..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className="admin-search-input"
           />
         </div>
         
-        <div className="filter-group">
+        <div className="filter-section">
           <select
             value={filterActivo}
             onChange={(e) => setFilterActivo(e.target.value as any)}
-            className="filter-select"
+            className="admin-select"
           >
             <option value="all">Todos los estados</option>
             <option value="active">Solo activos</option>
@@ -209,13 +211,15 @@ const AdminClientesPage: React.FC = () => {
             placeholder="Filtrar por ciudad..."
             value={filterCiudad}
             onChange={(e) => setFilterCiudad(e.target.value)}
-            className="filter-input"
+            className="admin-search-input"
           />
-          
+        </div>
+        
+        <div className="sort-section">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="filter-select"
+            className="admin-select"
           >
             <option value="fecha_registro">Ordenar por fecha</option>
             <option value="name">Ordenar por nombre</option>
@@ -231,85 +235,139 @@ const AdminClientesPage: React.FC = () => {
           <p>Mostrando {clientes.length} de {totalClientes} clientes</p>
         </div>
         
-        <div className="clientes-grid">
+        <div className="admin-grid">
           {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
               <ProductSkeleton key={index} />
             ))
           ) : clientes.length === 0 ? (
-            <div className="no-results">
+            <div style={{ 
+              gridColumn: '1 / -1', 
+              textAlign: 'center', 
+              padding: '40px', 
+              color: '#8b949e' 
+            }}>
               <p>No se encontraron clientes con los filtros aplicados</p>
             </div>
           ) : (
             clientes.map((cliente) => (
-              <div key={cliente._id} className="cliente-card">
-                <div className="cliente-header">
-                  <div className="cliente-avatar">
-                    {getNombreCompleto(cliente).charAt(0).toUpperCase()}
-                  </div>
-                  <div className="cliente-info">
-                    <h3 className="cliente-nombre">{getNombreCompleto(cliente)}</h3>
-                    <p className="cliente-email">{cliente.email}</p>
-                    <span className={`cliente-status ${cliente.activo ? 'active' : 'inactive'}`}>
-                      {cliente.activo ? 'Activo' : 'Inactivo'}
+              <div key={cliente._id} className="admin-card">
+                <div style={{ marginBottom: '15px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <h3 style={{ color: '#f0f6fc', margin: 0, fontSize: '1.1rem' }}>
+                      {getNombreCompleto(cliente)}
+                    </h3>
+                    <span className={`status-badge ${cliente.activo ? 'approved' : 'cancelled'}`}>
+                      {cliente.activo ? 'ACTIVO' : 'INACTIVO'}
                     </span>
+                  </div>
+                  
+                  <div style={{ color: '#8b949e', fontSize: '14px', marginBottom: '8px' }}>
+                    📧 {cliente.email}
+                  </div>
+                  
+                  <div style={{ color: '#8b949e', fontSize: '14px', marginBottom: '8px' }}>
+                    📞 {cliente.telefono}
+                  </div>
+                  
+                  <div style={{ color: '#8b949e', fontSize: '14px', marginBottom: '8px' }}>
+                    📍 {getDireccionCompleta(cliente)}
                   </div>
                 </div>
-                
-                <div className="cliente-details">
-                  <div className="detail-row">
-                    <span className="detail-label">Teléfono:</span>
-                    <span className="detail-value">{cliente.telefono}</span>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <div style={{ color: '#8b949e', fontSize: '12px', marginBottom: '8px' }}>
+                    ESTADÍSTICAS:
                   </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Dirección:</span>
-                    <span className="detail-value">{getDireccionCompleta(cliente)}</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                    <div style={{ color: '#c9d1d9' }}>
+                      <span style={{ color: '#8b949e' }}>Compras:</span> {cliente.numero_ordenes}
+                    </div>
+                    <div style={{ color: '#c9d1d9' }}>
+                      <span style={{ color: '#8b949e' }}>Total:</span> {formatCurrency(cliente.total_gastado)}
+                    </div>
+                    <div style={{ color: '#c9d1d9' }}>
+                      <span style={{ color: '#8b949e' }}>Promedio:</span> {formatCurrency(cliente.numero_ordenes > 0 ? cliente.total_gastado / cliente.numero_ordenes : 0)}
+                    </div>
+                    <div style={{ color: '#c9d1d9' }}>
+                      <span style={{ color: '#8b949e' }}>Idioma:</span> {cliente.preferencias.idioma.toUpperCase()}
+                    </div>
                   </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Registrado:</span>
-                    <span className="detail-value">{formatDate(cliente.fecha_registro)}</span>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <div style={{ color: '#8b949e', fontSize: '12px', marginBottom: '8px' }}>
+                    PREFERENCIAS:
                   </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Última actividad:</span>
-                    <span className="detail-value">{formatDate(cliente.ultima_actividad)}</span>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {cliente.preferencias.notificaciones_email && (
+                      <span style={{ 
+                        background: 'rgba(88, 166, 255, 0.2)', 
+                        color: '#58a6ff', 
+                        padding: '2px 8px', 
+                        borderRadius: '12px', 
+                        fontSize: '11px',
+                        border: '1px solid #58a6ff'
+                      }}>
+                        Email
+                      </span>
+                    )}
+                    {cliente.preferencias.notificaciones_sms && (
+                      <span style={{ 
+                        background: 'rgba(88, 166, 255, 0.2)', 
+                        color: '#58a6ff', 
+                        padding: '2px 8px', 
+                        borderRadius: '12px', 
+                        fontSize: '11px',
+                        border: '1px solid #58a6ff'
+                      }}>
+                        SMS
+                      </span>
+                    )}
+                    {cliente.preferencias.newsletter && (
+                      <span style={{ 
+                        background: 'rgba(88, 166, 255, 0.2)', 
+                        color: '#58a6ff', 
+                        padding: '2px 8px', 
+                        borderRadius: '12px', 
+                        fontSize: '11px',
+                        border: '1px solid #58a6ff'
+                      }}>
+                        Newsletter
+                      </span>
+                    )}
                   </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Compras:</span>
-                    <span className="detail-value">{cliente.numero_ordenes}</span>
+                </div>
+
+                <div style={{ 
+                  borderTop: '1px solid #30363d', 
+                  paddingTop: '15px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <div style={{ color: '#8b949e', fontSize: '12px' }}>
+                      Registrado: {formatDate(cliente.fecha_registro)}
+                    </div>
+                    <div style={{ color: '#8b949e', fontSize: '12px' }}>
+                      Última actividad: {formatDate(cliente.ultima_actividad)}
+                    </div>
                   </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Total gastado:</span>
-                    <span className="detail-value highlight">{formatCurrency(cliente.total_gastado)}</span>
-                  </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Promedio por compra:</span>
-                    <span className="detail-value">
-                      {cliente.numero_ordenes > 0 
-                        ? formatCurrency(cliente.total_gastado / cliente.numero_ordenes)
-                        : '$0'
-                      }
-                    </span>
-                  </div>
-                  
-                  <div className="detail-row">
-                    <span className="detail-label">Preferencias:</span>
-                    <div className="preferencias">
-                      {cliente.preferencias.notificaciones_email && (
-                        <span className="preferencia-tag">Email</span>
-                      )}
-                      {cliente.preferencias.notificaciones_sms && (
-                        <span className="preferencia-tag">SMS</span>
-                      )}
-                      {cliente.preferencias.newsletter && (
-                        <span className="preferencia-tag">Newsletter</span>
-                      )}
-                      <span className="preferencia-tag">{cliente.preferencias.idioma.toUpperCase()}</span>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%', 
+                      background: 'linear-gradient(135deg, #58a6ff, #8b5cf6)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '16px'
+                    }}>
+                      {getNombreCompleto(cliente).charAt(0).toUpperCase()}
                     </div>
                   </div>
                 </div>
