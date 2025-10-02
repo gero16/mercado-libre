@@ -47,7 +47,7 @@ const AdminProductList: React.FC<AdminProductListProps> = ({ productos }) => {
                 <td className="admin-td">{variante.stock}</td>
                 <td className="admin-td">{variante.color || '-'}</td>
                 <td className="admin-td">{producto.status}</td>
-                <td className="admin-td-ml-id">{variante.ml_id || producto.ml_id || '-'}</td>
+                <td className="admin-td-ml-id">{producto.ml_id || '-'}</td>
                 <td className="admin-td-variante-id">{variante._id}</td>
               </tr>
             ));

@@ -210,7 +210,6 @@ const DetalleProductoPage: React.FC = () => {
   const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 14
   const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
   const diasEnvio = producto?.dropshipping?.dias_envio_estimado || 0
-  const tiempoTotal = diasPreparacion + diasEnvio
 
   // Función helper para obtener el stock de una variante específica
   const getStockVariante = (): number => {
