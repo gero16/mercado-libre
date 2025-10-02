@@ -16,6 +16,7 @@ import PaymentPendingPage from './pages/PaymentPendingPage'
 import AdminPage from './pages/AdminPage'
 import AdminDropshippingPage from './pages/AdminDropshippingPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
+import AdminClientesPage from './pages/AdminClientesPage' // 🆕 Importar página de clientes
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -25,6 +26,7 @@ import './css/cart.css'
 import './css/detalleProducto.css'
 import './css/react-styles.css'
 import './css/admin.css'
+import './css/admin-clientes.css' // 🆕 Importar estilos de clientes
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -49,6 +51,7 @@ function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/dropshipping" element={<AdminDropshippingPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
+            <Route path="/admin/clientes" element={<AdminClientesPage />} /> {/* 🆕 Ruta de clientes */}
             
             {/* Rutas de resultado de pago */}
             <Route path="/payment-success" element={<PaymentSuccessPage />} />
