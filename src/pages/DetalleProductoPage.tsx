@@ -209,7 +209,6 @@ const DetalleProductoPage: React.FC = () => {
   // Verificar si es producto de dropshipping
   const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 14
   const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
-  const diasEnvio = producto?.dropshipping?.dias_envio_estimado || 0
 
   // Función helper para obtener el stock de una variante específica
   const getStockVariante = (): number => {
