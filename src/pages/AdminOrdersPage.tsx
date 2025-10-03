@@ -53,7 +53,7 @@ const AdminOrdersPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [totalOrders, setTotalOrders] = useState(0)
 
-  const API_BASE_URL = 'https://tienda-virtual-ts-back-production.up.railway.app'
+  const API_BASE_URL = 'https://poppy-shop-production.up.railway.app'
 
   // Fetch órdenes desde el backend
   const fetchOrders = async () => {

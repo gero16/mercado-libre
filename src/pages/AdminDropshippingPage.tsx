@@ -45,7 +45,7 @@ const AdminDropshippingPage: React.FC = () => {
   const fetchDropshippingProducts = async (): Promise<ProductoML[]> => {
     try {
       console.log(' Intentando obtener productos de dropshipping...')
-      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/tipo/dropshipping')
+      const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos/tipo/dropshipping')
       
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`)

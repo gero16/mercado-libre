@@ -65,7 +65,7 @@ const AdminClientesPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [totalClientes, setTotalClientes] = useState(0)
 
-  const API_BASE_URL = 'https://tienda-virtual-ts-back-production.up.railway.app'
+  const API_BASE_URL = 'https://poppy-shop-production.up.railway.app'
 
   // Fetch clientes desde el backend
   const fetchClientes = async () => {

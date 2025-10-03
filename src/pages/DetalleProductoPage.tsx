@@ -25,7 +25,7 @@ const DetalleProductoPage: React.FC = () => {
   const cargarProducto = async (productId: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`https://tienda-virtual-ts-back-production.up.railway.app/ml/productos/${productId}`)
+      const response = await fetch(`https://poppy-shop-production.up.railway.app/ml/productos/${productId}`)
       
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`)

@@ -28,7 +28,7 @@ export class MercadoPagoService {
     try {
       // En un entorno real, esto debería ir a tu backend
       // El backend debería manejar las credenciales privadas de MercadoPago
-      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/api/create_preference', {
+      const response = await fetch('https://poppy-shop-production.up.railway.app/api/create_preference', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

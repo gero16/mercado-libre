@@ -1,0 +1,67 @@
+/* Estilos para el filtro de categorías */
+.categorias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.categoria-filtro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.categoria-filtro:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.categoria-filtro.seleccionado {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.categoria-nombre {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.categoria-contador {
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.categoria-filtro.seleccionado .categoria-contador {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .categorias-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .categoria-filtro {
+    padding: 10px 12px;
+  }
+  
+  .categoria-nombre {
+    font-size: 13px;
+  }
+  
+  .categoria-contador {
+    font-size: 11px;
+  }
+}

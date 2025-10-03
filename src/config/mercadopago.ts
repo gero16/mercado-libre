@@ -8,7 +8,7 @@ export const MERCADOPAGO_CONFIG = {
   PENDING_URL: '/payment-pending',
   
   // URL del backend para procesar pagos - USAR URL COMPLETA
-  BACKEND_URL: 'https://tienda-virtual-ts-back-production.up.railway.app/api/process_payment'
+  BACKEND_URL: 'https://poppy-shop-production.up.railway.app/api/process_payment'
 }
 
 // Configuración de métodos de pago para el Brick
