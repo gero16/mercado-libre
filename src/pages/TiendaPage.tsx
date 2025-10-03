@@ -48,7 +48,7 @@ const TiendaMLPage: React.FC = () => {
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
-      const response = await fetch('https://tienda-virtual-ts-back-production.up.railway.app/ml/productos')
+      const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
       const data = await response.json()
       console.log('🔍 Productos recibidos:', data)
       return data || []

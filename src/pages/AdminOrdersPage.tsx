@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import '../css/admin.css'
-import '../css/admin-unified.css'
+// import '../css/admin.css'
+import '../css/admin-clean.css'
 
 // Interfaz para las órdenes
 interface Orden {
