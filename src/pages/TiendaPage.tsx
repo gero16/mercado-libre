@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
-import CategoryFilter from '../components/CategoryFilter'
+import Pagination from '../components/Pagination'
 import '../styles/categoryFilter.css'
+import '../styles/pagination.css'
 
 // Mapeo de categorías de ML a tus categorías (basado en datos reales)
 const mapeoCategorias: Record<string, string> = {
@@ -39,7 +40,6 @@ const mapeoCategorias: Record<string, string> = {
   'MLU1915': 'soportes-airtag',
   'MLU443772': 'llaveros-airtag',
   'MLU1155': 'tablets-infantiles',
-  'MLU116559': 'auriculares-gaming',
   'MLU1658': 'tarjetas-video',
   'MLU1717': 'cables',
   'MLU195437': 'meta-quest',
@@ -63,7 +63,6 @@ const mapeoCategorias: Record<string, string> = {
   'MLU443583': 'sillas-gaming',
   'MLU439534': 'volantes-sim-racing',
   'MLU448173': 'volantes-sim-racing',
-  'MLU10858': 'volantes-sim-racing',
   
   // Drones y cámaras
   'MLU178089': 'drones',
@@ -73,7 +72,6 @@ const mapeoCategorias: Record<string, string> = {
   'MLU413444': 'baterias-drones',
   'MLU414123': 'sistemas-airdrop',
   'MLU1042': 'lentes-camara',
-  'MLU188198': 'adaptadores-camara',
   
   // Hogar y decoración
   'MLU190994': 'mochilas',
@@ -141,35 +139,14 @@ const mapeoCategorias: Record<string, string> = {
   'MLU178391': 'tablets',
   'MLU172030': 'limpiadores-piscina',
   'MLU1152': 'fundas-asus',
-  'MLU163765': 'fundas-ipad',
   'MLU165337': 'estaciones-carga',
   'MLU206537': 'botellas-deportivas',
   'MLU168223': 'cajas-seguridad',
   'MLU202844': 'sierras-agujero',
-  'MLU414123': 'sistemas-airdrop',
-  'MLU413564': 'controles-remotos',
-  'MLU413515': 'docking-stations',
-  'MLU429735': 'accesorios-apple',
-  'MLU455057': 'cables-convertidores',
-  'MLU455839': 'protectores-asus',
-  'MLU9914': 'hubs-carga',
   
   // Memoria y almacenamiento
   'MLU70969': 'memorias-microsd',
   'MLU6336': 'tarjetas-memoria',
-  'MLU1152': 'fundas-asus',
-  'MLU163765': 'fundas-ipad',
-  'MLU165337': 'estaciones-carga',
-  'MLU206537': 'botellas-deportivas',
-  'MLU168223': 'cajas-seguridad',
-  'MLU202844': 'sierras-agujero',
-  'MLU414123': 'sistemas-airdrop',
-  'MLU413564': 'controles-remotos',
-  'MLU413515': 'docking-stations',
-  'MLU429735': 'accesorios-apple',
-  'MLU455057': 'cables-convertidores',
-  'MLU455839': 'protectores-asus',
-  'MLU9914': 'hubs-carga',
   
   // Otros
   'MLU40629': 'monitores-bebes',
@@ -178,21 +155,6 @@ const mapeoCategorias: Record<string, string> = {
   'MLU379647': 'intercomunicadores-moto',
   'MLU4702': 'telescopios',
   'MLU52047': 'tocadiscos-victrola',
-  'MLU10553': 'camaras-seguridad',
-  'MLU1155': 'tablets-infantiles',
-  'MLU116559': 'auriculares-gaming',
-  'MLU1658': 'tarjetas-video',
-  'MLU1717': 'cables',
-  'MLU195437': 'meta-quest',
-  'MLU372999': 'desarrollo',
-  'MLU188198': 'adaptadores-camara',
-  'MLU32605': 'papel-fotografico',
-  'MLU413515': 'docking-stations',
-  'MLU413564': 'controles-remotos',
-  'MLU429735': 'accesorios-apple',
-  'MLU455057': 'cables-convertidores',
-  'MLU455839': 'protectores-asus',
-  'MLU9914': 'hubs-carga',
 }
 
 // Función para obtener categoría segura
@@ -276,6 +238,14 @@ const TiendaMLPage: React.FC = () => {
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
     { id: 'mostrar-todo', name: 'Mostrar Todo' }
   ])
+  
+  // 🚀 Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(100)
+  const [totalPages, setTotalPages] = useState(1)
+  const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
+  const [isChangingPage, setIsChangingPage] = useState(false)
+  
   const { addToCart } = useCart()
 
   // Fetch productos de Mercado Libre desde el backend
@@ -397,7 +367,7 @@ const TiendaMLPage: React.FC = () => {
     loadProducts()
   }, [])
 
-  // Filtrar items
+  // Filtrar items y aplicar paginación
   useEffect(() => {
     let filtered = itemsTienda
 
@@ -410,7 +380,24 @@ const TiendaMLPage: React.FC = () => {
     filtered = filtered.filter(item => item.price >= priceFilter)
 
     setFilteredItems(filtered)
-  }, [itemsTienda, categoryFilter, priceFilter])
+    
+    // 🚀 Calcular paginación
+    const totalItems = filtered.length
+    const totalPagesCalculated = Math.ceil(totalItems / itemsPerPage)
+    setTotalPages(totalPagesCalculated)
+    
+    // 🚀 Ajustar página actual si es necesario
+    if (currentPage > totalPagesCalculated && totalPagesCalculated > 0) {
+      setCurrentPage(1)
+    }
+    
+    // 🚀 Obtener items para la página actual
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const itemsForCurrentPage = filtered.slice(startIndex, endIndex)
+    
+    setPaginatedItems(itemsForCurrentPage)
+  }, [itemsTienda, categoryFilter, priceFilter, currentPage, itemsPerPage])
 
   const handleProductClick = (item: ItemTienda) => {
     navigate(`/producto/${item.productoPadre?._id || item.id}`)
@@ -465,6 +452,25 @@ const TiendaMLPage: React.FC = () => {
   const handlePriceFilter = (price: number) => {
     setPriceFilter(price)
   }
+
+  // 🚀 Funciones para manejar paginación
+  const handlePageChange = (page: number) => {
+    setIsChangingPage(true)
+    setCurrentPage(page)
+    // Scroll hacia arriba cuando cambies de página
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    
+    // Simular un pequeño delay para mostrar el indicador de carga
+    setTimeout(() => {
+      setIsChangingPage(false)
+    }, 300)
+  }
+
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items)
+    setCurrentPage(1) // Reset a la primera página
+  }
+
 
   if (loading) {
     return (
@@ -547,13 +553,13 @@ const TiendaMLPage: React.FC = () => {
               <section className="filtro-categorias centrar-texto">
                 <h3 className="precios-titulo">Filtrar por Categoría</h3>
                 <div className="categorias-grid">
-                  {categorias.map(category => (
+                {categorias.map(category => (
                     <div 
-                      key={category.id}
-                      className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
-                      onClick={() => handleCategoryFilter(category.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
+                    key={category.id}
+                    className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
+                    onClick={() => handleCategoryFilter(category.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                       <span className="categoria-nombre">{category.name}</span>
                       {category.count && (
                         <span className="categoria-contador">({category.count})</span>
@@ -567,13 +573,45 @@ const TiendaMLPage: React.FC = () => {
         </div>
 
         {/* Items de la tienda */}
-        <div className="productos">
-          {filteredItems.map(item => (
+        <div className="productos" style={{ position: 'relative' }}>
+          {/* Indicador de carga cuando se cambia de página */}
+          {isChangingPage && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              padding: '20px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                border: '2px solid #f3f3f3',
+                borderTop: '2px solid #007bff',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '500' }}>Cargando productos...</span>
+            </div>
+          )}
+
+          {paginatedItems.map(item => (
             <div 
               key={item.id}
               className="producto centrar-texto"
               onClick={() => handleProductClick(item)}
-              style={{ cursor: 'pointer' }}
+              style={{ 
+                cursor: 'pointer',
+                opacity: isChangingPage ? 0.5 : 1,
+                transition: 'opacity 0.3s ease'
+              }}
             >
               <img src={item.image} alt={item.title} />
               <p>{item.title}</p>
@@ -590,12 +628,24 @@ const TiendaMLPage: React.FC = () => {
             </div>
           ))}
           
-          {filteredItems.length === 0 && (
+          {paginatedItems.length === 0 && !isChangingPage && (
             <div className="centrar-texto">
               <p>No se encontraron productos con los filtros seleccionados.</p>
             </div>
           )}
         </div>
+
+        {/* 🚀 Controles de paginación */}
+        {filteredItems.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredItems.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
+        )}
       </section>
     </main>
   )
