@@ -1,0 +1,166 @@
+/* Estilos para el banner promocional */
+.promotional-banner {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark), var(--color-primary));
+  background-size: 400% 400%;
+  animation: gradientShift 3s ease infinite;
+  padding: 20px 20px;
+  margin: 0;
+  position: relative;
+  overflow: visible;
+  min-height: 60px;
+}
+
+.promotional-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.promotional-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 60px;
+}
+
+.promotional-text {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  line-height: 1.4;
+  padding: 0;
+  margin: 0;
+}
+
+.shipping-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.discount-text {
+  color: #fff;
+}
+
+.discount-text strong {
+  background: rgba(255,255,255,0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.separator {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+/* Animaciones */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .promotional-banner {
+    padding: 15px 15px;
+    margin: 0;
+    min-height: 70px;
+  }
+  
+  .promotional-content {
+    min-height: 70px;
+  }
+  
+  .promotional-text {
+    font-size: 14px;
+    gap: 10px;
+    flex-direction: column;
+    line-height: 1.5;
+    padding: 0;
+  }
+  
+  .separator {
+    display: none;
+  }
+  
+  .discount-text strong {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .promotional-banner {
+    padding: 15px 12px;
+    margin: 0;
+    min-height: 80px;
+  }
+  
+  .promotional-content {
+    min-height: 80px;
+  }
+  
+  .promotional-text {
+    font-size: 13px;
+    gap: 8px;
+    line-height: 1.5;
+    padding: 0;
+  }
+  
+  .discount-text strong {
+    padding: 3px 6px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+  
+  .shipping-text {
+    gap: 5px;
+  }
+}
+
+/* Efecto de pulso para llamar la atención */
+.promotional-banner {
+  animation: gradientShift 3s ease infinite, pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}

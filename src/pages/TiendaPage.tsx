@@ -6,6 +6,7 @@ import ProductSkeleton from '../components/ProductSkeleton'
 import Pagination from '../components/Pagination'
 import '../styles/categoryFilter.css'
 import '../styles/pagination.css'
+import '../styles/tienda-improved.css'
 
 // Mapeo de categorías de ML a tus categorías (basado en datos reales)
 const mapeoCategorias: Record<string, string> = {

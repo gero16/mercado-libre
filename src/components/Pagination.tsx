@@ -71,66 +71,46 @@ const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="pagination-container" style={{
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'center',
       alignItems: 'center',
-      margin: '30px 0',
-      padding: '20px',
+      margin: '40px auto',
+      padding: '25px',
       backgroundColor: '#f8f9fa',
       borderRadius: '12px',
       border: '1px solid #e9ecef',
       flexWrap: 'wrap',
-      gap: '15px'
+      gap: '20px',
+      maxWidth: '900px',
+      width: '100%',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
     }}>
-      {/* Información de paginación */}
-      <div className="pagination-info" style={{ 
-        fontSize: '14px', 
-        color: '#6c757d',
-        fontWeight: '500'
+      {/* Layout centrado en una sola fila */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '30px',
+        flexWrap: 'wrap',
+        width: '100%'
       }}>
-        Mostrando <strong>{startItem}</strong> - <strong>{endItem}</strong> de <strong>{totalItems}</strong> productos
-      </div>
-
-      {/* Selector de productos por página */}
-      <div className="items-per-page" style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '8px' 
-      }}>
-        <label htmlFor="items-per-page" style={{ 
-          fontSize: '14px',
+        {/* Información de paginación */}
+        <div className="pagination-info" style={{ 
+          fontSize: '14px', 
+          color: '#6c757d',
           fontWeight: '500',
-          color: '#495057'
+          textAlign: 'center',
+          whiteSpace: 'nowrap'
         }}>
-          Por página:
-        </label>
-        <select 
-          id="items-per-page"
-          value={itemsPerPage} 
-          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          style={{ 
-            padding: '6px 12px', 
-            borderRadius: '6px', 
-            border: '1px solid #ced4da',
-            backgroundColor: 'white',
-            fontSize: '14px',
-            cursor: 'pointer',
-            outline: 'none'
-          }}
-        >
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-          <option value={200}>200</option>
-          <option value={500}>500</option>
-        </select>
-      </div>
+          Mostrando <strong>{startItem}</strong> - <strong>{endItem}</strong> de <strong>{totalItems}</strong> productos
+        </div>
 
-      {/* Controles de navegación */}
-      <div className="pagination-buttons" style={{ 
-        display: 'flex', 
-        gap: '4px',
-        alignItems: 'center'
-      }}>
+        {/* Controles de navegación */}
+        <div className="pagination-buttons" style={{ 
+          display: 'flex', 
+          gap: '4px',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
         {/* Botón primera página */}
         <button 
           onClick={goToFirstPage}
@@ -299,6 +279,42 @@ const Pagination: React.FC<PaginationProps> = ({
         >
           »»
         </button>
+        </div>
+
+        {/* Selector de productos por página */}
+        <div className="items-per-page" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px'
+        }}>
+          <label htmlFor="items-per-page" style={{ 
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#495057'
+          }}>
+            Por página:
+          </label>
+          <select 
+            id="items-per-page"
+            value={itemsPerPage} 
+            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+            style={{ 
+              padding: '6px 12px', 
+              borderRadius: '6px', 
+              border: '1px solid #ced4da',
+              backgroundColor: 'white',
+              fontSize: '14px',
+              cursor: 'pointer',
+              outline: 'none'
+            }}
+          >
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={200}>200</option>
+            <option value={500}>500</option>
+          </select>
+        </div>
       </div>
     </div>
   )

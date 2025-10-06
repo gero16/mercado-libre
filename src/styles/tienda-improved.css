@@ -1,0 +1,528 @@
+/* ========================================
+   ESTILOS MEJORADOS PARA LA TIENDA
+   ======================================== */
+
+/* Layout principal mejorado */
+.pagina-principal {
+  background-color: rgb(255, 255, 255);
+  border-radius: 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Grid layout responsive mejorado */
+@media (min-width: 600px) {
+  .pagina-principal {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Filtros más estrechos */
+    gap: 20px;
+  }
+}
+
+/* ========================================
+   FILTROS MEJORADOS
+   ======================================== */
+
+.div-filtros {
+  margin: 110px 0px 30px 0px;
+  padding: 0px 10px;
+  min-width: 260px; /* Reducido de 18vw */
+}
+
+.filtro {
+  font-family: "Rubik", sans-serif;
+  color: #8c949c;
+  background-color: white;
+  border-radius: 10px;
+  min-height: 400px;
+  width: 100%; /* Cambiado de 80% */
+  margin: 0px auto;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Categorías más compactas */
+.categorias-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Una columna para categorías */
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.categoria-filtro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px; /* Reducido */
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 13px; /* Texto más pequeño */
+}
+
+.categoria-filtro:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.categoria-filtro.seleccionado {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.categoria-nombre {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.categoria-contador {
+  font-size: 11px;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.categoria-filtro.seleccionado .categoria-contador {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ========================================
+   PRODUCTOS MEJORADOS - MÁS POR FILA
+   ======================================== */
+
+/* Sobrescribir estilos del CSS original con mayor especificidad */
+.pagina-principal .productos {
+  margin: 100px 0px 20px 0px !important;
+  display: grid !important;
+  gap: 20px !important;
+  justify-content: center !important;
+  padding: 0 20px !important;
+  overflow: visible !important;
+}
+
+/* Mobile: 1 producto por fila - SOBRESCRIBIR CSS ORIGINAL */
+@media (max-width: 619px) {
+  .pagina-principal .productos {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+}
+
+/* Tablet pequeña: 2 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
+@media (min-width: 620px) and (max-width: 899px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+}
+
+/* Tablet: 3 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+}
+
+/* Desktop: 4 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
+}
+
+/* Desktop grande: 5 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
+@media (min-width: 1600px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 20px !important;
+  }
+}
+
+/* ========================================
+   SOBRESCRIBIR TODOS LOS MEDIA QUERIES DEL CSS ORIGINAL
+   ======================================== */
+
+/* Sobrescribir media query de 750px del CSS original */
+@media (min-width: 750px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .pagina-principal .producto {
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}
+
+/* Sobrescribir media query de 920px del CSS original */
+@media (min-width: 920px) {
+  .pagina-principal .producto {
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}
+
+/* Sobrescribir media query de 1000px del CSS original */
+@media (min-width: 1000px) {
+  .pagina-principal .producto {
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}
+
+/* Sobrescribir media query de 1200px del CSS original */
+@media (min-width: 1200px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .pagina-principal .producto {
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}
+
+/* Sobrescribir media query de 1300px del CSS original */
+@media (min-width: 1300px) {
+  .pagina-principal .producto {
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}
+
+/* Sobrescribir media query de 1480px del CSS original */
+@media (min-width: 1480px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
+  
+  .pagina-principal .producto {
+    width: auto !important;
+    height: auto !important;
+  }
+  
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: 180px !important;
+  }
+}
+
+/* Sobrescribir media query de 1700px del CSS original */
+@media (min-width: 1700px) {
+  .pagina-principal .productos {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 20px !important;
+  }
+}
+
+/* ========================================
+   PRODUCTO INDIVIDUAL MEJORADO
+   ======================================== */
+
+/* Sobrescribir estilos del CSS original con mayor especificidad */
+.pagina-principal .producto {
+  background-color: white !important;
+  border-radius: 12px !important;
+  padding: 15px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  min-height: 280px !important;
+  justify-content: space-between !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+.producto:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Sobrescribir estilos de imágenes del CSS original */
+.pagina-principal .producto img {
+  width: 100% !important;
+  height: 180px !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.producto p {
+  font-weight: 600;
+  color: #1c1d1d;
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.producto .add {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: auto;
+}
+
+.producto .add:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.producto .add:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================
+   PAGINACIÓN CENTRADA
+   ======================================== */
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px auto;
+  padding: 25px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Layout horizontal centrado para paginación */
+.pagination-container > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* Información de paginación */
+.pagination-info {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Controles de navegación */
+.pagination-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Selector de productos por página */
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ========================================
+   RESPONSIVE MEJORADO
+   ======================================== */
+
+@media (max-width: 768px) {
+  .pagina-principal {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .div-filtros {
+    margin: 20px 0;
+    padding: 0;
+  }
+  
+  .filtro {
+    width: 100%;
+    padding: 15px;
+  }
+  
+  .productos {
+    margin: 20px 0;
+    padding: 0 10px;
+  }
+  
+  /* Paginación responsive para móviles */
+  .pagination-container {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 95%;
+  }
+  
+  .pagination-container > div {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .pagination-info {
+    order: 1;
+    font-size: 13px;
+  }
+  
+  .pagination-buttons {
+    order: 2;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .items-per-page {
+    order: 3;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .producto {
+    min-height: 250px;
+    padding: 12px;
+  }
+  
+  .producto img {
+    height: 150px;
+  }
+  
+  .producto p {
+    font-size: 13px;
+  }
+  
+  .producto .add {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+/* ========================================
+   ANIMACIONES Y TRANSICIONES
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.producto {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Indicador de carga mejorado */
+.loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}

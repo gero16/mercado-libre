@@ -27,6 +27,12 @@ import './css/detalleProducto.css'
 import './css/react-styles.css'
 import './css/admin.css'
 import './css/admin-clean.css' // 🆕 Importar estilos limpios
+import './css/image-carousel.css' // 🆕 Importar estilos del carrusel
+import './css/promotional-banner.css' // 🆕 Importar estilos del banner promocional
+import './css/special-promotion.css' // 🆕 Importar estilos de promoción especial
+import './css/featured-products.css' // 🆕 Importar estilos de productos destacados
+import './css/discounted-products.css' // 🆕 Importar estilos de productos con descuento
+import './css/customer-reviews.css' // 🆕 Importar estilos de reseñas
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
