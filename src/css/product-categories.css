@@ -1,11 +1,34 @@
 /* Sección de categorías de productos */
 .product-categories-section {
   padding: 45px 0;
-  background: #ffffff;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
   margin: 0;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  transition: background 0.3s ease;
+}
+
+/* Modo claro */
+body.light-mode .product-categories-section {
+  background: #ffffff;
+}
+
+/* Títulos de sección */
+.product-categories-section .section-title {
+  color: var(--color-secondary);
+}
+
+body.dark-mode .product-categories-section .section-title {
+  color: #ffffff;
+}
+
+.product-categories-section .section-subtitle {
+  color: #6c757d;
+}
+
+body.dark-mode .product-categories-section .section-subtitle {
+  color: #cccccc;
 }
 
 /* Grid de categorías visuales */
@@ -23,9 +46,15 @@
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   height: 400px;
+  background: #2c3e50;
+}
+
+/* Modo claro */
+body.light-mode .category-card-visual {
   background: #f8f9fa;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .category-card-visual:hover {
@@ -98,9 +127,9 @@
 
 /* Icono de categoría en overlay */
 .category-icon {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 

@@ -1,11 +1,17 @@
 /* Estilos para la sección de productos con descuento */
 .discounted-products {
   padding: 45px 0;
-  background: #ffffff;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
   margin: 0;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  transition: background 0.3s ease;
+}
+
+/* Modo claro */
+body.light-mode .discounted-products {
+  background: #ffffff;
 }
 
 .section-header {
@@ -13,13 +19,18 @@
   margin-bottom: 35px;
 }
 
-.section-title {
+.discounted-products .section-title {
   font-size: 2rem;
   font-weight: 700;
   color: var(--color-secondary);
   margin-bottom: 15px;
   position: relative;
   display: inline-block;
+}
+
+/* Modo oscuro */
+body.dark-mode .discounted-products .section-title {
+  color: #ffffff;
 }
 
 .section-title::after {
@@ -34,11 +45,16 @@
   border-radius: 2px;
 }
 
-.section-subtitle {
+.discounted-products .section-subtitle {
   font-size: 1.1rem;
   color: #6c757d;
   margin: 0;
   font-weight: 400;
+}
+
+/* Modo oscuro */
+body.dark-mode .discounted-products .section-subtitle {
+  color: #cccccc;
 }
 
 .products-carousel {
@@ -117,15 +133,21 @@
   transform: scale(1.1);
 }
 
-.product-card {
-  background: white;
+.discounted-products .product-card {
+  background: #2c3e50;
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
   position: relative;
   max-width: 100%;
   width: 100%;
+}
+
+/* Modo claro */
+body.light-mode .discounted-products .product-card {
+  background: white;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 .product-card:hover {
@@ -188,12 +210,17 @@
   padding: 12px;
 }
 
-.product-name {
+.discounted-products .product-name {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-secondary);
+  color: #ffffff;
   margin-bottom: 12px;
   line-height: 1.3;
+}
+
+/* Modo claro */
+body.light-mode .discounted-products .product-name {
+  color: var(--color-secondary);
 }
 
 .product-category {

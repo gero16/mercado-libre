@@ -3,6 +3,12 @@
   background: #f8f9fa;
   position: relative;
   overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+/* Modo oscuro */
+body.dark-mode .instagram-section {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
 }
 
 .instagram-section::before {
@@ -37,6 +43,11 @@
   flex-wrap: wrap;
 }
 
+/* Modo oscuro */
+body.dark-mode .instagram-title {
+  color: #ffffff;
+}
+
 .instagram-icon {
   width: 45px;
   height: 45px;
@@ -56,6 +67,11 @@
   font-size: 1.1rem;
   color: #666;
   font-weight: 400;
+}
+
+/* Modo oscuro */
+body.dark-mode .instagram-subtitle {
+  color: #cccccc;
 }
 
 .instagram-grid {

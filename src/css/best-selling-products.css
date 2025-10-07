@@ -1,11 +1,17 @@
 /* Estilos para la sección de productos más vendidos */
 .best-selling-products {
   padding: 45px 0;
-  background: #ffffff;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
   margin: 0;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  transition: background 0.3s ease;
+}
+
+/* Modo claro */
+body.light-mode .best-selling-products {
+  background: #ffffff;
 }
 
 .best-selling-products .section-header {
@@ -20,6 +26,11 @@
   margin-bottom: 15px;
   position: relative;
   display: inline-block;
+}
+
+/* Modo oscuro */
+body.dark-mode .best-selling-products .section-title {
+  color: #ffffff;
 }
 
 .best-selling-products .section-title::after {
@@ -39,6 +50,11 @@
   color: #6c757d;
   margin: 0;
   font-weight: 400;
+}
+
+/* Modo oscuro */
+body.dark-mode .best-selling-products .section-subtitle {
+  color: #cccccc;
 }
 
 .best-selling-products .products-carousel {
@@ -118,15 +134,21 @@
 }
 
 .best-selling-products .product-card {
-  background: white;
+  background: #2c3e50;
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   position: relative;
   max-width: 100%;
   width: 100%;
   border: 2px solid transparent;
+}
+
+/* Modo claro */
+body.light-mode .best-selling-products .product-card {
+  background: white;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .best-selling-products .product-card:hover {
@@ -260,9 +282,14 @@
 .best-selling-products .product-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #2c2c2c;
+  color: #ffffff;
   margin-bottom: 4px;
   line-height: 1.3;
+}
+
+/* Modo claro */
+body.light-mode .best-selling-products .product-name {
+  color: #2c2c2c;
 }
 
 .best-selling-products .product-category {

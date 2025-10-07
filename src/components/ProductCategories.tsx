@@ -174,7 +174,7 @@ const ProductCategories: React.FC = () => {
       <section className="product-categories-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">🛍️ Explora por Categorías</h2>
+            <h2 className="section-title">🛍️ Explora nuestros productos</h2>
             <p className="section-subtitle">Cargando categorías...</p>
           </div>
         </div>
@@ -186,7 +186,7 @@ const ProductCategories: React.FC = () => {
     <section className="product-categories-section">
       <div className="container">
         <div className="section-header">
-          <h2 className="section-title">🛍️ Explora por Categorías</h2>
+          <h2 className="section-title">🛍️ Explora nuestros productos </h2>
           <p className="section-subtitle">Encuentra lo que buscas fácilmente</p>
         </div>
         

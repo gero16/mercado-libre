@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext'
 import { MERCADOPAGO_CONFIG } from './config/mercadopago'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import ThemeToggle from './components/ThemeToggle'
 import HomePage from './pages/HomePage'
 import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
@@ -34,6 +35,7 @@ import './css/featured-products.css' // 🆕 Importar estilos de productos desta
 import './css/discounted-products.css' // 🆕 Importar estilos de productos con descuento
 import './css/best-selling-products.css' // 🆕 Importar estilos de productos más vendidos
 import './css/customer-reviews.css' // 🆕 Importar estilos de reseñas
+import './css/theme-toggle.css' // 🆕 Importar estilos del toggle de tema
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -45,6 +47,7 @@ function App() {
         <div className="App">
           
           <Header />
+          <ThemeToggle />
           
           <Routes>
             <Route path="/" element={<HomePage />} />
