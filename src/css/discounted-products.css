@@ -5,6 +5,9 @@
   margin: 40px 0;
   border-top: 3px solid var(--color-secondary);
   border-bottom: 3px solid var(--color-secondary);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .section-header {
@@ -46,6 +49,7 @@
   align-items: center;
   gap: 20px;
   margin-bottom: 40px;
+  overflow: hidden;
 }
 
 .products-grid {
@@ -53,6 +57,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 30px;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -121,6 +126,8 @@
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
   position: relative;
+  max-width: 100%;
+  width: 100%;
 }
 
 .product-card:hover {
