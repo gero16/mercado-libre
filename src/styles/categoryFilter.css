@@ -24,9 +24,9 @@
 }
 
 .categoria-filtro.seleccionado {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
+  background-color: #fe9f01 !important;
+  border-color: #fe9f01 !important;
+  color: white !important;
 }
 
 .categoria-nombre {

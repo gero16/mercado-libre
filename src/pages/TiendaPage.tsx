@@ -370,7 +370,9 @@ const TiendaMLPage: React.FC = () => {
   }, [itemsTienda, categoryFilter, priceFilter, currentPage, itemsPerPage])
 
   const handleProductClick = (item: ItemTienda) => {
-    navigate(`/producto/${item.productoPadre?._id || item.id}`)
+    // Usar ml_id en lugar de _id para buscar el producto
+    const productId = item.productoPadre?.ml_id || item.ml_id || item.id
+    navigate(`/producto/${productId}`)
   }
 
   const handleAddToCart = (e: React.MouseEvent, item: ItemTienda) => {
