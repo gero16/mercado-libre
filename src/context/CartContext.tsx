@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Producto, CartItem } from '../types'
+import { Producto, CartItem, ValidacionCupon } from '../types'
 
 interface CartContextType {
   cartItems: CartItem[]
@@ -11,6 +11,12 @@ interface CartContextType {
   clearCart: () => void
   cartTotal: number
   cartItemCount: number
+  // 🆕 Cupones
+  cuponAplicado: ValidacionCupon | null
+  aplicarCupon: (codigo: string, email?: string) => Promise<ValidacionCupon>
+  quitarCupon: () => void
+  cartTotalConDescuento: number
+  descuentoCupon: number
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -30,6 +36,8 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
+  // 🆕 Estado para cupón
+  const [cuponAplicado, setCuponAplicado] = useState<ValidacionCupon | null>(null)
 
   // Cargar carrito desde localStorage al inicializar
   useEffect(() => {
@@ -119,9 +127,58 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCartItems([]);
   };
 
-  // Calcular total del carrito (los precios ya incluyen descuentos aplicados)
+  // Calcular total del carrito (los precios ya incluyen descuentos de productos aplicados)
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.cantidad), 0)
   const cartItemCount = cartItems.reduce((total, item) => total + item.cantidad, 0)
+
+  // 🆕 Calcular descuento del cupón
+  const descuentoCupon = cuponAplicado?.descuento || 0
+  const cartTotalConDescuento = Math.max(0, cartTotal - descuentoCupon)
+
+  // 🆕 Función para aplicar cupón
+  const aplicarCupon = async (codigo: string, email?: string): Promise<ValidacionCupon> => {
+    try {
+      const response = await fetch('https://poppy-shop-production.up.railway.app/api/cupones/validar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          codigo,
+          monto_compra: cartTotal,
+          email_usuario: email
+        })
+      })
+
+      const data: ValidacionCupon = await response.json()
+
+      if (data.valido) {
+        setCuponAplicado(data)
+        console.log('✅ Cupón aplicado:', data)
+      }
+
+      return data
+    } catch (error) {
+      console.error('❌ Error validando cupón:', error)
+      return {
+        valido: false,
+        error: 'Error al validar el cupón'
+      }
+    }
+  }
+
+  // 🆕 Función para quitar cupón
+  const quitarCupon = () => {
+    setCuponAplicado(null)
+  }
+
+  // 🆕 Recalcular cupón cuando cambie el total del carrito
+  useEffect(() => {
+    if (cuponAplicado && cuponAplicado.valido) {
+      // Revalidar el cupón con el nuevo total
+      aplicarCupon(cuponAplicado.cupon?.codigo || '')
+    }
+  }, [cartTotal])
 
   const value: CartContextType = {
     cartItems,
@@ -132,7 +189,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     updateQuantity,
     clearCart,
     cartTotal,
-    cartItemCount
+    cartItemCount,
+    // 🆕 Cupones
+    cuponAplicado,
+    aplicarCupon,
+    quitarCupon,
+    cartTotalConDescuento,
+    descuentoCupon
   }
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

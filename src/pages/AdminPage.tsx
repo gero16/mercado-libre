@@ -291,6 +291,16 @@ const AdminPage: React.FC = () => {
           >
            ↳ Gestionar Descuentos 🔥
           </button>
+          <button 
+            onClick={() => navigate("/admin/cupones")}
+            className="btn-orden btn-cupones"
+            style={{
+              background: 'linear-gradient(135deg, #00acc1 0%, #00838f 100%)',
+              color: 'white'
+            }}
+          >
+           ↳ Gestionar Cupones 🎟️
+          </button>
         </div>
 
         {/* Controles de filtrado y búsqueda */}

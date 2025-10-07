@@ -108,3 +108,34 @@ export interface ProductoML {
 export interface OrderML {
   items: ProductoML[];
 }
+
+// 🆕 Interfaces para Cupones
+export interface Cupon {
+  _id: string;
+  codigo: string;
+  descripcion: string;
+  tipo_descuento: 'porcentaje' | 'monto_fijo';
+  valor_descuento: number;
+  activo: boolean;
+  fecha_inicio: string;
+  fecha_fin?: string;
+  usos_maximos?: number;
+  usos_actuales: number;
+  monto_minimo_compra?: number;
+  limite_por_usuario: number;
+  date_created: string;
+}
+
+export interface ValidacionCupon {
+  valido: boolean;
+  error?: string;
+  cupon?: {
+    _id: string;
+    codigo: string;
+    descripcion: string;
+    tipo_descuento: 'porcentaje' | 'monto_fijo';
+    valor_descuento: number;
+  };
+  descuento?: number;
+  monto_final?: number;
+}
