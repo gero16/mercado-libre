@@ -18,6 +18,7 @@ import AdminPage from './pages/AdminPage'
 import AdminDropshippingPage from './pages/AdminDropshippingPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminClientesPage from './pages/AdminClientesPage' // 🆕 Importar página de clientes
+import AdminDescuentos from './pages/AdminDescuentos' // 🆕 Importar página de descuentos
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -36,6 +37,7 @@ import './css/discounted-products.css' // 🆕 Importar estilos de productos con
 import './css/best-selling-products.css' // 🆕 Importar estilos de productos más vendidos
 import './css/customer-reviews.css' // 🆕 Importar estilos de reseñas
 import './css/theme-toggle.css' // 🆕 Importar estilos del toggle de tema
+import './css/admin-descuentos.css' // 🆕 Importar estilos de administración de descuentos
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -62,6 +64,7 @@ function App() {
             <Route path="/admin/dropshipping" element={<AdminDropshippingPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/clientes" element={<AdminClientesPage />} /> {/* 🆕 Ruta de clientes */}
+            <Route path="/admin/descuentos" element={<AdminDescuentos />} /> {/* 🆕 Ruta de descuentos */}
             
             {/* Rutas de resultado de pago */}
             <Route path="/payment-success" element={<PaymentSuccessPage />} />

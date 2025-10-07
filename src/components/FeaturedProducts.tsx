@@ -160,6 +160,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                 ? product.images[0].url 
                 : product.main_image
               const imagenPrincipal = getOptimizedImageUrl(imagenOriginal)
+              const tieneDescuento = product.descuento?.activo
+              const precioOriginal = product.descuento?.precio_original
+              const porcentajeDescuento = product.descuento?.porcentaje
               
               return (
                 <div 
@@ -174,9 +177,18 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                       alt={product.title}
                       className="product-image"
                     />
-                    <div className="product-badge">
-                      Destacado
-                    </div>
+                    {tieneDescuento && porcentajeDescuento ? (
+                      <div className="product-badge" style={{
+                        background: 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
+                        boxShadow: '0 4px 15px rgba(211, 47, 47, 0.4)'
+                      }}>
+                        -{porcentajeDescuento}%
+                      </div>
+                    ) : (
+                      <div className="product-badge">
+                        Destacado
+                      </div>
+                    )}
                   </div>
                   
                   <div className="product-info">
@@ -184,7 +196,25 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                     {product.metrics?.reviews.rating_average && 
                       renderStars(product.metrics.reviews.rating_average)}
                     <div className="product-price-container">
-                      <span className="product-price">{formatPrice(product.price)}</span>
+                      {tieneDescuento && precioOriginal ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-start' }}>
+                          <span style={{ 
+                            textDecoration: 'line-through', 
+                            color: '#999',
+                            fontSize: '0.9rem'
+                          }}>
+                            {formatPrice(precioOriginal)}
+                          </span>
+                          <span className="product-price" style={{ 
+                            color: '#d32f2f',
+                            fontWeight: '700'
+                          }}>
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="product-price">{formatPrice(product.price)}</span>
+                      )}
                     </div>
                   </div>
                 </div>

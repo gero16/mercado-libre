@@ -95,6 +95,14 @@ export interface ProductoML {
     costo_importacion: number;
     tiempo_configurado_en_ml: boolean;
   };
+  // 🆕 Información de descuentos
+  descuento?: {
+    activo: boolean;
+    porcentaje: number;
+    precio_original?: number;
+    fecha_inicio?: string;
+    fecha_fin?: string;
+  };
 }
 
 export interface OrderML {

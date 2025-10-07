@@ -119,6 +119,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCartItems([]);
   };
 
+  // Calcular total del carrito (los precios ya incluyen descuentos aplicados)
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.cantidad), 0)
   const cartItemCount = cartItems.reduce((total, item) => total + item.cantidad, 0)
 

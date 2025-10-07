@@ -403,12 +403,11 @@ const TiendaMLPage: React.FC = () => {
         .slice(0, 50) // Top 50 más vendidos
     }
     else if (categoryFilter === 'con-descuento') {
-      // Productos con descuento: filtrar por productos que tengan descuento
+      // Productos con descuento: filtrar por productos que tengan descuento activo
       filtered = filtered.filter(item => {
         const producto = item.productoPadre
         return producto?.status !== 'paused' && 
-               producto?.original_price && 
-               producto.original_price > producto.price
+               producto?.descuento?.activo === true
       })
     }
     else if (categoryFilter !== 'mostrar-todo') {
@@ -750,31 +749,82 @@ const TiendaMLPage: React.FC = () => {
             </div>
           )}
 
-          {paginatedItems.map(item => (
-            <div 
-              key={item.id}
-              className="producto centrar-texto"
-              onClick={() => handleProductClick(item)}
-              style={{ 
-                cursor: 'pointer',
-                opacity: isChangingPage ? 0.5 : 1,
-                transition: 'opacity 0.3s ease'
-              }}
-            >
-              <img src={item.image} alt={item.title} />
-              <p>{item.title}</p>
-              <p>${item.price}</p>
-              {/* 🔍 DEBUG: Mostrar información de debug en el botón */}
-              <button 
-                className="add"
-                onClick={(e) => handleAddToCart(e, item)}
-                disabled={item.stock <= 0 || item.isPaused}
-                title={`Debug: isPaused=${item.isPaused}, stock=${item.stock}, status=${item.productoPadre?.status}`}
+          {paginatedItems.map(item => {
+            const tieneDescuento = item.productoPadre?.descuento?.activo
+            const precioOriginal = item.productoPadre?.descuento?.precio_original
+            const porcentajeDescuento = item.productoPadre?.descuento?.porcentaje
+            
+            return (
+              <div 
+                key={item.id}
+                className="producto centrar-texto"
+                onClick={() => handleProductClick(item)}
+                style={{ 
+                  cursor: 'pointer',
+                  opacity: isChangingPage ? 0.5 : 1,
+                  transition: 'opacity 0.3s ease',
+                  position: 'relative'
+                }}
               >
-                {item.isPaused ? 'Pausado' : item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
-              </button>
-            </div>
-          ))}
+                {tieneDescuento && porcentajeDescuento && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
+                    color: 'white',
+                    padding: '8px 15px',
+                    borderRadius: '25px',
+                    fontWeight: '800',
+                    fontSize: '0.9rem',
+                    boxShadow: '0 4px 15px rgba(211, 47, 47, 0.4)',
+                    zIndex: 2
+                  }}>
+                    -{porcentajeDescuento}%
+                  </div>
+                )}
+                <img src={item.image} alt={item.title} />
+                <p>{item.title}</p>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center',
+                  gap: '5px',
+                  margin: '10px 0'
+                }}>
+                  {tieneDescuento && precioOriginal ? (
+                    <>
+                      <p style={{ 
+                        textDecoration: 'line-through', 
+                        color: '#999',
+                        fontSize: '0.9rem',
+                        margin: '0'
+                      }}>
+                        ${precioOriginal}
+                      </p>
+                      <p style={{ 
+                        color: '#d32f2f',
+                        fontWeight: '700',
+                        fontSize: '1.4rem',
+                        margin: '0'
+                      }}>
+                        ${item.price}
+                      </p>
+                    </>
+                  ) : (
+                    <p style={{ margin: '0' }}>${item.price}</p>
+                  )}
+                </div>
+                <button 
+                  className="add"
+                  onClick={(e) => handleAddToCart(e, item)}
+                  disabled={item.stock <= 0 || item.isPaused}
+                >
+                  {item.isPaused ? 'Pausado' : item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
+                </button>
+              </div>
+            )
+          })}
           
           {paginatedItems.length === 0 && !isChangingPage && (
             <div className="centrar-texto">
