@@ -7,7 +7,7 @@ import '../css/detalleProducto.css'
 const DetalleProductoPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { addToCart } = useCart()
+  const { addToCart, setCartOpen } = useCart()
   
   const [producto, setProducto] = useState<ProductoML | null>(null)
   const [varianteSeleccionada, setVarianteSeleccionada] = useState<Variante | null>(null)
@@ -164,10 +164,11 @@ const DetalleProductoPage: React.FC = () => {
     console.log('✅ Producto válido en detalle, agregando al carrito')
 
     // Convertir a formato compatible con el carrito
+    const productIdBase = producto.ml_id || producto._id
     const cartProduct = {
       id: varianteExacta 
-        ? `${producto._id}_${varianteExacta.color}_${varianteExacta.size}` // ID único para la variante
-        : producto._id, // ID del producto si no hay variantes
+        ? `${productIdBase}_${varianteExacta.color}_${varianteExacta.size}` // ID único para la variante
+        : productIdBase, // ID del producto si no hay variantes
       name: varianteExacta 
         ? `${producto.title} - ${varianteExacta.color} ${varianteExacta.size}`
         : producto.title,
@@ -177,11 +178,13 @@ const DetalleProductoPage: React.FC = () => {
       stock: stockDisponible,
       cantidad: cantidad,
       color: varianteExacta?.color,
-      size: varianteExacta?.size
+      size: varianteExacta?.size || null
     }
     
+    console.log('🛒 Agregando producto al carrito desde detalle:', cartProduct)
     addToCart(cartProduct)
-    alert('Producto agregado al carrito!')
+    alert('¡Producto agregado al carrito exitosamente!')
+    setCartOpen(true) // Abrir el carrito para mostrar el producto agregado
   }
 
   // Obtener la imagen principal a mostrar
