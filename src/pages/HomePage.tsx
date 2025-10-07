@@ -7,6 +7,7 @@ import FeaturedProducts from '../components/FeaturedProducts'
 import BestSellingProducts from '../components/BestSellingProducts'
 import DiscountedProducts from '../components/DiscountedProducts'
 import CustomerReviews from '../components/CustomerReviews'
+import InstagramSection from '../components/InstagramSection'
 
 const HomePage: React.FC = () => {
   // Array de imágenes para el carrusel
@@ -54,6 +55,9 @@ const HomePage: React.FC = () => {
       
       {/* Sección de reseñas de clientes */}
       <CustomerReviews />
+      
+      {/* Sección de Instagram */}
+      <InstagramSection />
       
       <div className="metodo-pago centrar-texto">
       </div>
