@@ -6,7 +6,7 @@ interface FeaturedProductsProps {
   limit?: number
 }
 
-const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 8 }) => {
+const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   const navigate = useNavigate()
   const [featuredProducts, setFeaturedProducts] = useState<ProductoML[]>([])
   const [loading, setLoading] = useState(true)
@@ -86,6 +86,17 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 8 }) => {
     }).format(price)
   }
 
+  // Función para obtener URL de imagen optimizada (tamaño mediano)
+  const getOptimizedImageUrl = (url: string) => {
+    // Mercado Libre usa diferentes sufijos para diferentes tamaños:
+    // -I.jpg = Original (grande)
+    // -O.jpg = 500x500px
+    // -V.jpg = 250x250px
+    // -S.jpg = 150x150px
+    if (!url) return url
+    return url.replace(/-[IOSV]\.jpg$/, '-V.jpg')
+  }
+
   const handleProductClick = (product: ProductoML) => {
     navigate(`/producto/${product.ml_id}`)
   }
@@ -145,9 +156,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 8 }) => {
           
           <div className="products-grid">
             {getCurrentProducts().map((product) => {
-              const imagenPrincipal = product.images && product.images.length > 0 
+              const imagenOriginal = product.images && product.images.length > 0 
                 ? product.images[0].url 
                 : product.main_image
+              const imagenPrincipal = getOptimizedImageUrl(imagenOriginal)
               
               return (
                 <div 

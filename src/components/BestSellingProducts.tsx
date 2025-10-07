@@ -6,7 +6,7 @@ interface BestSellingProductsProps {
   limit?: number
 }
 
-const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) => {
+const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 }) => {
   const navigate = useNavigate()
   const [bestSellingProducts, setBestSellingProducts] = useState<ProductoML[]>([])
   const [loading, setLoading] = useState(true)
@@ -68,6 +68,17 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) 
     }).format(price)
   }
 
+  // Función para obtener URL de imagen optimizada (tamaño mediano)
+  const getOptimizedImageUrl = (url: string) => {
+    // Mercado Libre usa diferentes sufijos para diferentes tamaños:
+    // -I.jpg = Original (grande)
+    // -O.jpg = 500x500px
+    // -V.jpg = 250x250px
+    // -S.jpg = 150x150px
+    if (!url) return url
+    return url.replace(/-[IOSV]\.jpg$/, '-V.jpg')
+  }
+
   const handleProductClick = (product: ProductoML) => {
     navigate(`/producto/${product.ml_id}`)
   }
@@ -127,9 +138,13 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) 
           
           <div className="products-grid">
             {getCurrentProducts().map((product, index) => {
-              const imagenPrincipal = product.images && product.images.length > 0 
+              const imagenOriginal = product.images && product.images.length > 0 
                 ? product.images[0].url 
                 : product.main_image
+              const imagenPrincipal = getOptimizedImageUrl(imagenOriginal)
+              
+              // Calcular el índice global del producto
+              const globalIndex = currentPage * productsPerPage + index
               
               return (
                 <div 
@@ -138,11 +153,11 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) 
                   onClick={() => handleProductClick(product)}
                   style={{ cursor: 'pointer' }}
                 >
-                  <div className={`bestseller-rank ${index === 0 ? 'gold-medal' : index === 1 ? 'silver-medal' : index === 2 ? 'bronze-medal' : ''}`}>
-                    {index === 0 && '🥇'}
-                    {index === 1 && '🥈'}
-                    {index === 2 && '🥉'}
-                    {index > 2 && `#${currentPage * productsPerPage + index + 1}`}
+                  <div className={`bestseller-rank ${globalIndex === 0 ? 'gold-medal' : globalIndex === 1 ? 'silver-medal' : globalIndex === 2 ? 'bronze-medal' : ''}`}>
+                    {globalIndex === 0 && '🥇'}
+                    {globalIndex === 1 && '🥈'}
+                    {globalIndex === 2 && '🥉'}
+                    {globalIndex > 2 && `#${globalIndex + 1}`}
                   </div>
                   
                   <div className="product-image-container">
