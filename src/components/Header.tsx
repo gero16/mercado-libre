@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 
@@ -13,11 +13,11 @@ const Header: React.FC = () => {
 
         <div className="navbar">
           <ul>
-            <li><Link to="/">Inicio</Link></li>
-           { /*<li><Link to="/tienda">Tienda</Link></li> */ }
-            <li><Link to="/tienda-ml">Productos </Link></li>
-            <li><Link to="/contacto">Contacto</Link></li>
-            <li><Link to="/admin" className="admin-link">Admin</Link></li>
+            <li><NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>Inicio</NavLink></li>
+           { /*<li><NavLink to="/tienda">Tienda</NavLink></li> */ }
+            <li><NavLink to="/tienda-ml" className={({ isActive }) => isActive ? 'active' : ''}>Productos </NavLink></li>
+            <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
+            <li><NavLink to="/admin" className={({ isActive }) => isActive ? 'admin-link active' : 'admin-link'}>Admin</NavLink></li>
             
             <li>
               <button 

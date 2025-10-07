@@ -64,7 +64,7 @@ header {
   position: fixed;
   top: 0;
   z-index: 90;
-  background-color: white;
+  background-color: #000000;
   font-size: 18px;
   font-weight: 600;
   margin: 0px 5px 0px 0px;
@@ -115,18 +115,29 @@ header {
 }
 
 .navbar li {
-  color: white;
+  color: #ffffff;
 }
 
 .navbar ul li a {
   transition: 0.5s ease-in-out;
-  filter: brightness(85%);
+  color: #ffffff;
+  filter: brightness(95%);
   font-size: small;
 }
 
 .navbar ul li a:hover {
   transition: 0.5s ease-in-out;
-  filter: brightness(110%);
+  color: #ffffff;
+  filter: brightness(120%);
+}
+
+.navbar ul li a.active {
+  color: #ff8c00;
+  font-weight: 700;
+}
+
+.navbar ul li a.active:hover {
+  color: #ffa500;
 }
 
 .footer p {
@@ -194,20 +205,22 @@ footer img {
 .carrito {
   width: 30px;
   height: 30px;
+  filter: brightness(0) saturate(100%) invert(52%) sepia(78%) saturate(1647%) hue-rotate(6deg) brightness(105%) contrast(103%);
 }
 
 .carrito:hover {
   cursor: pointer;
+  filter: brightness(0) saturate(100%) invert(69%) sepia(78%) saturate(1647%) hue-rotate(6deg) brightness(105%) contrast(103%);
 }
 
 .numero-compras {
   font-weight: bold;
   font-size: 8px;
   position: relative;
-  color: white;
+  color: #000000;
   top: -8px;
   left: -8px;
-  background-color: rgb(98, 17, 35);
+  background-color: #ff8c00;
   padding: 3px;
   border-radius: 10px;
   width: 10px;
@@ -414,7 +427,7 @@ footer img {
 
 /* === ESTILOS PARA ENLACE DE ADMINISTRACIÓN === */
 .admin-link {
-  color: #e6edf3 !important;
+  color: #ffffff !important;
   transition: all 0.3s ease !important;
   padding: 8px 12px !important;
   border-radius: 4px !important;
@@ -422,9 +435,19 @@ footer img {
 }
 
 .admin-link:hover {
-  color: #58a6ff !important;
-  background-color: rgba(88, 166, 255, 0.1) !important;
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
   transform: translateY(-1px) !important;
+}
+
+.admin-link.active {
+  color: #ff8c00 !important;
+  font-weight: 700 !important;
+}
+
+.admin-link.active:hover {
+  color: #ffa500 !important;
+  background-color: rgba(255, 140, 0, 0.15) !important;
 }
 
 .admin-link:focus {
