@@ -4,6 +4,7 @@ import PromotionalBanner from '../components/PromotionalBanner'
 import SpecialPromotion from '../components/SpecialPromotion'
 import ProductCategories from '../components/ProductCategories'
 import FeaturedProducts from '../components/FeaturedProducts'
+import BestSellingProducts from '../components/BestSellingProducts'
 import DiscountedProducts from '../components/DiscountedProducts'
 import CustomerReviews from '../components/CustomerReviews'
 
@@ -41,6 +42,9 @@ const HomePage: React.FC = () => {
       
       {/* Sección de productos destacados */}
       <FeaturedProducts />
+      
+      {/* Sección de productos más vendidos */}
+      <BestSellingProducts />
       
       {/* Sección de categorías de productos */}
       <ProductCategories />

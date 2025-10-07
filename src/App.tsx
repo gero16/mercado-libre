@@ -32,6 +32,7 @@ import './css/promotional-banner.css' // 🆕 Importar estilos del banner promoc
 import './css/special-promotion.css' // 🆕 Importar estilos de promoción especial
 import './css/featured-products.css' // 🆕 Importar estilos de productos destacados
 import './css/discounted-products.css' // 🆕 Importar estilos de productos con descuento
+import './css/best-selling-products.css' // 🆕 Importar estilos de productos más vendidos
 import './css/customer-reviews.css' // 🆕 Importar estilos de reseñas
 
 // Inicializar MercadoPago con la public key y configuración en español
