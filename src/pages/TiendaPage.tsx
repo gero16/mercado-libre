@@ -218,6 +218,7 @@ const TiendaMLPage: React.FC = () => {
   const location = useLocation()
   const [itemsTienda, setItemsTienda] = useState<ItemTienda[]>([])
   const [filteredItems, setFilteredItems] = useState<ItemTienda[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [priceFilter, setPriceFilter] = useState(0)
   const [categoryFilter, setCategoryFilter] = useState(
     (location.state as any)?.categoryFilter || 'mostrar-todo'
@@ -365,6 +366,14 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     let filtered = itemsTienda
 
+    // Filtro por búsqueda de texto
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(item => 
+        item.title.toLowerCase().includes(query)
+      )
+    }
+
     // Filtros especiales
     if (categoryFilter === 'destacados') {
       // Productos destacados: basado en score combinado (visitas, rating, reseñas, health)
@@ -428,7 +437,7 @@ const TiendaMLPage: React.FC = () => {
     const itemsForCurrentPage = filtered.slice(startIndex, endIndex)
     
     setPaginatedItems(itemsForCurrentPage)
-  }, [itemsTienda, categoryFilter, priceFilter, currentPage, itemsPerPage])
+  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, currentPage, itemsPerPage])
 
   const handleProductClick = (item: ItemTienda) => {
     // Usar ml_id en lugar de _id para buscar el producto
@@ -484,6 +493,16 @@ const TiendaMLPage: React.FC = () => {
 
   const handlePriceFilter = (price: number) => {
     setPriceFilter(price)
+  }
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query)
+    setCurrentPage(1) // Reset a la primera página cuando se busca
+  }
+
+  const clearSearch = () => {
+    setSearchQuery('')
+    setCurrentPage(1)
   }
 
   // 🚀 Funciones para manejar paginación
@@ -597,6 +616,76 @@ const TiendaMLPage: React.FC = () => {
                     <span id="mostrar-precio">${priceFilter}</span>
                   </div>
                 </div>
+              </section>
+
+              {/* Buscador */}
+              <section className="centrar-texto" style={{ marginTop: '20px', marginBottom: '20px' }}>
+                <h3 className="precios-titulo">Buscar Productos</h3>
+                <div style={{
+                  position: 'relative',
+                  width: '100%',
+                  marginTop: '10px'
+                }}>
+                  <input
+                    type="text"
+                    placeholder="🔍 Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 35px 10px 12px',
+                      fontSize: '14px',
+                      border: '2px solid #ddd',
+                      borderRadius: '20px',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'var(--color-primary)'
+                      e.target.style.boxShadow = '0 4px 12px rgba(254, 159, 1, 0.2)'
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#ddd'
+                      e.target.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={clearSearch}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '18px',
+                        cursor: 'pointer',
+                        color: '#999',
+                        padding: '0 5px',
+                        transition: 'color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#333'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+                      title="Limpiar búsqueda"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {searchQuery && (
+                  <div style={{
+                    marginTop: '8px',
+                    color: '#666',
+                    fontSize: '12px'
+                  }}>
+                    {filteredItems.length > 0 
+                      ? `${filteredItems.length} resultado${filteredItems.length !== 1 ? 's' : ''}`
+                      : 'Sin resultados'
+                    }
+                  </div>
+                )}
               </section>
 
               <section className="filtro-categorias centrar-texto">
