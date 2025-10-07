@@ -3,7 +3,7 @@
   padding: 60px 0;
   background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
   color: white;
-  margin: 40px 0;
+  margin: 0;
 }
 
 .section-header {
@@ -11,17 +11,19 @@
   margin-bottom: 50px;
 }
 
-.section-title {
+.customer-reviews .section-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 15px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  color: white;
 }
 
-.section-subtitle {
+.customer-reviews .section-subtitle {
   font-size: 1.1rem;
   opacity: 0.9;
   margin: 0;
+  color: white;
 }
 
 .reviews-container {
@@ -133,10 +135,12 @@
   font-size: 1.2rem;
   opacity: 0.3;
   transition: opacity 0.3s ease;
+  filter: grayscale(100%);
 }
 
 .star.filled {
   opacity: 1;
+  filter: grayscale(0%);
 }
 
 .review-content {
@@ -234,6 +238,7 @@
   font-weight: 700;
   margin-bottom: 8px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  color: white;
 }
 
 .stat-label {
@@ -241,6 +246,7 @@
   opacity: 0.9;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: white;
 }
 
 /* Responsive */
