@@ -179,9 +179,57 @@
 .product-category {
   color: #6c757d;
   font-size: 0.9rem;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.product-stats {
+  margin-bottom: 12px;
+}
+
+.visits-badge {
+  display: inline-block;
+  background-color: #f0f0f0;
+  color: #6c757d;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.star {
+  color: #ddd;
+  font-size: 1rem;
+}
+
+.star.full {
+  color: #ffd700;
+}
+
+.star.half {
+  background: linear-gradient(90deg, #ffd700 50%, #ddd 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star.empty {
+  color: #ddd;
+}
+
+.rating-number {
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 5px;
+  font-weight: 500;
 }
 
 .product-price-container {

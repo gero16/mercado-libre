@@ -1,115 +1,44 @@
-import React, { useState } from 'react'
-import { Producto } from '../types'
+import React, { useState, useEffect } from 'react'
+import { ProductoML } from '../types'
+import { useNavigate } from 'react-router-dom'
 
 interface BestSellingProductsProps {
-  products?: BestSellingProduct[]
+  limit?: number
 }
 
-interface BestSellingProduct extends Producto {
-  unitsSold: number
-  rating?: number
-}
+const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) => {
+  const navigate = useNavigate()
+  const [bestSellingProducts, setBestSellingProducts] = useState<ProductoML[]>([])
+  const [loading, setLoading] = useState(true)
 
-const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) => {
-  // Productos más vendidos de ejemplo
-  const bestSellingProducts: BestSellingProduct[] = products || [
-    {
-      id: '1',
-      name: 'Zapatillas Adidas Running',
-      image: '/img/champion4.png',
-      category: 'Calzado',
-      price: 18999,
-      stock: 12,
-      cantidad: 1,
-      color: 'Negro/Blanco',
-      unitsSold: 245,
-      rating: 4.8
-    },
-    {
-      id: '2', 
-      name: 'Remera Deportiva Adidas',
-      image: '/img/remera2.webp',
-      category: 'Ropa',
-      price: 6999,
-      stock: 20,
-      cantidad: 1,
-      color: 'Varios',
-      unitsSold: 189,
-      rating: 4.6
-    },
-    {
-      id: '3',
-      name: 'Short Champion Training',
-      image: '/img/short2.webp', 
-      category: 'Ropa',
-      price: 7999,
-      stock: 15,
-      cantidad: 1,
-      color: 'Negro',
-      unitsSold: 167,
-      rating: 4.7
-    },
-    {
-      id: '4',
-      name: 'Mochila Champion Pro',
-      image: '/img/mochila3.jpg',
-      category: 'Accesorios', 
-      price: 11999,
-      stock: 8,
-      cantidad: 1,
-      color: 'Negro',
-      unitsSold: 156,
-      rating: 4.9
-    },
-    {
-      id: '5',
-      name: 'Campera Deportiva',
-      image: '/img/campera.webp',
-      category: 'Ropa',
-      price: 15999,
-      stock: 10,
-      cantidad: 1,
-      color: 'Negro',
-      unitsSold: 143,
-      rating: 4.5
-    },
-    {
-      id: '6',
-      name: 'Pantalón Deportivo',
-      image: '/img/pantalon2.webp',
-      category: 'Ropa',
-      price: 9999,
-      stock: 18,
-      cantidad: 1,
-      color: 'Gris',
-      unitsSold: 128,
-      rating: 4.6
-    },
-    {
-      id: '7',
-      name: 'Gorro Champion',
-      image: '/img/gorro2.webp',
-      category: 'Accesorios',
-      price: 4999,
-      stock: 25,
-      cantidad: 1,
-      color: 'Negro',
-      unitsSold: 112,
-      rating: 4.4
-    },
-    {
-      id: '8',
-      name: 'Remera Estampada Champion',
-      image: '/img/remera3.webp',
-      category: 'Ropa',
-      price: 7999,
-      stock: 14,
-      cantidad: 1,
-      color: 'Blanco',
-      unitsSold: 98,
-      rating: 4.5
+  useEffect(() => {
+    const fetchBestSellers = async () => {
+      try {
+        const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+        const data: ProductoML[] = await response.json()
+        
+        // Filtrar productos con ventas y ordenar por cantidad vendida
+        const productosMasVendidos = data
+          .filter(p => p.status !== 'paused' && (p.sold_quantity || 0) > 0)
+          .sort((a, b) => (b.sold_quantity || 0) - (a.sold_quantity || 0))
+          .slice(0, limit)
+        
+        console.log('🏆 Productos más vendidos:', productosMasVendidos.map(p => ({
+          title: p.title,
+          sold_quantity: p.sold_quantity,
+          price: p.price
+        })))
+        
+        setBestSellingProducts(productosMasVendidos)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error cargando productos más vendidos:', error)
+        setLoading(false)
+      }
     }
-  ]
+    
+    fetchBestSellers()
+  }, [limit])
 
   const [currentPage, setCurrentPage] = useState(0)
   const productsPerPage = 4
@@ -139,6 +68,10 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     }).format(price)
   }
 
+  const handleProductClick = (product: ProductoML) => {
+    navigate(`/producto/${product.ml_id}`)
+  }
+
   const renderStars = (rating?: number) => {
     if (!rating) return null
     const fullStars = Math.floor(rating)
@@ -156,6 +89,23 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
         <span className="rating-number">({rating})</span>
       </div>
     )
+  }
+
+  if (loading) {
+    return (
+      <section className="best-selling-products">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">🏆 Productos Más Vendidos</h2>
+            <p className="section-subtitle">Cargando productos...</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (bestSellingProducts.length === 0) {
+    return null
   }
 
   return (
@@ -176,49 +126,69 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
           </button>
           
           <div className="products-grid">
-            {getCurrentProducts().map((product, index) => (
-              <div key={product.id} className="product-card">
-                <div className="bestseller-rank">
-                  #{currentPage * productsPerPage + index + 1}
-                </div>
-                
-                <div className="product-image-container">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="product-image"
-                  />
-                  <div className="bestseller-badge">
-                    <span className="badge-icon">🏆</span>
-                    <span className="badge-text">Top Ventas</span>
-                  </div>
-                </div>
-                
-                <div className="product-info">
-                  <h3 className="product-name">{product.name}</h3>
-                  <p className="product-category">{product.category}</p>
-                  
-                  {renderStars(product.rating)}
-                  
-                  <div className="sales-info">
-                    <span className="units-sold">
-                      <strong>{product.unitsSold}</strong> vendidos
-                    </span>
+            {getCurrentProducts().map((product, index) => {
+              const imagenPrincipal = product.images && product.images.length > 0 
+                ? product.images[0].url 
+                : product.main_image
+              
+              return (
+                <div 
+                  key={product._id} 
+                  className="product-card"
+                  onClick={() => handleProductClick(product)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="bestseller-rank">
+                    #{currentPage * productsPerPage + index + 1}
                   </div>
                   
-                  <div className="product-price-container">
-                    <span className="product-price">{formatPrice(product.price)}</span>
-                    <span className="product-stock">
-                      {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
-                    </span>
+                  <div className="product-image-container">
+                    <img 
+                      src={imagenPrincipal} 
+                      alt={product.title}
+                      className="product-image"
+                    />
+                    <div className="bestseller-badge">
+                      <span className="badge-icon">🏆</span>
+                      <span className="badge-text">Top Ventas</span>
+                    </div>
                   </div>
                   
-                  <button className="product-button">
-                    Comprar Ahora
-                  </button>
+                  <div className="product-info">
+                    <h3 className="product-name">{product.title}</h3>
+                    <p className="product-category">
+                      {product.category_id ? 'Producto ML' : 'General'}
+                    </p>
+                    
+                    {product.metrics?.reviews.rating_average && 
+                      renderStars(product.metrics.reviews.rating_average)}
+                    
+                    <div className="sales-info">
+                      <span className="units-sold">
+                        <strong>{product.sold_quantity || 0}</strong> vendidos
+                      </span>
+                    </div>
+                    
+                    <div className="product-price-container">
+                      <span className="product-price">{formatPrice(product.price)}</span>
+                      <span className="product-stock">
+                        {product.available_quantity > 0 ? `${product.available_quantity} disponibles` : 'Sin stock'}
+                      </span>
+                    </div>
+                    
+                    <button 
+                      className="product-button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleProductClick(product)
+                      }}
+                    >
+                      Ver Producto
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
           
           <button 
@@ -242,8 +212,11 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
         </div>
         
         <div className="section-footer">
-          <button className="view-all-button">
-            Ver Todos los Bestsellers
+          <button 
+            className="view-all-button"
+            onClick={() => navigate('/tienda-ml')}
+          >
+            Ver Todos los Productos
           </button>
         </div>
       </div>
@@ -252,4 +225,3 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
 }
 
 export default BestSellingProducts
-

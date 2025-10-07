@@ -1,94 +1,62 @@
-import React, { useState } from 'react'
-import { Producto } from '../types'
+import React, { useState, useEffect } from 'react'
+import { ProductoML } from '../types'
+import { useNavigate } from 'react-router-dom'
 
 interface FeaturedProductsProps {
-  products?: Producto[]
+  limit?: number
 }
 
-const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
-  // Productos destacados de ejemplo (puedes reemplazar con datos reales)
-  const featuredProducts: Producto[] = products || [
-    {
-      id: '1',
-      name: 'Campera Adidas Originals',
-      image: '/img/campera.webp',
-      category: 'Ropa',
-      price: 15999,
-      stock: 15,
-      cantidad: 1,
-      color: 'Negro'
-    },
-    {
-      id: '2', 
-      name: 'Mochila Champion',
-      image: '/img/mochila.webp',
-      category: 'Accesorios',
-      price: 8999,
-      stock: 8,
-      cantidad: 1,
-      color: 'Azul'
-    },
-    {
-      id: '3',
-      name: 'Remera Adidas',
-      image: '/img/remera.webp', 
-      category: 'Ropa',
-      price: 5999,
-      stock: 25,
-      cantidad: 1,
-      color: 'Blanco'
-    },
-    {
-      id: '4',
-      name: 'Gorro Champion',
-      image: '/img/gorro.webp',
-      category: 'Accesorios', 
-      price: 4999,
-      stock: 12,
-      cantidad: 1,
-      color: 'Gris'
-    },
-    {
-      id: '5',
-      name: 'Pantalón Adidas',
-      image: '/img/pantalon.webp',
-      category: 'Ropa',
-      price: 12999,
-      stock: 10,
-      cantidad: 1,
-      color: 'Negro'
-    },
-    {
-      id: '6',
-      name: 'Short Champion',
-      image: '/img/short.webp',
-      category: 'Ropa',
-      price: 6999,
-      stock: 18,
-      cantidad: 1,
-      color: 'Azul'
-    },
-    {
-      id: '7',
-      name: 'Medias Adidas',
-      image: '/img/medias.webp',
-      category: 'Accesorios',
-      price: 3999,
-      stock: 30,
-      cantidad: 1,
-      color: 'Blanco'
-    },
-    {
-      id: '8',
-      name: 'Mochila Adidas',
-      image: '/img/mochila2.jpg',
-      category: 'Accesorios',
-      price: 10999,
-      stock: 6,
-      cantidad: 1,
-      color: 'Negro'
+const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 8 }) => {
+  const navigate = useNavigate()
+  const [featuredProducts, setFeaturedProducts] = useState<ProductoML[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+        const data: ProductoML[] = await response.json()
+        
+        // Calcular score combinado para cada producto
+        const calcularScore = (producto: ProductoML) => {
+          const visitas = producto.metrics?.visits || 0
+          const rating = producto.metrics?.reviews.rating_average || 0
+          const totalReseñas = producto.metrics?.reviews.total || 0
+          const health = producto.health || 0
+          
+          // Fórmula ponderada:
+          // - Visitas tienen peso bajo (mucho volumen)
+          // - Rating tiene peso alto (calidad)
+          // - Total de reseñas indica popularidad
+          // - Health indica salud del producto en ML
+          return (visitas * 0.3) + (rating * 10) + (totalReseñas * 3) + (health * 5)
+        }
+        
+        // Filtrar productos activos y ordenar por score
+        const productosDestacados = data
+          .filter(p => p.status !== 'paused' && p.available_quantity > 0)
+          .map(p => ({ ...p, score: calcularScore(p) }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, limit)
+        
+        console.log('⭐ Productos destacados:', productosDestacados.map(p => ({
+          title: p.title,
+          score: p.score,
+          visits: p.metrics?.visits,
+          rating: p.metrics?.reviews.rating_average,
+          reviews: p.metrics?.reviews.total
+        })))
+        
+        setFeaturedProducts(productosDestacados)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error cargando productos destacados:', error)
+        setLoading(false)
+      }
     }
-  ]
+    
+    fetchFeaturedProducts()
+  }, [limit])
 
   const [currentPage, setCurrentPage] = useState(0)
   const productsPerPage = 4
@@ -118,6 +86,46 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     }).format(price)
   }
 
+  const handleProductClick = (product: ProductoML) => {
+    navigate(`/producto/${product.ml_id}`)
+  }
+
+  const renderStars = (rating?: number) => {
+    if (!rating) return null
+    const fullStars = Math.floor(rating)
+    const hasHalfStar = rating % 1 !== 0
+    
+    return (
+      <div className="product-rating">
+        {[...Array(fullStars)].map((_, i) => (
+          <span key={i} className="star full">★</span>
+        ))}
+        {hasHalfStar && <span className="star half">★</span>}
+        {[...Array(5 - Math.ceil(rating))].map((_, i) => (
+          <span key={i} className="star empty">★</span>
+        ))}
+        <span className="rating-number">({rating})</span>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <section className="featured-products">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">⭐ Productos Destacados</h2>
+            <p className="section-subtitle">Cargando productos...</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (featuredProducts.length === 0) {
+    return null
+  }
+
   return (
     <section className="featured-products">
       <div className="container">
@@ -136,36 +144,66 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
           </button>
           
           <div className="products-grid">
-            {getCurrentProducts().map((product) => (
-              <div key={product.id} className="product-card">
-                <div className="product-image-container">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="product-image"
-                  />
-                  <div className="product-badge">
-                    Destacado
+            {getCurrentProducts().map((product) => {
+              const imagenPrincipal = product.images && product.images.length > 0 
+                ? product.images[0].url 
+                : product.main_image
+              
+              return (
+                <div 
+                  key={product._id} 
+                  className="product-card"
+                  onClick={() => handleProductClick(product)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="product-image-container">
+                    <img 
+                      src={imagenPrincipal} 
+                      alt={product.title}
+                      className="product-image"
+                    />
+                    <div className="product-badge">
+                      Destacado
+                    </div>
+                  </div>
+                  
+                  <div className="product-info">
+                    <h3 className="product-name">{product.title}</h3>
+                    <p className="product-category">
+                      {product.category_id ? 'Producto ML' : 'General'}
+                    </p>
+                    
+                    {product.metrics?.reviews.rating_average && 
+                      renderStars(product.metrics.reviews.rating_average)}
+                    
+                    {product.metrics?.visits && product.metrics.visits > 0 && (
+                      <div className="product-stats">
+                        <span className="visits-badge">
+                          👁️ {product.metrics.visits} vistas
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className="product-price-container">
+                      <span className="product-price">{formatPrice(product.price)}</span>
+                      <span className="product-stock">
+                        {product.available_quantity > 0 ? `${product.available_quantity} disponibles` : 'Sin stock'}
+                      </span>
+                    </div>
+                    
+                    <button 
+                      className="product-button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleProductClick(product)
+                      }}
+                    >
+                      Ver Detalles
+                    </button>
                   </div>
                 </div>
-                
-                <div className="product-info">
-                  <h3 className="product-name">{product.name}</h3>
-                  <p className="product-category">{product.category}</p>
-                  
-                  <div className="product-price-container">
-                    <span className="product-price">{formatPrice(product.price)}</span>
-                    <span className="product-stock">
-                      {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
-                    </span>
-                  </div>
-                  
-                  <button className="product-button">
-                    Ver Detalles
-                  </button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
           
           <button 
@@ -189,7 +227,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
         </div>
         
         <div className="section-footer">
-          <button className="view-all-button">
+          <button 
+            className="view-all-button"
+            onClick={() => navigate('/tienda-ml')}
+          >
             Ver Todos los Productos
           </button>
         </div>

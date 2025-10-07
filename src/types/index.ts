@@ -67,6 +67,16 @@ export interface ProductoML {
   categoria?: string;
   category_id?: string;
   images: Image[];
+  // Métricas de Mercado Libre
+  sold_quantity?: number;
+  health?: number;
+  metrics?: {
+    visits: number;
+    reviews: {
+      rating_average: number;
+      total: number;
+    };
+  };
   // Nuevas propiedades para dropshipping
   dias_preparacion?: number;
   dias_envio_estimado?: number;
