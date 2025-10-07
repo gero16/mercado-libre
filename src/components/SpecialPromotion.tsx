@@ -69,7 +69,7 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
             </div>
             
             <div className="promotion-timer">
-              <p className="timer-text">¡Oferta termina en!</p>
+              <p className="timer-text">¡Termina el {endDate}!</p>
               <div className="countdown">
                 <div className="time-unit">
                   <span className="time-number">07</span>
