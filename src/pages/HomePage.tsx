@@ -33,6 +33,12 @@ const HomePage: React.FC = () => {
         showArrows={true}
       />
 
+      {/* Sección de productos más vendidos */}
+      <BestSellingProducts />
+      
+      {/* Sección de categorías de productos */}
+      <ProductCategories />
+
       {/* Sección especial de promoción */}
       <SpecialPromotion 
         title="🎃 Halloween Sale"
@@ -45,17 +51,11 @@ const HomePage: React.FC = () => {
       {/* Sección de productos destacados */}
       <FeaturedProducts />
       
-      {/* Sección de productos más vendidos */}
-      <BestSellingProducts />
-      
-      {/* Sección de categorías de productos */}
-      <ProductCategories />
+      {/* Sección de productos con descuento */}
+      <DiscountedProducts />
       
       {/* Segunda sección de categorías */}
       <ProductCategories2 />
-      
-      {/* Sección de productos con descuento */}
-      <DiscountedProducts />
       
       {/* Sección de reseñas de clientes */}
       <CustomerReviews />
