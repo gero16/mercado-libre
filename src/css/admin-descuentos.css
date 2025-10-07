@@ -403,6 +403,99 @@
 }
 
 /* ==========================================
+   INFORMACIÓN DE PAGINACIÓN
+   ========================================== */
+
+.info-paginacion {
+  text-align: center;
+  margin: 20px 0;
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* ==========================================
+   PAGINACIÓN
+   ========================================== */
+
+.paginacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.btn-paginacion {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+}
+
+.btn-paginacion:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-paginacion:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #95a5a6;
+}
+
+.numeros-pagina {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.numero-pagina {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ecf0f1;
+  color: #2c3e50;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.numero-pagina:hover {
+  background: #d4e6f1;
+  border-color: #3498db;
+  transform: translateY(-2px);
+}
+
+.numero-pagina.activo {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  border-color: #2980b9;
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.puntos {
+  color: #7f8c8d;
+  font-weight: 700;
+  padding: 0 5px;
+}
+
+/* ==========================================
    RESPONSIVE
    ========================================== */
 
@@ -425,5 +518,25 @@
 
   .productos-lista {
     max-height: 400px;
+  }
+
+  .paginacion {
+    gap: 10px;
+    padding: 15px 0;
+  }
+
+  .btn-paginacion {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .numero-pagina {
+    width: 35px;
+    height: 35px;
+    font-size: 0.85rem;
+  }
+
+  .info-paginacion {
+    font-size: 0.85rem;
   }
 }

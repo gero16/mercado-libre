@@ -41,6 +41,10 @@ const AdminPage: React.FC = () => {
   const [filterDelivery, setFilterDelivery] = useState<'all' | 'fast' | 'slow'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'delivery'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  
+  // 🆕 Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(20)
 
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
@@ -197,6 +201,28 @@ const AdminPage: React.FC = () => {
       return sortOrder === 'asc' ? comparison : -comparison
     })
 
+  // 🆕 Paginación
+  const totalPages = Math.ceil(filteredAndSortedItems.length / itemsPerPage)
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentItems = filteredAndSortedItems.slice(indexOfFirstItem, indexOfLastItem)
+
+  // 🆕 Funciones de paginación
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleItemsPerPageChange = (value: number) => {
+    setItemsPerPage(value)
+    setCurrentPage(1) // Reset a primera página
+  }
+
+  // 🆕 Resetear página cuando cambien los filtros
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterType, filterStatus, filterDelivery, sortBy, sortOrder])
+
   // Comentamos las funciones no utilizadas
   // const handleEditProduct = (item: AdminItem) => {
   //   console.log('Editar producto:', item)
@@ -244,7 +270,7 @@ const AdminPage: React.FC = () => {
             ↳ Configurar Dropshipping
           </button>
           <button 
-            onClick={() => navigate('/admin/orders')} // 🆕 Agregar enlace a órdenes
+            onClick={() => navigate('/admin/orders')}
             className="btn-orden btn-orders"
           >
            ↳ Ver Órdenes de Compra
@@ -254,6 +280,16 @@ const AdminPage: React.FC = () => {
             className="btn-orden btn-clientes"
           >
            ↳ Gestionar Clientes
+          </button>
+          <button 
+            onClick={() => navigate("/admin/descuentos")}
+            className="btn-orden btn-descuentos"
+            style={{
+              background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
+              color: 'white'
+            }}
+          >
+           ↳ Gestionar Descuentos 🔥
           </button>
         </div>
 
@@ -326,6 +362,57 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
 
+        {/* 🆕 Información de paginación y control */}
+        <div style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '20px',
+          borderRadius: '15px',
+          marginBottom: '20px',
+          color: 'white',
+          boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '15px'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>
+                📊 Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredAndSortedItems.length)} de {filteredAndSortedItems.length} items
+              </h3>
+              {totalPages > 1 && (
+                <p style={{ margin: 0, opacity: 0.9 }}>
+                  Página {currentPage} de {totalPages}
+                </p>
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <label style={{ fontWeight: '600' }}>Items por página:</label>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                style={{
+                  padding: '8px 15px',
+                  borderRadius: '8px',
+                  border: '2px solid white',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Estadísticas */}
         <div className="admin-stats">
           <div className="stat-card">
@@ -358,14 +445,14 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Lista de productos */}
+        {/* Lista de productos paginada */}
         <div className="admin-products-list">
-          {filteredAndSortedItems.length === 0 ? (
+          {currentItems.length === 0 ? (
             <div className="no-products">
               <p>No se encontraron productos con los filtros seleccionados.</p>
             </div>
           ) : (
-            filteredAndSortedItems.map(item => (
+            currentItems.map(item => (
               <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
                 <div className="product-image">
                   <img 
@@ -489,6 +576,170 @@ const AdminPage: React.FC = () => {
             ))
           )}
         </div>
+
+        {/* 🆕 Paginación */}
+        {totalPages > 1 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '15px',
+            marginTop: '40px',
+            padding: '30px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '15px',
+            flexWrap: 'wrap',
+            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
+          }}>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{
+                padding: '12px 24px',
+                background: currentPage === 1 ? 'rgba(255,255,255,0.2)' : 'white',
+                color: currentPage === 1 ? 'rgba(255,255,255,0.5)' : '#667eea',
+                border: 'none',
+                borderRadius: '10px',
+                fontWeight: '700',
+                fontSize: '1rem',
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: currentPage === 1 ? 'none' : '0 4px 15px rgba(0,0,0,0.2)'
+              }}
+            >
+              ← Anterior
+            </button>
+
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              justifyContent: 'center'
+            }}>
+              {/* Primera página */}
+              {currentPage > 3 && (
+                <>
+                  <button
+                    onClick={() => handlePageChange(1)}
+                    style={{
+                      width: '45px',
+                      height: '45px',
+                      background: 'white',
+                      color: '#667eea',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    1
+                  </button>
+                  {currentPage > 4 && (
+                    <span style={{ color: 'white', fontWeight: '700', padding: '0 5px' }}>...</span>
+                  )}
+                </>
+              )}
+
+              {/* Páginas cercanas */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(pageNum =>
+                  pageNum === currentPage ||
+                  pageNum === currentPage - 1 ||
+                  pageNum === currentPage + 1 ||
+                  pageNum === currentPage - 2 ||
+                  pageNum === currentPage + 2
+                )
+                .map(pageNum => (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    style={{
+                      width: '45px',
+                      height: '45px',
+                      background: pageNum === currentPage 
+                        ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                        : 'white',
+                      color: pageNum === currentPage ? 'white' : '#667eea',
+                      border: pageNum === currentPage ? '3px solid white' : 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      transform: pageNum === currentPage ? 'scale(1.1)' : 'scale(1)',
+                      boxShadow: pageNum === currentPage 
+                        ? '0 6px 20px rgba(245, 87, 108, 0.4)'
+                        : '0 4px 15px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+              {/* Última página */}
+              {currentPage < totalPages - 2 && (
+                <>
+                  {currentPage < totalPages - 3 && (
+                    <span style={{ color: 'white', fontWeight: '700', padding: '0 5px' }}>...</span>
+                  )}
+                  <button
+                    onClick={() => handlePageChange(totalPages)}
+                    style={{
+                      width: '45px',
+                      height: '45px',
+                      background: 'white',
+                      color: '#667eea',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              style={{
+                padding: '12px 24px',
+                background: currentPage === totalPages ? 'rgba(255,255,255,0.2)' : 'white',
+                color: currentPage === totalPages ? 'rgba(255,255,255,0.5)' : '#667eea',
+                border: 'none',
+                borderRadius: '10px',
+                fontWeight: '700',
+                fontSize: '1rem',
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: currentPage === totalPages ? 'none' : '0 4px 15px rgba(0,0,0,0.2)'
+              }}
+            >
+              Siguiente →
+            </button>
+          </div>
+        )}
+
+        {/* Info adicional si todo cabe en una página */}
+        {totalPages <= 1 && filteredAndSortedItems.length > 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '20px',
+            marginTop: '20px',
+            background: '#e8f5e9',
+            borderRadius: '10px',
+            color: '#2e7d32',
+            fontWeight: '600'
+          }}>
+            ✅ Todos los {filteredAndSortedItems.length} items están en una sola página
+          </div>
+        )}
       </div>
     </main>
   )

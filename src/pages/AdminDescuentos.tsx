@@ -13,6 +13,12 @@ const AdminDescuentos: React.FC = () => {
   const [porcentaje, setPorcentaje] = useState<number>(10)
   const [searchQuery, setSearchQuery] = useState('')
   const [mensaje, setMensaje] = useState<{ tipo: 'success' | 'error', texto: string } | null>(null)
+  
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(10) // Reducido a 10 para ver paginación más fácilmente
+  const [currentPageDescuentos, setCurrentPageDescuentos] = useState(1)
+  const [itemsPerPageDescuentos] = useState(6) // Reducido a 6 para ver paginación más fácilmente
 
   // Cargar productos
   useEffect(() => {
@@ -134,6 +140,40 @@ const AdminDescuentos: React.FC = () => {
 
   const productosSeleccionadosCount = productos.filter(p => p.seleccionado).length
 
+  // Paginación para productos a aplicar descuento
+  const totalPages = Math.ceil(productosFiltrados.length / itemsPerPage)
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentItems = productosFiltrados.slice(indexOfFirstItem, indexOfLastItem)
+
+  // Paginación para productos con descuento
+  const totalPagesDescuentos = Math.ceil(productosConDescuento.length / itemsPerPageDescuentos)
+  const indexOfLastDescuento = currentPageDescuentos * itemsPerPageDescuentos
+  const indexOfFirstDescuento = indexOfLastDescuento - itemsPerPageDescuentos
+  const currentDescuentos = productosConDescuento.slice(indexOfFirstDescuento, indexOfLastDescuento)
+
+  // Debug: Log para verificar paginación
+  console.log('📊 Paginación Info:', {
+    totalProductos: productosFiltrados.length,
+    totalPages,
+    currentPage,
+    productosConDescuento: productosConDescuento.length,
+    totalPagesDescuentos,
+    currentPageDescuentos
+  })
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    // Scroll suave al inicio de la lista
+    document.querySelector('.productos-lista')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handlePageChangeDescuentos = (pageNumber: number) => {
+    setCurrentPageDescuentos(pageNumber)
+    // Scroll suave al inicio de la sección
+    document.querySelector('.seccion-descuentos-activos')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   if (loading) {
     return (
       <div className="admin-descuentos">
@@ -157,13 +197,19 @@ const AdminDescuentos: React.FC = () => {
 
         {/* Sección: Productos con descuento activo */}
         <section className="seccion-descuentos-activos">
-          <h2 className="seccion-titulo">🔥 Productos con Descuento Activo</h2>
+          <h2 className="seccion-titulo">
+            🔥 Productos con Descuento Activo 
+            <span style={{ fontSize: '1rem', fontWeight: 'normal', marginLeft: '10px', color: '#7f8c8d' }}>
+              ({productosConDescuento.length} producto{productosConDescuento.length !== 1 ? 's' : ''})
+            </span>
+          </h2>
           
           {productosConDescuento.length === 0 ? (
             <p className="texto-vacio">No hay productos con descuento activo</p>
           ) : (
-            <div className="productos-grid">
-              {productosConDescuento.map((producto: any) => (
+            <>
+              <div className="productos-grid">
+                {currentDescuentos.map((producto: any) => (
                 <div key={producto.ml_id} className="producto-descuento-card">
                   <img 
                     src={producto.image} 
@@ -188,12 +234,62 @@ const AdminDescuentos: React.FC = () => {
                 </div>
               ))}
             </div>
+            
+            {/* Información y Paginación para productos con descuento */}
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '20px',
+              padding: '15px',
+              background: '#f8f9fa',
+              borderRadius: '10px'
+            }}>
+              <p style={{ margin: '0 0 10px 0', color: '#7f8c8d', fontWeight: '600' }}>
+                Mostrando {indexOfFirstDescuento + 1} - {Math.min(indexOfLastDescuento, productosConDescuento.length)} de {productosConDescuento.length} productos con descuento
+              </p>
+              {totalPagesDescuentos > 1 && (
+                <div className="paginacion">
+                <button 
+                  onClick={() => handlePageChangeDescuentos(currentPageDescuentos - 1)}
+                  disabled={currentPageDescuentos === 1}
+                  className="btn-paginacion"
+                >
+                  ← Anterior
+                </button>
+                
+                <div className="numeros-pagina">
+                  {Array.from({ length: totalPagesDescuentos }, (_, i) => i + 1).map(pageNum => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChangeDescuentos(pageNum)}
+                      className={`numero-pagina ${currentPageDescuentos === pageNum ? 'activo' : ''}`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={() => handlePageChangeDescuentos(currentPageDescuentos + 1)}
+                  disabled={currentPageDescuentos === totalPagesDescuentos}
+                  className="btn-paginacion"
+                >
+                  Siguiente →
+                </button>
+              </div>
+              )}
+            </div>
+          </>
           )}
         </section>
 
         {/* Sección: Aplicar descuentos */}
         <section className="seccion-aplicar-descuentos">
-          <h2 className="seccion-titulo">💰 Aplicar Descuentos</h2>
+          <h2 className="seccion-titulo">
+            💰 Aplicar Descuentos
+            <span style={{ fontSize: '1rem', fontWeight: 'normal', marginLeft: '10px', color: '#7f8c8d' }}>
+              ({productosFiltrados.length} producto{productosFiltrados.length !== 1 ? 's' : ''})
+            </span>
+          </h2>
 
           <div className="controles">
             <div className="control-grupo">
@@ -240,9 +336,24 @@ const AdminDescuentos: React.FC = () => {
             </div>
           </div>
 
+          {/* Información de paginación - Siempre visible */}
+          <div style={{ 
+            textAlign: 'center', 
+            margin: '20px 0',
+            padding: '12px',
+            background: '#e8f4f8',
+            borderRadius: '8px',
+            border: '2px solid #3498db'
+          }}>
+            <p style={{ margin: 0, color: '#2c3e50', fontWeight: '600', fontSize: '1rem' }}>
+              📦 Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, productosFiltrados.length)} de {productosFiltrados.length} productos
+              {totalPages > 1 && <span style={{ marginLeft: '15px', color: '#3498db' }}>| Página {currentPage} de {totalPages}</span>}
+            </p>
+          </div>
+
           {/* Lista de productos */}
           <div className="productos-lista">
-            {productosFiltrados.map(producto => (
+            {currentItems.map(producto => (
               <div 
                 key={producto.ml_id} 
                 className={`producto-item ${producto.seleccionado ? 'seleccionado' : ''}`}
@@ -268,6 +379,83 @@ const AdminDescuentos: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Paginación para productos - Siempre mostrar info */}
+          <div style={{ 
+            marginTop: '30px',
+            padding: '20px',
+            background: '#f8f9fa',
+            borderRadius: '10px',
+            border: '2px solid #3498db'
+          }}>
+            {totalPages > 1 ? (
+              <div className="paginacion">
+              <button 
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="btn-paginacion"
+              >
+                ← Anterior
+              </button>
+              
+              <div className="numeros-pagina">
+                {/* Mostrar primeras páginas */}
+                {currentPage > 3 && (
+                  <>
+                    <button onClick={() => handlePageChange(1)} className="numero-pagina">1</button>
+                    {currentPage > 4 && <span className="puntos">...</span>}
+                  </>
+                )}
+                
+                {/* Páginas alrededor de la actual */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(pageNum => 
+                    pageNum === currentPage ||
+                    pageNum === currentPage - 1 ||
+                    pageNum === currentPage + 1 ||
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  )
+                  .map(pageNum => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`numero-pagina ${currentPage === pageNum ? 'activo' : ''}`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                
+                {/* Últimas páginas */}
+                {currentPage < totalPages - 2 && (
+                  <>
+                    {currentPage < totalPages - 3 && <span className="puntos">...</span>}
+                    <button onClick={() => handlePageChange(totalPages)} className="numero-pagina">
+                      {totalPages}
+                    </button>
+                  </>
+                )}
+              </div>
+              
+              <button 
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="btn-paginacion"
+              >
+                Siguiente →
+              </button>
+            </div>
+            ) : (
+              <p style={{ 
+                textAlign: 'center', 
+                margin: 0, 
+                color: '#7f8c8d',
+                fontSize: '0.95rem'
+              }}>
+                ℹ️ Todos los productos caben en una página ({productosFiltrados.length} productos)
+              </p>
+            )}
           </div>
         </section>
       </div>
