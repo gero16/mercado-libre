@@ -11,7 +11,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '1',
       name: 'Campera Adidas Originals',
-      image: '/src/img/campera.webp',
+      image: '/img/campera.webp',
       category: 'Ropa',
       price: 15999,
       stock: 15,
@@ -21,7 +21,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '2', 
       name: 'Mochila Champion',
-      image: '/src/img/mochila.webp',
+      image: '/img/mochila.webp',
       category: 'Accesorios',
       price: 8999,
       stock: 8,
@@ -31,7 +31,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '3',
       name: 'Remera Adidas',
-      image: '/src/img/remera.webp', 
+      image: '/img/remera.webp', 
       category: 'Ropa',
       price: 5999,
       stock: 25,
@@ -41,7 +41,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '4',
       name: 'Gorro Champion',
-      image: '/src/img/gorro.webp',
+      image: '/img/gorro.webp',
       category: 'Accesorios', 
       price: 4999,
       stock: 12,
@@ -51,7 +51,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '5',
       name: 'Pantalón Adidas',
-      image: '/src/img/pantalon.webp',
+      image: '/img/pantalon.webp',
       category: 'Ropa',
       price: 12999,
       stock: 10,
@@ -61,7 +61,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '6',
       name: 'Short Champion',
-      image: '/src/img/short.webp',
+      image: '/img/short.webp',
       category: 'Ropa',
       price: 6999,
       stock: 18,
@@ -71,7 +71,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '7',
       name: 'Medias Adidas',
-      image: '/src/img/medias.webp',
+      image: '/img/medias.webp',
       category: 'Accesorios',
       price: 3999,
       stock: 30,
@@ -81,7 +81,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ products }) => {
     {
       id: '8',
       name: 'Mochila Adidas',
-      image: '/src/img/mochila2.jpg',
+      image: '/img/mochila2.jpg',
       category: 'Accesorios',
       price: 10999,
       stock: 6,

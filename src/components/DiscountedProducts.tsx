@@ -16,7 +16,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '1',
       name: 'Campera Adidas Originals',
-      image: '/src/img/campera.webp',
+      image: '/img/campera.webp',
       category: 'Ropa',
       price: 12799,
       originalPrice: 15999,
@@ -28,7 +28,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '2', 
       name: 'Mochila Champion',
-      image: '/src/img/mochila.webp',
+      image: '/img/mochila.webp',
       category: 'Accesorios',
       price: 7199,
       originalPrice: 8999,
@@ -40,7 +40,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '3',
       name: 'Remera Adidas',
-      image: '/src/img/remera.webp', 
+      image: '/img/remera.webp', 
       category: 'Ropa',
       price: 4799,
       originalPrice: 5999,
@@ -52,7 +52,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '4',
       name: 'Gorro Champion',
-      image: '/src/img/gorro.webp',
+      image: '/img/gorro.webp',
       category: 'Accesorios', 
       price: 3999,
       originalPrice: 4999,
@@ -64,7 +64,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '5',
       name: 'Pantalón Adidas',
-      image: '/src/img/pantalon.webp',
+      image: '/img/pantalon.webp',
       category: 'Ropa',
       price: 10399,
       originalPrice: 12999,
@@ -76,7 +76,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '6',
       name: 'Short Champion',
-      image: '/src/img/short.webp',
+      image: '/img/short.webp',
       category: 'Ropa',
       price: 5599,
       originalPrice: 6999,
@@ -88,7 +88,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '7',
       name: 'Medias Adidas',
-      image: '/src/img/medias.webp',
+      image: '/img/medias.webp',
       category: 'Accesorios',
       price: 3199,
       originalPrice: 3999,
@@ -100,7 +100,7 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
     {
       id: '8',
       name: 'Mochila Adidas',
-      image: '/src/img/mochila2.jpg',
+      image: '/img/mochila2.jpg',
       category: 'Accesorios',
       price: 8799,
       originalPrice: 10999,

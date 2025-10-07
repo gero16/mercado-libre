@@ -12,11 +12,11 @@ import InstagramSection from '../components/InstagramSection'
 const HomePage: React.FC = () => {
   // Array de imágenes para el carrusel
   const carouselImages = [
-    '/src/img/adidas.png',
+    '/img/adidas.png',
     '/img/banner.png', 
-    '/src/img/runnin.jpg',
-    '/src/img/portada4.jpg',
-    '/src/img/run.jpg'
+    '/img/runnin.jpg',
+    '/img/portada4.jpg',
+    '/img/run.jpg'
   ]
 
   return (

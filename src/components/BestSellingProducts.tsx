@@ -16,7 +16,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '1',
       name: 'Zapatillas Adidas Running',
-      image: '/src/img/champion4.png',
+      image: '/img/champion4.png',
       category: 'Calzado',
       price: 18999,
       stock: 12,
@@ -28,7 +28,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '2', 
       name: 'Remera Deportiva Adidas',
-      image: '/src/img/remera2.webp',
+      image: '/img/remera2.webp',
       category: 'Ropa',
       price: 6999,
       stock: 20,
@@ -40,7 +40,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '3',
       name: 'Short Champion Training',
-      image: '/src/img/short2.webp', 
+      image: '/img/short2.webp', 
       category: 'Ropa',
       price: 7999,
       stock: 15,
@@ -52,7 +52,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '4',
       name: 'Mochila Champion Pro',
-      image: '/src/img/mochila3.jpg',
+      image: '/img/mochila3.jpg',
       category: 'Accesorios', 
       price: 11999,
       stock: 8,
@@ -64,7 +64,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '5',
       name: 'Campera Deportiva',
-      image: '/src/img/campera.webp',
+      image: '/img/campera.webp',
       category: 'Ropa',
       price: 15999,
       stock: 10,
@@ -76,7 +76,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '6',
       name: 'Pantalón Deportivo',
-      image: '/src/img/pantalon2.webp',
+      image: '/img/pantalon2.webp',
       category: 'Ropa',
       price: 9999,
       stock: 18,
@@ -88,7 +88,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '7',
       name: 'Gorro Champion',
-      image: '/src/img/gorro2.webp',
+      image: '/img/gorro2.webp',
       category: 'Accesorios',
       price: 4999,
       stock: 25,
@@ -100,7 +100,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ products }) =
     {
       id: '8',
       name: 'Remera Estampada Champion',
-      image: '/src/img/remera3.webp',
+      image: '/img/remera3.webp',
       category: 'Ropa',
       price: 7999,
       stock: 14,
