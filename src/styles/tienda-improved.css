@@ -178,6 +178,10 @@
   .pagina-principal .producto img {
     width: 100% !important;
     height: 180px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #f8f9fa !important;
+    padding: 8px !important;
   }
 }
 
@@ -191,6 +195,10 @@
   .pagina-principal .producto img {
     width: 100% !important;
     height: 180px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #f8f9fa !important;
+    padding: 8px !important;
   }
 }
 
@@ -209,6 +217,10 @@
   .pagina-principal .producto img {
     width: 100% !important;
     height: 180px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #f8f9fa !important;
+    padding: 8px !important;
   }
 }
 
@@ -222,6 +234,10 @@
   .pagina-principal .producto img {
     width: 100% !important;
     height: 180px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #f8f9fa !important;
+    padding: 8px !important;
   }
 }
 
@@ -240,6 +256,10 @@
   .pagina-principal .producto img {
     width: 100% !important;
     height: 180px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #f8f9fa !important;
+    padding: 8px !important;
   }
 }
 
@@ -282,9 +302,12 @@
 .pagina-principal .producto img {
   width: 100% !important;
   height: 180px !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #f8f9fa !important;
   border-radius: 8px !important;
   margin-bottom: 12px !important;
+  padding: 8px !important;
 }
 
 .producto p {

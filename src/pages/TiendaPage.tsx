@@ -240,6 +240,30 @@ const TiendaMLPage: React.FC = () => {
   
   const { addToCart } = useCart()
 
+  // 🆕 Función para optimizar imágenes de ML (usar versiones más pequeñas)
+  const getOptimizedImageUrl = (url: string) => {
+    if (!url) return url
+    
+    // Mercado Libre usa diferentes sufijos para tamaños:
+    // -I.jpg = Original (muy grande, ~2-5MB)
+    // -O.jpg = 500x500px (~200KB)
+    // -V.jpg = 250x250px (~50KB) ← Perfecto para tienda
+    // -S.jpg = 150x150px (~20KB)
+    
+    // Intentar reemplazar cualquier sufijo por -V.jpg
+    if (url.match(/-[IOSV]\.(jpg|jpeg|png|webp)$/i)) {
+      return url.replace(/-[IOSV]\.(jpg|jpeg|png|webp)$/i, '-V.jpg')
+    }
+    
+    // Si no tiene sufijo, intentar agregarlo antes de la extensión
+    if (url.match(/\.(jpg|jpeg|png|webp)$/i)) {
+      return url.replace(/\.(jpg|jpeg|png|webp)$/i, '-V.jpg')
+    }
+    
+    // Si nada funciona, devolver URL original
+    return url
+  }
+
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
@@ -291,7 +315,7 @@ const TiendaMLPage: React.FC = () => {
               ml_id: producto.ml_id,
               title: `${producto.title} - ${variante.color || ''}`.trim(),
               price: variante.price || producto.price,
-              image: imagenVariante,
+              image: getOptimizedImageUrl(imagenVariante),
               stock: effectiveStock,
               esVariante: true,
               variante: variante,
@@ -310,7 +334,7 @@ const TiendaMLPage: React.FC = () => {
               ml_id: producto.ml_id,
             title: producto.title,
             price: producto.price,
-            image: producto.images[0]?.url || producto.main_image,
+            image: getOptimizedImageUrl(producto.images[0]?.url || producto.main_image),
             stock: effectiveStock,
             esVariante: false,
             productoPadre: producto,
