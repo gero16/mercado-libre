@@ -1,14 +1,73 @@
 /* Estilos para el filtro de categorías */
 .categorias-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 8px;
-  margin-top: 16px;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+
+/* Grid para filtros especiales - mismo estilo que las normales */
+.categorias-grid-especial {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+
+/* Asegurar que los elementos de filtro ocupen todo el ancho */
+.filtro-categorias {
+  width: 100% !important;
+}
+
+.lista-filtro {
+  width: 100% !important;
+}
+
+.filtro {
+  width: 100% !important;
+}
+
+/* Filtro de precio - forzar ancho completo */
+section.precios {
+  width: 100% !important;
+  margin-bottom: 20px !important;
+}
+
+.precios .div-precios {
+  width: 100% !important;
+}
+
+.precios .precio-principal {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 5px !important;
+}
+
+.precios .precio-principal label {
+  width: 100% !important;
+}
+
+.precios .precio-principal input[type="range"] {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.precios #input-precio {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.precios #mostrar-precio {
+  width: 100% !important;
+  display: block !important;
+  text-align: center !important;
 }
 
 .categoria-filtro {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 12px 16px;
   border: 2px solid #e5e7eb;
@@ -65,3 +124,4 @@
     font-size: 11px;
   }
 }
+

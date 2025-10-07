@@ -175,22 +175,12 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ products }) => 
                 
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
-                  <p className="product-category">{product.category}</p>
                   
                   <div className="product-price-container">
                     <div className="price-info">
                       <span className="product-price">{formatPrice(product.price)}</span>
                       <span className="original-price">{formatPrice(product.originalPrice)}</span>
                     </div>
-                    <span className="product-stock">
-                      {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
-                    </span>
-                  </div>
-                  
-                  <div className="savings-info">
-                    <span className="savings-text">
-                      Ahorrás {formatPrice(product.originalPrice - product.price)}
-                    </span>
                   </div>
                   
                   <button className="product-button">

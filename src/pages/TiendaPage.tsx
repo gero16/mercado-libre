@@ -206,7 +206,10 @@ const TiendaMLPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('mostrar-todo')
   const [loading, setLoading] = useState(true)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
-    { id: 'mostrar-todo', name: 'Mostrar Todo' }
+    { id: 'mostrar-todo', name: 'Mostrar Todo' },
+    { id: 'destacados', name: '⭐ Productos Destacados' },
+    { id: 'mas-vendidos', name: '🏆 Más Vendidos' },
+    { id: 'con-descuento', name: '🔥 Con Descuento' }
   ])
   
   // 🚀 Estados para paginación
@@ -329,6 +332,9 @@ const TiendaMLPage: React.FC = () => {
       
       setCategorias([
         { id: 'mostrar-todo', name: 'Mostrar Todo' },
+        { id: 'destacados', name: '⭐ Productos Destacados' },
+        { id: 'mas-vendidos', name: '🏆 Más Vendidos' },
+        { id: 'con-descuento', name: '🔥 Con Descuento' },
         ...categoriasFiltro
       ])
       
@@ -341,8 +347,45 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     let filtered = itemsTienda
 
-    // Filtro por categoría
-    if (categoryFilter !== 'mostrar-todo') {
+    // Filtros especiales
+    if (categoryFilter === 'destacados') {
+      // Productos destacados: basado en score combinado (visitas, rating, reseñas, health)
+      const calcularScore = (item: ItemTienda) => {
+        const producto = item.productoPadre
+        if (!producto) return 0
+        
+        const visitas = producto.metrics?.visits || 0
+        const rating = producto.metrics?.reviews.rating_average || 0
+        const totalReseñas = producto.metrics?.reviews.total || 0
+        const health = producto.health || 0
+        
+        return (visitas * 0.3) + (rating * 10) + (totalReseñas * 3) + (health * 5)
+      }
+      
+      filtered = filtered
+        .filter(item => item.productoPadre?.status !== 'paused')
+        .map(item => ({ ...item, score: calcularScore(item) }))
+        .sort((a: any, b: any) => b.score - a.score)
+        .slice(0, 50) // Top 50 destacados
+    } 
+    else if (categoryFilter === 'mas-vendidos') {
+      // Productos más vendidos: ordenados por cantidad vendida
+      filtered = filtered
+        .filter(item => item.productoPadre?.status !== 'paused' && (item.productoPadre?.sold_quantity || 0) > 0)
+        .sort((a, b) => (b.productoPadre?.sold_quantity || 0) - (a.productoPadre?.sold_quantity || 0))
+        .slice(0, 50) // Top 50 más vendidos
+    }
+    else if (categoryFilter === 'con-descuento') {
+      // Productos con descuento: filtrar por productos que tengan descuento
+      filtered = filtered.filter(item => {
+        const producto = item.productoPadre
+        return producto?.status !== 'paused' && 
+               producto?.original_price && 
+               producto.original_price > producto.price
+      })
+    }
+    else if (categoryFilter !== 'mostrar-todo') {
+      // Filtro por categoría normal
       filtered = filtered.filter(item => item.categoria === categoryFilter)
     }
 
@@ -472,16 +515,24 @@ const TiendaMLPage: React.FC = () => {
                 </section>
 
                 <section className="filtro-categorias centrar-texto">
-                  {categorias.map(category => (
-                    <p 
-                      key={category.id}
-                      className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
-                      onClick={() => handleCategoryFilter(category.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {category.name}
-                    </p>
-                  ))}
+                  <div className="categorias-grid-especial">
+                    {categorias.filter(cat => ['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
+                      <div 
+                        key={category.id}
+                        className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
+                        onClick={() => handleCategoryFilter(category.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <span className="categoria-nombre">{category.name}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="categorias-grid" style={{ marginTop: '12px' }}>
+                    <div style={{ padding: '20px', color: '#999' }}>
+                      Cargando categorías...
+                    </div>
+                  </div>
                 </section>
               </div>
             </div>
@@ -523,19 +574,28 @@ const TiendaMLPage: React.FC = () => {
               </section>
 
               <section className="filtro-categorias centrar-texto">
-                <h3 className="precios-titulo">Filtrar por Categoría</h3>
-                <div className="categorias-grid">
-                {categorias.map(category => (
+                <div className="categorias-grid-especial">
+                  {categorias.filter(cat => ['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
                     <div 
-                    key={category.id}
-                    className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
-                    onClick={() => handleCategoryFilter(category.id)}
-                    style={{ cursor: 'pointer' }}
-                  >
+                      key={category.id}
+                      className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
+                      onClick={() => handleCategoryFilter(category.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <span className="categoria-nombre">{category.name}</span>
-                      {category.count && (
-                        <span className="categoria-contador">({category.count})</span>
-                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="categorias-grid" style={{ marginTop: '12px' }}>
+                  {categorias.filter(cat => !['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
+                    <div 
+                      key={category.id}
+                      className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
+                      onClick={() => handleCategoryFilter(category.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <span className="categoria-nombre">{category.name}</span>
                     </div>
                   ))}
                 </div>

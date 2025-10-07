@@ -169,37 +169,11 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 8 }) => {
                   
                   <div className="product-info">
                     <h3 className="product-name">{product.title}</h3>
-                    <p className="product-category">
-                      {product.category_id ? 'Producto ML' : 'General'}
-                    </p>
-                    
                     {product.metrics?.reviews.rating_average && 
                       renderStars(product.metrics.reviews.rating_average)}
-                    
-                    {product.metrics?.visits && product.metrics.visits > 0 && (
-                      <div className="product-stats">
-                        <span className="visits-badge">
-                          👁️ {product.metrics.visits} vistas
-                        </span>
-                      </div>
-                    )}
-                    
                     <div className="product-price-container">
                       <span className="product-price">{formatPrice(product.price)}</span>
-                      <span className="product-stock">
-                        {product.available_quantity > 0 ? `${product.available_quantity} disponibles` : 'Sin stock'}
-                      </span>
                     </div>
-                    
-                    <button 
-                      className="product-button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleProductClick(product)
-                      }}
-                    >
-                      Ver Detalles
-                    </button>
                   </div>
                 </div>
               )

@@ -156,35 +156,11 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) 
                   
                   <div className="product-info">
                     <h3 className="product-name">{product.title}</h3>
-                    <p className="product-category">
-                      {product.category_id ? 'Producto ML' : 'General'}
-                    </p>
-                    
                     {product.metrics?.reviews.rating_average && 
                       renderStars(product.metrics.reviews.rating_average)}
-                    
-                    <div className="sales-info">
-                      <span className="units-sold">
-                        <strong>{product.sold_quantity || 0}</strong> vendidos
-                      </span>
-                    </div>
-                    
                     <div className="product-price-container">
                       <span className="product-price">{formatPrice(product.price)}</span>
-                      <span className="product-stock">
-                        {product.available_quantity > 0 ? `${product.available_quantity} disponibles` : 'Sin stock'}
-                      </span>
                     </div>
-                    
-                    <button 
-                      className="product-button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleProductClick(product)
-                      }}
-                    >
-                      Ver Producto
-                    </button>
                   </div>
                 </div>
               )
