@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -157,19 +157,34 @@ const mapeoCategorias: Record<string, string> = {
   'MLU457091': 'otros',
 }
 
-// Nombres legibles de categorías GENERALES
+// Nombres legibles de categorías GENERALES con iconos
 const nombresCategoriasGenerales: Record<string, string> = {
-  'electronica': '📱 Electrónica y Tecnología',
-  'gaming': '🎮 Gaming',
-  'hogar': '🏠 Hogar y Decoración',
-  'cocina': '🍳 Cocina',
-  'bebes-ninos': '👶 Bebés y Niños',
-  'accesorios': '🎒 Accesorios',
-  'drones-foto': '🚁 Drones y Fotografía',
-  'deportes': '🏋️ Deportes y Fitness',
-  'juguetes-coleccionables': '🎭 Juguetes y Coleccionables',
-  'mascotas': '🐾 Mascotas',
-  'otros': '🔧 Otros',
+  'electronica': 'Electrónica y Tecnología',
+  'gaming': 'Gaming',
+  'hogar': 'Hogar y Decoración',
+  'cocina': 'Cocina',
+  'bebes-ninos': 'Bebés y Niños',
+  'accesorios': 'Accesorios',
+  'drones-foto': 'Drones y Fotografía',
+  'deportes': 'Deportes y Fitness',
+  'juguetes-coleccionables': 'Juguetes y Coleccionables',
+  'mascotas': 'Mascotas',
+  'otros': 'Otros',
+}
+
+// Iconos para cada categoría
+const iconosCategoriasGenerales: Record<string, string> = {
+  'electronica': '📱',
+  'gaming': '🎮',
+  'hogar': '🏠',
+  'cocina': '🍳',
+  'bebes-ninos': '👶',
+  'accesorios': '🎒',
+  'drones-foto': '🚁',
+  'deportes': '🏋️',
+  'juguetes-coleccionables': '🎭',
+  'mascotas': '🐾',
+  'otros': '🔧',
 }
 
 // Función para obtener categoría general
@@ -200,10 +215,13 @@ interface ItemTienda {
 
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [itemsTienda, setItemsTienda] = useState<ItemTienda[]>([])
   const [filteredItems, setFilteredItems] = useState<ItemTienda[]>([])
   const [priceFilter, setPriceFilter] = useState(0)
-  const [categoryFilter, setCategoryFilter] = useState('mostrar-todo')
+  const [categoryFilter, setCategoryFilter] = useState(
+    (location.state as any)?.categoryFilter || 'mostrar-todo'
+  )
   const [loading, setLoading] = useState(true)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
     { id: 'mostrar-todo', name: 'Mostrar Todo' },
@@ -529,9 +547,17 @@ const TiendaMLPage: React.FC = () => {
                   </div>
 
                   <div className="categorias-grid" style={{ marginTop: '12px' }}>
-                    <div style={{ padding: '20px', color: '#999' }}>
-                      Cargando categorías...
-                    </div>
+                    {categorias.filter(cat => !['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
+                      <div 
+                        key={category.id}
+                        className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
+                        onClick={() => handleCategoryFilter(category.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
+                        <span className="categoria-nombre">{category.name}</span>
+                      </div>
+                    ))}
                   </div>
                 </section>
               </div>
@@ -595,6 +621,7 @@ const TiendaMLPage: React.FC = () => {
                       onClick={() => handleCategoryFilter(category.id)}
                       style={{ cursor: 'pointer' }}
                     >
+                      <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
                       <span className="categoria-nombre">{category.name}</span>
                     </div>
                   ))}

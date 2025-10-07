@@ -138,8 +138,11 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 8 }) 
                   onClick={() => handleProductClick(product)}
                   style={{ cursor: 'pointer' }}
                 >
-                  <div className="bestseller-rank">
-                    #{currentPage * productsPerPage + index + 1}
+                  <div className={`bestseller-rank ${index === 0 ? 'gold-medal' : index === 1 ? 'silver-medal' : index === 2 ? 'bronze-medal' : ''}`}>
+                    {index === 0 && '🥇'}
+                    {index === 1 && '🥈'}
+                    {index === 2 && '🥉'}
+                    {index > 2 && `#${currentPage * productsPerPage + index + 1}`}
                   </div>
                   
                   <div className="product-image-container">

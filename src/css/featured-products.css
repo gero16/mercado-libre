@@ -135,7 +135,7 @@
 
 .product-image-container {
   position: relative;
-  height: 180px;
+  height: 150px;
   overflow: hidden;
 }
 
@@ -165,7 +165,7 @@
 }
 
 .product-info {
-  padding: 15px;
+  padding: 12px;
 }
 
 .product-name {

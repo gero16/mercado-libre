@@ -153,9 +153,55 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Medallas especiales para los primeros 3 - sin fondo */
+.bestseller-rank.gold-medal {
+  background: transparent;
+  font-size: 2.5rem;
+  animation: pulse-gold 2s ease-in-out infinite;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+}
+
+.bestseller-rank.silver-medal {
+  background: transparent;
+  font-size: 2.5rem;
+  animation: pulse-silver 2s ease-in-out infinite;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+}
+
+.bestseller-rank.bronze-medal {
+  background: transparent;
+  font-size: 2.5rem;
+  animation: pulse-bronze 2s ease-in-out infinite;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+}
+
+@keyframes pulse-silver {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes pulse-bronze {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
 .best-selling-products .product-image-container {
   position: relative;
-  height: 180px;
+  height: 150px;
   overflow: hidden;
   background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
 }
@@ -204,7 +250,7 @@
 }
 
 .best-selling-products .product-info {
-  padding: 15px;
+  padding: 12px;
 }
 
 .best-selling-products .product-name {
