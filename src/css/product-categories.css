@@ -24,7 +24,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  height: 320px;
+  height: 400px;
+  background: #f8f9fa;
 }
 
 .category-card-visual:hover {
@@ -38,18 +39,42 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 15px;
 }
 
 /* Imagen de categoría */
 .category-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+  object-fit: contain;
+  animation: slideInZoom 0.8s ease-out;
 }
 
+/* Animación de entrada con zoom y slide */
+@keyframes slideInZoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Hover con zoom suave */
 .category-card-visual:hover .category-image {
-  transform: scale(1.1);
+  animation: none; /* Desactivar la animación en hover */
+  transition: transform 0.3s ease;
+  transform: scale(1.08);
 }
 
 /* Overlay oscuro con texto */
@@ -104,7 +129,7 @@
   }
   
   .category-card-visual {
-    height: 280px;
+    height: 350px;
   }
 }
 
@@ -119,7 +144,7 @@
   }
   
   .category-card-visual {
-    height: 220px;
+    height: 280px;
   }
   
   .category-title {
@@ -138,7 +163,7 @@
   }
   
   .category-card-visual {
-    height: 250px;
+    height: 320px;
   }
 }
 

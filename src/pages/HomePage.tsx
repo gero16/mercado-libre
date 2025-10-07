@@ -3,6 +3,7 @@ import ImageCarousel from '../components/ImageCarousel'
 import PromotionalBanner from '../components/PromotionalBanner'
 import SpecialPromotion from '../components/SpecialPromotion'
 import ProductCategories from '../components/ProductCategories'
+import ProductCategories2 from '../components/ProductCategories2'
 import FeaturedProducts from '../components/FeaturedProducts'
 import BestSellingProducts from '../components/BestSellingProducts'
 import DiscountedProducts from '../components/DiscountedProducts'
@@ -49,6 +50,9 @@ const HomePage: React.FC = () => {
       
       {/* Sección de categorías de productos */}
       <ProductCategories />
+      
+      {/* Segunda sección de categorías */}
+      <ProductCategories2 />
       
       {/* Sección de productos con descuento */}
       <DiscountedProducts />

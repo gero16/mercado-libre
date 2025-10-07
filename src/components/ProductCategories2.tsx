@@ -11,7 +11,7 @@ interface Category {
   description: string
 }
 
-const ProductCategories: React.FC = () => {
+const ProductCategories2: React.FC = () => {
   const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -29,31 +29,31 @@ const ProductCategories: React.FC = () => {
     return url.replace(/-[IOSV]\.jpg$/, '-O.jpg')
   }
   
-  // Categorías principales a mostrar
+  // Categorías secundarias a mostrar
   const mainCategories = [
     { 
-      id: 'electronica', 
-      name: 'Electrónica', 
-      icon: '📱',
-      description: 'Tecnología y dispositivos'
+      id: 'cocina', 
+      name: 'Cocina', 
+      icon: '🍳',
+      description: 'Electrodomésticos y utensilios'
     },
     { 
-      id: 'gaming', 
-      name: 'Gaming', 
-      icon: '🎮',
-      description: 'Consolas y juegos'
+      id: 'bebes-ninos', 
+      name: 'Bebés y Niños', 
+      icon: '👶',
+      description: 'Todo para los más pequeños'
     },
     { 
-      id: 'hogar', 
-      name: 'Hogar', 
-      icon: '🏠',
-      description: 'Decoración y muebles'
+      id: 'accesorios', 
+      name: 'Accesorios', 
+      icon: '🎒',
+      description: 'Mochilas y complementos'
     },
     { 
-      id: 'deportes', 
-      name: 'Deportes', 
-      icon: '🏋️',
-      description: 'Ropa y equipos deportivos'
+      id: 'drones-foto', 
+      name: 'Drones y Fotografía', 
+      icon: '🚁',
+      description: 'Tecnología audiovisual'
     }
   ]
 
@@ -65,13 +65,19 @@ const ProductCategories: React.FC = () => {
         
         // Mapeo de categorías ML a categorías generales
         const mapeoCategorias: Record<string, string> = {
-          'MLU163646': 'electronica', 'MLU163764': 'electronica', 'MLU163765': 'electronica',
-          'MLU163771': 'electronica', 'MLU168248': 'electronica', 'MLU3697': 'electronica',
-          'MLU6344': 'gaming', 'MLU443628': 'gaming', 'MLU448172': 'gaming',
-          'MLU443741': 'gaming', 'MLU10858': 'gaming',
-          'MLU12201': 'hogar', 'MLU7969': 'hogar', 'MLU40398': 'hogar',
-          'MLU205198': 'hogar', 'MLU43687': 'hogar',
-          'MLU165701': 'deportes', 'MLU165785': 'deportes', 'MLU413593': 'deportes'
+          'MLU442710': 'cocina', 'MLU196263': 'cocina', 'MLU416585': 'cocina',
+          'MLU414038': 'cocina', 'MLU442747': 'cocina', 'MLU442751': 'cocina',
+          'MLU455144': 'cocina', 'MLU74887': 'cocina', 'MLU74925': 'cocina',
+          'MLU412348': 'cocina',
+          'MLU178390': 'bebes-ninos', 'MLU443005': 'bebes-ninos', 'MLU412585': 'bebes-ninos',
+          'MLU187852': 'bebes-ninos', 'MLU443022': 'bebes-ninos', 'MLU443133': 'bebes-ninos',
+          'MLU1889': 'bebes-ninos', 'MLU40629': 'bebes-ninos', 'MLU457852': 'bebes-ninos',
+          'MLU429242': 'bebes-ninos',
+          'MLU190994': 'accesorios', 'MLU442981': 'accesorios', 'MLU187975': 'accesorios',
+          'MLU26538': 'accesorios', 'MLU158838': 'accesorios', 'MLU434789': 'accesorios',
+          'MLU178089': 'drones-foto', 'MLU413447': 'drones-foto', 'MLU413635': 'drones-foto',
+          'MLU430406': 'drones-foto', 'MLU413444': 'drones-foto', 'MLU414123': 'drones-foto',
+          'MLU1042': 'drones-foto'
         }
         
         // Agrupar productos por categoría
@@ -174,7 +180,7 @@ const ProductCategories: React.FC = () => {
       <section className="product-categories-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">🛍️ Explora por Categorías</h2>
+            <h2 className="section-title">🎨 Más Categorías</h2>
             <p className="section-subtitle">Cargando categorías...</p>
           </div>
         </div>
@@ -186,8 +192,8 @@ const ProductCategories: React.FC = () => {
     <section className="product-categories-section">
       <div className="container">
         <div className="section-header">
-          <h2 className="section-title">🛍️ Explora por Categorías</h2>
-          <p className="section-subtitle">Encuentra lo que buscas fácilmente</p>
+          <h2 className="section-title">🎨 Más Categorías</h2>
+          <p className="section-subtitle">Descubre más productos increíbles</p>
         </div>
         
         <div className="categories-grid-visual">
@@ -218,4 +224,5 @@ const ProductCategories: React.FC = () => {
   )
 }
 
-export default ProductCategories 
+export default ProductCategories2
+
