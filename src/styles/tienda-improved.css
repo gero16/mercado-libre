@@ -320,82 +320,6 @@
   transform: none;
 }
 
-/* ========================================
-   PAGINACIÓN CENTRADA
-   ======================================== */
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px auto;
-  padding: 25px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-  flex-wrap: wrap;
-  gap: 20px;
-  max-width: 900px;
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Layout horizontal centrado para paginación */
-.pagination-container > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-/* Información de paginación */
-.pagination-info {
-  font-size: 14px;
-  color: #6c757d;
-  font-weight: 500;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Controles de navegación */
-.pagination-buttons {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Selector de productos por página */
-.items-per-page {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pagination-info {
-  font-size: 14px;
-  color: #6c757d;
-  font-weight: 500;
-  text-align: center;
-}
-
-.items-per-page {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.pagination-buttons {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
 
 /* ========================================
    RESPONSIVE MEJORADO
@@ -420,34 +344,6 @@
   .productos {
     margin: 20px 0;
     padding: 0 10px;
-  }
-  
-  /* Paginación responsive para móviles */
-  .pagination-container {
-    margin: 20px auto;
-    padding: 20px;
-    max-width: 95%;
-  }
-  
-  .pagination-container > div {
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .pagination-info {
-    order: 1;
-    font-size: 13px;
-  }
-  
-  .pagination-buttons {
-    order: 2;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  
-  .items-per-page {
-    order: 3;
-    justify-content: center;
   }
 }
 
