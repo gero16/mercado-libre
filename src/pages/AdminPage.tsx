@@ -27,6 +27,7 @@ interface AdminItem {
   dias_envio_estimado?: number;
   tiempo_total_entrega?: number;
   es_entrega_larga?: boolean; // > 14 días
+  es_stock_fisico?: boolean; // Flex o entrega 1-7 días
   proveedor?: string;
   pais_origen?: string;
 }
@@ -87,6 +88,19 @@ const AdminPage: React.FC = () => {
         const tiempoTotalEntrega = diasPreparacion + diasEnvio
         const esEntregaLarga = tiempoTotalEntrega > 14
         
+        // 🚀 DETERMINAR SI ES STOCK FÍSICO/RÁPIDO
+        // Basado en análisis: xd_drop_off con dias_preparacion: 0 es lo más "local"
+        const esFlex = producto.shipping?.logistic_type === 'fulfillment'
+        const esXdDropOff = producto.shipping?.logistic_type === 'xd_drop_off'
+        const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
+        const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
+        
+        // Es "stock rápido" si:
+        // 1. Flex (fulfillment) - ideal
+        // 2. Cross Docking SIN días de preparación (solo envío) = ~7 días
+        // 3. Cualquier producto con entrega ≤ 10 días total
+        const esStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
+        
         // Agregar el producto principal
         items.push({
           id: producto._id,
@@ -107,6 +121,7 @@ const AdminPage: React.FC = () => {
           dias_envio_estimado: diasEnvio,
           tiempo_total_entrega: tiempoTotalEntrega,
           es_entrega_larga: esEntregaLarga,
+          es_stock_fisico: esStockFisico,
           proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
           pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado'
         })
@@ -125,6 +140,11 @@ const AdminPage: React.FC = () => {
             const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
             const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
             const variantEsEntregaLarga = variantTiempoTotal > 14
+            
+            // 🚀 DETERMINAR SI LA VARIANTE ES STOCK RÁPIDO
+            const variantSinPreparacion = (variante.dropshipping?.dias_preparacion || producto.dropshipping?.dias_preparacion || 0) === 0
+            const variantEntregaTotal = variantTiempoTotal || (variante.dropshipping?.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 7)
+            const variantEsStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
             
             items.push({
               id: `${producto._id}_${variante._id}`,
@@ -145,6 +165,7 @@ const AdminPage: React.FC = () => {
               dias_envio_estimado: variantDiasEnvio,
               tiempo_total_entrega: variantTiempoTotal,
               es_entrega_larga: variantEsEntregaLarga,
+              es_stock_fisico: variantEsStockFisico,
               proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
               pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado'
             })
@@ -451,7 +472,10 @@ const AdminPage: React.FC = () => {
           </div>
           <div className="stat-card">
             <h3>Stock Físico</h3>
-            <span className="stat-number">{adminItems.filter(item => !item.es_entrega_larga && (item.tiempo_total_entrega || 0) > 0).length}</span>
+            <span className="stat-number">{adminItems.filter(item => !item.isPaused && item.stock > 0 && item.es_stock_fisico).length}</span>
+            <div className="stat-subtitle">
+              Self Service (~7 días)
+            </div>
           </div>
         </div>
 
@@ -500,6 +524,26 @@ const AdminPage: React.FC = () => {
                       ) : null}
                       {item.es_entrega_larga && (
                         <span className="badge badge-slow-delivery">A Pedido</span>
+                      )}
+                      {item.es_stock_fisico && !item.isPaused && item.stock > 0 && (
+                        <span className="badge badge-physical-stock" style={{
+                          backgroundColor: item.productoPadre?.shipping?.logistic_type === 'fulfillment' 
+                            ? '#00a650' 
+                            : (item.productoPadre?.shipping?.logistic_type === 'xd_drop_off' && (item.dias_preparacion || 0) === 0)
+                              ? '#2196f3'
+                              : '#3483fa',
+                          color: 'white',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold'
+                        }}>
+                          {item.productoPadre?.shipping?.logistic_type === 'fulfillment' 
+                            ? '⚡ FLEX' 
+                            : (item.productoPadre?.shipping?.logistic_type === 'xd_drop_off' && (item.dias_preparacion || 0) === 0)
+                              ? '🚚 Cross Docking'
+                              : `📦 ${item.tiempo_total_entrega || 7}d`}
+                        </span>
                       )}
                     </div>
                   </div>

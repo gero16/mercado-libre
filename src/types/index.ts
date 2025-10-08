@@ -86,6 +86,13 @@ export interface ProductoML {
   }>;
   warranty?: string;
   condition?: string;
+  // Información de envío
+  shipping?: {
+    logistic_type?: string; // 'fulfillment' (Flex), 'self_service', 'cross_docking', etc.
+    mode?: string;
+    free_shipping?: boolean;
+    tags?: string[];
+  };
   // Nuevas propiedades para dropshipping
   dias_preparacion?: number;
   dias_envio_estimado?: number;

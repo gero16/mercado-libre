@@ -156,6 +156,14 @@
   display: block;
 }
 
+.stat-subtitle {
+  color: #8b949e !important;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
 /* Lista de productos */
 .admin-products-list {
   display: flex;
