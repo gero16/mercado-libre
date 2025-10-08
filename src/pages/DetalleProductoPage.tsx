@@ -408,16 +408,13 @@ const DetalleProductoPage: React.FC = () => {
             )}
 
 
-            {/* Características principales */}
-            {producto.attributes && producto.attributes.length > 0 && (
-              <div className="caracteristicas">
-                <h3>Características</h3>
-                <div className="lista-caracteristicas">
-                  {producto.attributes.slice(0, 8).map((attr) => (
-                    <div key={attr.id} className="caracteristica-item">
-                      <span className="caracteristica-nombre">{attr.name}:</span>
-                      <span className="caracteristica-valor">{attr.value_name}</span>
-                    </div>
+            {/* Descripción */}
+            {producto.description && (
+              <div className="descripcion">
+                <h3>Descripción</h3>
+                <div className="descripcion-texto">
+                  {producto.description.split('\n').map((linea, index) => (
+                    <p key={index}>{linea || '\u00A0'}</p>
                   ))}
                 </div>
               </div>
@@ -428,18 +425,6 @@ const DetalleProductoPage: React.FC = () => {
               <div className="garantia">
                 <h3>Garantía</h3>
                 <p>{producto.warranty}</p>
-              </div>
-            )}
-
-            {/* Descripción */}
-            {producto.description && (
-              <div className="descripcion">
-                <h3>Descripción</h3>
-                <div className="descripcion-texto">
-                  {producto.description.split('\n').map((linea, index) => (
-                    <p key={index}>{linea || '\u00A0'}</p>
-                  ))}
-                </div>
               </div>
             )}
 
@@ -480,6 +465,21 @@ const DetalleProductoPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Características principales - Sección completa debajo */}
+        {producto.attributes && producto.attributes.length > 0 && (
+          <div className="caracteristicas-seccion-completa">
+            <h3>Características del Producto</h3>
+            <div className="lista-caracteristicas-grid">
+              {producto.attributes.map((attr) => (
+                <div key={attr.id} className="caracteristica-item-grid">
+                  <span className="caracteristica-nombre">{attr.name}:</span>
+                  <span className="caracteristica-valor">{attr.value_name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -466,45 +466,61 @@
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
 }
 
-/* === CARACTERÍSTICAS === */
-.caracteristicas {
-  margin: 0;
-  padding: 8px 10px;
+/* === CARACTERÍSTICAS - SECCIÓN COMPLETA === */
+.caracteristicas-seccion-completa {
+  margin: 12px 0 0 0;
+  padding: 12px;
   background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
-  border-radius: 4px;
-  border-left: 2px solid #eab308;
+  border-radius: 6px;
+  border: 2px solid #eab308;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.caracteristicas h3 {
-  font-size: 13px;
+.caracteristicas-seccion-completa h3 {
+  font-size: 15px;
   font-weight: 700;
   color: #374151;
-  margin: 0 0 6px 0;
+  margin: 0 0 10px 0;
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.caracteristicas h3::before {
-  content: "✨";
-  font-size: 12px;
-}
-
-.lista-caracteristicas {
-  display: grid;
-  grid-template-columns: 1fr;
   gap: 6px;
+  text-align: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #854d0e 0%, #a16207 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.caracteristica-item {
+.caracteristicas-seccion-completa h3::before {
+  content: "✨";
+  font-size: 16px;
+  -webkit-text-fill-color: initial;
+}
+
+.lista-caracteristicas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.caracteristica-item-grid {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 6px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 3px;
-  font-size: 10px;
-  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  font-size: 11px;
+  gap: 10px;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  transition: all 0.3s ease;
+}
+
+.caracteristica-item-grid:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(234, 179, 8, 0.15);
 }
 
 .caracteristica-nombre {
@@ -519,6 +535,7 @@
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 /* === GARANTÍA === */
@@ -729,9 +746,23 @@
     justify-content: center;
   }
   
-  .caracteristica-item {
-    font-size: 9px;
-    padding: 3px 5px;
+  .caracteristicas-seccion-completa {
+    padding: 10px;
+    margin: 10px 0 0 0;
+  }
+  
+  .caracteristicas-seccion-completa h3 {
+    font-size: 14px;
+  }
+  
+  .lista-caracteristicas-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .caracteristica-item-grid {
+    font-size: 10px;
+    padding: 6px 8px;
   }
 }
 
@@ -791,13 +822,26 @@
     padding: 2px 4px;
   }
   
-  .caracteristica-item {
-    font-size: 8px;
-    padding: 2px 4px;
+  .caracteristicas-seccion-completa {
+    padding: 8px;
+    margin: 8px 0 0 0;
+  }
+  
+  .caracteristicas-seccion-completa h3 {
+    font-size: 12px;
+  }
+  
+  .lista-caracteristicas-grid {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  
+  .caracteristica-item-grid {
+    font-size: 9px;
+    padding: 5px 6px;
     gap: 6px;
   }
   
-  .caracteristicas h3,
   .garantia h3,
   .descripcion h3 {
     font-size: 11px;
