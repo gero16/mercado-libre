@@ -216,68 +216,139 @@ const AdminOrdersPage: React.FC = () => {
         ) : (
           <div className="admin-grid">
             {filteredOrders.map((order) => (
-              <div key={order._id} className="admin-card">
+              <div 
+                key={order._id} 
+                className="admin-card"
+                style={{
+                  borderLeft: `4px solid ${
+                    order.status === 'approved' ? '#3fb950' :
+                    order.status === 'pending' ? '#d29922' :
+                    order.status === 'rejected' ? '#f85149' :
+                    '#8b949e'
+                  }`,
+                  marginBottom: '20px'
+                }}
+              >
                 <div style={{ marginBottom: '15px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <h3 style={{ color: '#f0f6fc', margin: 0, fontSize: '1.1rem' }}>
-                      Orden #{order.numero_orden || order.orden_id}
+                    <h3 style={{ color: '#f0f6fc', margin: 0, fontSize: '1.2rem', fontWeight: '700' }}>
+                      📦 Orden #{order.numero_orden || order.orden_id}
                     </h3>
                     <span className={`status-badge ${getStatusColor(order.status)}`}>
+                      {order.status === 'approved' ? '✓ ' : 
+                       order.status === 'pending' ? '⏳ ' :
+                       order.status === 'rejected' ? '✗ ' : ''}
                       {order.status.toUpperCase()}
                     </span>
                   </div>
                   
-                  <div style={{ color: '#8b949e', fontSize: '14px', marginBottom: '8px' }}>
-                    Cliente: {order.customer.name}
-                  </div>
-                  
-                  <div style={{ color: '#8b949e', fontSize: '14px', marginBottom: '8px' }}>
-                    Email: {order.customer.email}
-                  </div>
-                  
-                  <div style={{ color: '#8b949e', fontSize: '14px', marginBottom: '8px' }}>
-                    Teléfono: {order.customer.phone}
+                  <div style={{ 
+                    background: 'rgba(22, 27, 34, 0.5)', 
+                    padding: '12px', 
+                    borderRadius: '8px',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{ color: '#c9d1d9', fontSize: '14px', marginBottom: '6px', fontWeight: '600' }}>
+                      👤 {order.customer.name}
+                    </div>
+                    <div style={{ color: '#8b949e', fontSize: '13px', marginBottom: '4px' }}>
+                      ✉️ {order.customer.email}
+                    </div>
+                    <div style={{ color: '#8b949e', fontSize: '13px' }}>
+                      📞 {order.customer.phone}
+                    </div>
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '15px' }}>
-                  <div style={{ color: '#8b949e', fontSize: '12px', marginBottom: '5px' }}>
-                    PRODUCTOS:
+                  <div style={{ 
+                    color: '#f0f6fc', 
+                    fontSize: '13px', 
+                    marginBottom: '8px',
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    🛒 Productos:
                   </div>
                   {order.items.map((item, index) => (
                     <div key={index} style={{ 
                       display: 'flex', 
                       justifyContent: 'space-between', 
                       fontSize: '13px',
-                      marginBottom: '3px',
+                      marginBottom: '6px',
+                      padding: '6px 10px',
+                      background: 'rgba(110, 118, 129, 0.1)',
+                      borderRadius: '4px',
                       color: '#c9d1d9'
                     }}>
-                      <span>{item.quantity}x {item.product_name}</span>
-                      <span>{formatCurrency(item.total_price)}</span>
+                      <span style={{ fontWeight: '500' }}>
+                        <span style={{ 
+                          background: 'rgba(56, 139, 253, 0.15)',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          marginRight: '8px',
+                          fontSize: '12px',
+                          fontWeight: '700'
+                        }}>
+                          {item.quantity}x
+                        </span>
+                        {item.product_name}
+                        {item.color && <span style={{ color: '#8b949e', fontSize: '12px' }}> ({item.color})</span>}
+                        {item.size && <span style={{ color: '#8b949e', fontSize: '12px' }}> - Talle {item.size}</span>}
+                      </span>
+                      <span style={{ fontWeight: '700', color: '#58a6ff' }}>{formatCurrency(item.total_price)}</span>
                     </div>
                   ))}
                 </div>
 
                 <div style={{ 
-                  borderTop: '1px solid #30363d', 
+                  borderTop: '2px solid #30363d', 
                   paddingTop: '15px',
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  background: 'rgba(22, 27, 34, 0.3)',
+                  margin: '0 -20px -20px -20px',
+                  padding: '15px 20px'
                 }}>
                   <div>
-                    <div style={{ color: '#8b949e', fontSize: '12px' }}>
-                      Fecha: {formatDate(order.date_created)}
+                    <div style={{ color: '#c9d1d9', fontSize: '12px', marginBottom: '4px' }}>
+                      📅 {formatDate(order.date_created)}
                     </div>
-                    <div style={{ color: '#8b949e', fontSize: '12px' }}>
-                      Método: {order.payment_method_id.toUpperCase()}
+                    <div style={{ 
+                      color: '#8b949e', 
+                      fontSize: '11px',
+                      background: 'rgba(56, 139, 253, 0.1)',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      display: 'inline-block'
+                    }}>
+                      💳 {order.payment_method_id.toUpperCase()}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ color: '#f0f6fc', fontSize: '1.2rem', fontWeight: '700' }}>
+                    <div style={{ 
+                      color: '#f0f6fc', 
+                      fontSize: '1.4rem', 
+                      fontWeight: '800',
+                      background: order.status === 'approved' 
+                        ? 'linear-gradient(135deg, #3fb950 0%, #2ea043 100%)'
+                        : order.status === 'pending'
+                        ? 'linear-gradient(135deg, #d29922 0%, #bb8009 100%)'
+                        : 'linear-gradient(135deg, #58a6ff 0%, #1f6feb 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>
                       {formatCurrency(order.total)}
                     </div>
-                    <div style={{ color: '#8b949e', fontSize: '11px' }}>
+                    <div style={{ 
+                      color: '#8b949e', 
+                      fontSize: '10px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
+                    }}>
                       {order.currency}
                     </div>
                   </div>
