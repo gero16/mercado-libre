@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
@@ -224,8 +224,6 @@ const TiendaMLPage: React.FC = () => {
     (location.state as any)?.categoryFilter || 'mostrar-todo'
   )
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [allProductsLoaded, setAllProductsLoaded] = useState(false)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
     { id: 'mostrar-todo', name: 'Mostrar Todo' },
     { id: 'destacados', name: '⭐ Productos Destacados' },
@@ -331,7 +329,7 @@ const TiendaMLPage: React.FC = () => {
             sold_quantity: p.sold_quantity,
             images: p.images?.slice(0, 1), // Solo primera imagen
             main_image: p.main_image,
-            variantes: p.variantes?.map(v => ({
+            variantes: p.variantes?.map((v: Variante) => ({
               color: v.color,
               size: v.size,
               price: v.price,
@@ -369,7 +367,7 @@ const TiendaMLPage: React.FC = () => {
               available_quantity: p.available_quantity,
               images: p.images?.slice(0, 1),
               main_image: p.main_image,
-              variantes: p.variantes?.map(v => ({
+              variantes: p.variantes?.map((v: Variante) => ({
                 color: v.color,
                 size: v.size,
                 price: v.price,
@@ -543,7 +541,6 @@ const TiendaMLPage: React.FC = () => {
       // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI)
       if (allProducts.length > 50) {
         console.log(`🔄 Cargando ${allProducts.length - 50} productos restantes en segundo plano...`)
-        setLoadingMore(true)
         
         setTimeout(() => {
           const backgroundStart = performance.now()
@@ -611,13 +608,9 @@ const TiendaMLPage: React.FC = () => {
           
           setItemsTienda(prev => [...prev, ...remainingItems])
           setFilteredItems(prev => [...prev, ...remainingItems])
-          setLoadingMore(false)
-          setAllProductsLoaded(true)
           
           console.log(`🎉 TODOS los productos cargados (${allProducts.length} total)`)
         }, 100) // Pequeño delay para no bloquear UI
-      } else {
-        setAllProductsLoaded(true)
       }
     }
     loadProducts()
