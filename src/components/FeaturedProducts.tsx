@@ -197,17 +197,19 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                       renderStars(product.metrics.reviews.rating_average)}
                     <div className="product-price-container">
                       {tieneDescuento && precioOriginal ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ 
                             textDecoration: 'line-through', 
                             color: '#999',
-                            fontSize: '0.9rem'
+                            fontSize: '1rem',
+                            lineHeight: '1'
                           }}>
                             {formatPrice(precioOriginal)}
                           </span>
                           <span className="product-price" style={{ 
                             color: '#d32f2f',
-                            fontWeight: '700'
+                            fontWeight: '700',
+                            lineHeight: '1'
                           }}>
                             {formatPrice(product.price)}
                           </span>

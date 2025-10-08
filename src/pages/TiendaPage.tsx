@@ -817,12 +817,19 @@ const TiendaMLPage: React.FC = () => {
                   margin: '10px 0'
                 }}>
                   {tieneDescuento && precioOriginal ? (
-                    <>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      justifyContent: 'center'
+                    }}>
                       <p style={{ 
                         textDecoration: 'line-through', 
                         color: '#999',
-                        fontSize: '0.9rem',
-                        margin: '0'
+                        fontSize: '1rem',
+                        margin: '0',
+                        lineHeight: '1'
                       }}>
                         ${precioOriginal}
                       </p>
@@ -830,11 +837,12 @@ const TiendaMLPage: React.FC = () => {
                         color: '#d32f2f',
                         fontWeight: '700',
                         fontSize: '1.4rem',
-                        margin: '0'
+                        margin: '0',
+                        lineHeight: '1'
                       }}>
                         ${item.price}
                       </p>
-                    </>
+                    </div>
                   ) : (
                     <p style={{ margin: '0' }}>${item.price}</p>
                   )}

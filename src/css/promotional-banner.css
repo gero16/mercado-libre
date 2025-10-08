@@ -4,7 +4,7 @@
   background-size: 400% 400%;
   animation: gradientShift 3s ease infinite;
   padding: 10px 15px;
-  margin: 95px 0 0 0;
+  margin-top: 70px;
   position: relative;
   overflow: visible;
   min-height: 40px;
@@ -97,7 +97,7 @@
 @media (max-width: 768px) {
   .promotional-banner {
     padding: 10px 12px;
-    margin: 95px 0 0 0;
+    margin-top: 70px;
     min-height: 50px;
   }
   
@@ -130,7 +130,7 @@
 @media (max-width: 480px) {
   .promotional-banner {
     padding: 8px 10px;
-    margin: 95px 0 0 0;
+    margin-top: 70px;
     min-height: 60px;
   }
   

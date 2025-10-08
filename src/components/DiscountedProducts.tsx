@@ -152,8 +152,6 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
                         <span className="original-price">
                           {formatPrice(product.descuento?.precio_original || 0)}
                         </span>
-                      </div>
-                      <div className="price-row">
                         <span className="discount-price">
                           {formatPrice(product.price)}
                         </span>
