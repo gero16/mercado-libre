@@ -6,6 +6,24 @@
   width: 100%;
   height: 70px;
 }
+
+  /* Contenedor principal para todo el contenido - Compensar header y banner fijos */
+  .main-content {
+    margin-top: 135px; /* 95px header + 40px banner */
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main-content {
+      margin-top: 145px; /* 95px header + 50px banner mobile */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .main-content {
+      margin-top: 155px; /* 95px header + 60px banner mobile pequeño */
+    }
+  }
   button {
     border-radius: 8px;
     border: 1px solid transparent;

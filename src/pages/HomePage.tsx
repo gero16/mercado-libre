@@ -1,6 +1,5 @@
 import React from 'react'
 import ImageCarousel from '../components/ImageCarousel'
-import PromotionalBanner from '../components/PromotionalBanner'
 import SpecialPromotion from '../components/SpecialPromotion'
 import ProductCategories from '../components/ProductCategories'
 import ProductCategories2 from '../components/ProductCategories2'
@@ -21,9 +20,6 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      {/* Banner promocional en la parte superior */}
-      <PromotionalBanner />
-
       {/* Carrusel de imágenes principal */}
       <ImageCarousel 
         images={carouselImages}

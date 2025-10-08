@@ -6,6 +6,7 @@ import { MERCADOPAGO_CONFIG } from './config/mercadopago'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import ThemeToggle from './components/ThemeToggle'
+import PromotionalBanner from './components/PromotionalBanner'
 import HomePage from './pages/HomePage'
 import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
@@ -31,7 +32,6 @@ import './css/react-styles.css'
 import './css/admin.css'
 import './css/admin-clean.css' // 🆕 Importar estilos limpios
 import './css/image-carousel.css' // 🆕 Importar estilos del carrusel
-import './css/promotional-banner.css' // 🆕 Importar estilos del banner promocional
 import './css/special-promotion.css' // 🆕 Importar estilos de promoción especial
 import './css/featured-products.css' // 🆕 Importar estilos de productos destacados
 import './css/discounted-products.css' // 🆕 Importar estilos de productos con descuento
@@ -40,6 +40,7 @@ import './css/customer-reviews.css' // 🆕 Importar estilos de reseñas
 import './css/theme-toggle.css' // 🆕 Importar estilos del toggle de tema
 import './css/admin-descuentos.css' // 🆕 Importar estilos de administración de descuentos
 import './css/admin-cupones.css' // 🆕 Importar estilos de administración de cupones
+import './css/promotional-banner.css' // 🆕 ÚLTIMO - Importar estilos del banner promocional con máxima prioridad
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -51,10 +52,12 @@ function App() {
         <div className="App">
           
           <Header />
+          <PromotionalBanner />
           <ThemeToggle />
           
-          <Routes>
-            <Route path="/" element={<HomePage />} />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
             {/* Tienda antigua desde BD - Route path="/tienda" element={<TiendaPage />} />} */ }
             <Route path="/tienda-ml" element={<TiendaPage />} />
             <Route path="/producto/:id" element={<DetalleProductoPage />} />
@@ -73,7 +76,8 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/payment-failure" element={<PaymentFailurePage />} />
             <Route path="/payment-pending" element={<PaymentPendingPage />} />
-          </Routes>
+            </Routes>
+          </main>
           
           <Footer />
         </div>
