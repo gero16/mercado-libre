@@ -264,145 +264,45 @@ const TiendaMLPage: React.FC = () => {
     return url
   }
 
-  // Fetch productos de Mercado Libre con caché mejorado
-  const fetchProducts = async (): Promise<ProductoML[]> => {
-    const CACHE_KEY = 'ml_productos_cache_v2' // v2 para evitar caché antiguo
-    const CACHE_TIME_KEY = 'ml_productos_cache_time_v2'
-    const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
-    
+  // 🚀 Función para cargar productos con paginación del servidor
+  const fetchProductsPaginated = async (limit: number, skip: number): Promise<ProductoML[]> => {
     try {
-      // 🔍 Verificar caché válido
-      const cachedData = localStorage.getItem(CACHE_KEY)
-      const cacheTime = localStorage.getItem(CACHE_TIME_KEY)
+      console.log(`📡 Solicitando ${limit} productos (skip: ${skip}) desde servidor...`)
+      const startFetch = performance.now()
       
-      if (cachedData && cacheTime) {
-        const cacheAge = Date.now() - parseInt(cacheTime)
-        
-        if (cacheAge < CACHE_DURATION) {
-          try {
-            const parsed = JSON.parse(cachedData)
-            // Validar que sea un array con datos
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              console.log('✅ Usando caché (válido por', Math.round((CACHE_DURATION - cacheAge) / 1000), 'segundos más)')
-              return parsed
-            }
-          } catch (parseError) {
-            console.warn('⚠️ Caché corrupto, limpiando...')
-            localStorage.removeItem(CACHE_KEY)
-            localStorage.removeItem(CACHE_TIME_KEY)
-          }
-        } else {
-          console.log('⏰ Caché expirado, renovando...')
+      const response = await fetch(
+        `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}&skip=${skip}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+          },
+          keepalive: true
         }
-      }
-      
-      // Si no hay caché válido, fetch desde API
-      console.log('📡 Cargando productos desde servidor...')
-      const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+      )
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       
       const data = await response.json()
+      const endFetch = performance.now()
       
-      // Validar respuesta
-      if (!Array.isArray(data)) {
-        console.error('❌ Respuesta inválida del servidor')
-        return []
+      console.log(`✅ Servidor respondió en: ${(endFetch - startFetch).toFixed(0)}ms`)
+      
+      // La respuesta ahora viene con metadata de paginación
+      if (data.productos) {
+        console.log(`📊 Paginación - Total en DB: ${data.pagination.total}, Página actual: ${data.pagination.page}/${data.pagination.totalPages}`)
+        return data.productos
       }
       
-      console.log('✅ Productos cargados:', data.length)
-      
-      // Guardar en caché solo los datos esenciales (comprimido)
-      if (data.length > 0) {
-        try {
-          // Reducir tamaño: guardar solo campos necesarios
-          const compressedData = data.map(p => ({
-            _id: p._id,
-            ml_id: p.ml_id,
-            title: p.title,
-            price: p.price,
-            status: p.status,
-            category_id: p.category_id,
-            available_quantity: p.available_quantity,
-            sold_quantity: p.sold_quantity,
-            images: p.images?.slice(0, 1), // Solo primera imagen
-            main_image: p.main_image,
-            variantes: p.variantes?.map((v: Variante) => ({
-              color: v.color,
-              size: v.size,
-              price: v.price,
-              stock: v.stock,
-              images: v.images?.slice(0, 1) // Solo primera imagen
-            })),
-            descuento: p.descuento,
-            health: p.health,
-            metrics: {
-              visits: p.metrics?.visits,
-              reviews: {
-                total: p.metrics?.reviews?.total,
-                rating_average: p.metrics?.reviews?.rating_average
-              }
-            }
-          }))
-          
-          const cacheString = JSON.stringify(compressedData)
-          const cacheSizeKB = (cacheString.length / 1024).toFixed(2)
-          
-          localStorage.setItem(CACHE_KEY, cacheString)
-          localStorage.setItem(CACHE_TIME_KEY, Date.now().toString())
-          console.log(`💾 Caché guardado: ${cacheSizeKB}KB (${data.length} productos)`)
-        } catch (storageError) {
-          console.error('❌ No se pudo guardar en caché:', storageError)
-          // Si falla, intentar guardar solo los primeros 500 productos
-          try {
-            const limitedData = data.slice(0, 500).map(p => ({
-              _id: p._id,
-              ml_id: p.ml_id,
-              title: p.title,
-              price: p.price,
-              status: p.status,
-              category_id: p.category_id,
-              available_quantity: p.available_quantity,
-              images: p.images?.slice(0, 1),
-              main_image: p.main_image,
-              variantes: p.variantes?.map((v: Variante) => ({
-                color: v.color,
-                size: v.size,
-                price: v.price,
-                stock: v.stock,
-                images: v.images?.slice(0, 1)
-              }))
-            }))
-            localStorage.setItem(CACHE_KEY, JSON.stringify(limitedData))
-            localStorage.setItem(CACHE_TIME_KEY, Date.now().toString())
-            console.log('⚠️ Caché parcial guardado: primeros 500 productos')
-          } catch {
-            console.error('❌ Imposible guardar caché, localStorage lleno')
-          }
-        }
+      // Fallback por si el servidor devuelve array directo (compatibilidad)
+      if (Array.isArray(data)) {
+        return data
       }
       
-      return data
+      return []
     } catch (error) {
-      console.error('❌ Error cargando productos:', error)
-      
-      // Fallback: intentar usar caché expirado
-      const cachedData = localStorage.getItem(CACHE_KEY)
-      if (cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            console.log('⚠️ Usando caché expirado por error de red')
-            return parsed
-          }
-        } catch {
-          localStorage.removeItem(CACHE_KEY)
-          localStorage.removeItem(CACHE_TIME_KEY)
-        }
-      }
-      
+      console.error('❌ Error cargando productos paginados:', error)
       return []
     }
   }
@@ -410,16 +310,14 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       const startTime = performance.now()
-      console.log('⏱️ Iniciando carga RÁPIDA (primeros 50 productos)...')
+      console.log('⏱️ Iniciando carga RÁPIDA (primeros 50 productos desde servidor)...')
       
-      // 🚀 FASE 1: Cargar y mostrar solo los primeros 50 productos (RÁPIDO)
-      const allProducts = await fetchProducts()
+      // 🚀 FASE 1: Cargar SOLO los primeros 50 productos desde el servidor (SÚPER RÁPIDO)
+      const first50Products = await fetchProductsPaginated(50, 0)
       const fetchTime = performance.now()
-      console.log(`📡 Fetch completado en: ${(fetchTime - startTime).toFixed(0)}ms`)
-      console.log('🔍 Total productos recibidos:', allProducts.length)
+      console.log(`📡 Primeros 50 productos cargados en: ${(fetchTime - startTime).toFixed(0)}ms`)
+      console.log('🔍 Total productos recibidos:', first50Products.length)
       
-      // Procesar solo los primeros 50 para mostrar rápido
-      const first50Products = allProducts.slice(0, 50)
       console.log('⚡ Procesando primeros 50 productos para carga rápida...')
       const productList = first50Products
       
@@ -431,7 +329,7 @@ const TiendaMLPage: React.FC = () => {
         const isPaused = producto.status === 'paused'
         
         // 🔍 DEBUG: Log para verificar el status
-        console.log(`🔍 Producto: ${producto.title}, Status: "${producto.status}", isPaused: ${isPaused}`)
+       // console.log(`🔍 Producto: ${producto.title}, Status: "${producto.status}", isPaused: ${isPaused}`)
         
         // Si el producto tiene variantes, mostramos solo la primera variante de cada combinación única
         if (producto.variantes && producto.variantes.length > 0) {
@@ -538,16 +436,40 @@ const TiendaMLPage: React.FC = () => {
       
       setLoading(false)
       
-      // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI)
-      if (allProducts.length > 50) {
-        console.log(`🔄 Cargando ${allProducts.length - 50} productos restantes en segundo plano...`)
+      // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI) DESDE EL SERVIDOR
+      console.log(`🔄 Cargando productos restantes en segundo plano...`)
+      
+      setTimeout(async () => {
+        const backgroundStart = performance.now()
         
-        setTimeout(() => {
-          const backgroundStart = performance.now()
-          const remainingProducts = allProducts.slice(50)
-          const remainingItems: ItemTienda[] = []
+        // Cargar todos los productos restantes en lotes de 100
+        let allRemainingProducts: ProductoML[] = []
+        let currentSkip = 50
+        const batchSize = 100
+        let hasMore = true
+        
+        while (hasMore) {
+          const batch = await fetchProductsPaginated(batchSize, currentSkip)
           
-          remainingProducts.forEach(producto => {
+          if (batch.length === 0) {
+            hasMore = false
+            break
+          }
+          
+          allRemainingProducts = [...allRemainingProducts, ...batch]
+          currentSkip += batchSize
+          
+          console.log(`📦 Lote cargado: ${batch.length} productos (total acumulado: ${allRemainingProducts.length + 50})`)
+          
+          // Si recibimos menos productos que el batch size, ya no hay más
+          if (batch.length < batchSize) {
+            hasMore = false
+          }
+        }
+        
+        const remainingItems: ItemTienda[] = []
+        
+        allRemainingProducts.forEach(producto => {
             const categoria = obtenerCategoria(producto.category_id)
             const isPaused = producto.status === 'paused'
             
@@ -609,9 +531,8 @@ const TiendaMLPage: React.FC = () => {
           setItemsTienda(prev => [...prev, ...remainingItems])
           setFilteredItems(prev => [...prev, ...remainingItems])
           
-          console.log(`🎉 TODOS los productos cargados (${allProducts.length} total)`)
+          console.log(`🎉 TODOS los productos cargados (${allRemainingProducts.length + 50} total)`)
         }, 100) // Pequeño delay para no bloquear UI
-      }
     }
     loadProducts()
   }, [])
