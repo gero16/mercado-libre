@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ProductoML } from '../types'
 import { useNavigate } from 'react-router-dom'
 import '../css/discounted-products.css'
@@ -18,16 +18,30 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
         const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
         const data: ProductoML[] = await response.json()
         
-        // Filtrar productos con descuento activo
-        const productosConDescuento = data
-          .filter(p => 
-            p.descuento?.activo === true && 
-            p.status !== 'paused' && 
-            p.available_quantity > 0
-          )
-          .slice(0, limit)
+        console.log('📦 Total de productos recibidos:', data.length)
         
-        console.log('🔥 Productos con descuento:', productosConDescuento.length)
+        // Filtrar productos con descuento activo y con imagen
+        const productosConDescuento = data.filter(p => {
+          const tieneImagen = (p.images && p.images.length > 0 && p.images[0].url) || p.main_image
+          const tieneDescuento = p.descuento?.activo === true
+          const estaActivo = p.status === 'active'
+          const tieneStock = p.available_quantity > 0
+          
+          // Log detallado para debugging
+          if (tieneDescuento) {
+            console.log(`📋 ${p.title}:`, {
+              descuento: '✓',
+              imagen: tieneImagen ? '✓' : '✗',
+              status: p.status,
+              stock: p.available_quantity,
+              mostrar: tieneImagen && estaActivo && tieneStock
+            })
+          }
+          
+          return tieneDescuento && estaActivo && tieneStock && tieneImagen
+        }).slice(0, limit)
+        
+        console.log('🔥 Productos con descuento que se mostrarán:', productosConDescuento.length)
         
         setDiscountedProducts(productosConDescuento)
         setLoading(false)
@@ -42,24 +56,61 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
 
   const [currentPage, setCurrentPage] = useState(0)
   const productsPerPage = 4
-  const totalPages = Math.ceil(discountedProducts.length / productsPerPage)
+  
+  // Calcular totalPages con useMemo para asegurar que se recalcule cuando cambie discountedProducts
+  const totalPages = useMemo(() => {
+    const pages = Math.max(1, Math.ceil(discountedProducts.length / productsPerPage))
+    console.log('🔢 Total de páginas calculadas:', pages, '| Productos:', discountedProducts.length)
+    return pages
+  }, [discountedProducts.length])
+  
+  // Calcular productos actuales con useMemo
+  const getCurrentProducts = useMemo(() => {
+    const startIndex = currentPage * productsPerPage
+    const products = discountedProducts.slice(startIndex, startIndex + productsPerPage)
+    console.log('📄 Página actual:', currentPage, '| Mostrando productos:', products.length)
+    return products
+  }, [discountedProducts, currentPage])
 
   const nextPage = () => {
-    setCurrentPage((prev) => (prev + 1) % totalPages)
+    console.log('➡️ Click en flecha siguiente | totalPages:', totalPages)
+    if (totalPages <= 1) {
+      console.log('⚠️ No hay más páginas para avanzar')
+      return
+    }
+    setCurrentPage((prev) => {
+      const next = (prev + 1) % totalPages
+      console.log('➡️ Avanzando de página', prev, 'a', next)
+      return next
+    })
   }
 
   const prevPage = () => {
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
+    console.log('⬅️ Click en flecha anterior | totalPages:', totalPages)
+    if (totalPages <= 1) {
+      console.log('⚠️ No hay más páginas para retroceder')
+      return
+    }
+    setCurrentPage((prev) => {
+      const next = (prev - 1 + totalPages) % totalPages
+      console.log('⬅️ Retrocediendo de página', prev, 'a', next)
+      return next
+    })
   }
 
   const goToPage = (page: number) => {
-    setCurrentPage(page)
+    console.log('🎯 Ir a página:', page)
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page)
+    }
   }
-
-  const getCurrentProducts = () => {
-    const startIndex = currentPage * productsPerPage
-    return discountedProducts.slice(startIndex, startIndex + productsPerPage)
-  }
+  
+  // Reset currentPage si excede el número de páginas
+  useEffect(() => {
+    if (currentPage >= totalPages && totalPages > 0) {
+      setCurrentPage(0)
+    }
+  }, [totalPages, currentPage])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -110,21 +161,26 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
         </div>
         
         <div className="products-carousel">
-          <button 
-            className="carousel-arrow carousel-arrow-left" 
-            onClick={prevPage}
-            aria-label="Productos anteriores"
-          >
-            &#8249;
-          </button>
+          {totalPages > 1 && (
+            <button 
+              className="carousel-arrow carousel-arrow-left" 
+              onClick={prevPage}
+              aria-label="Productos anteriores"
+            >
+              &#8249;
+            </button>
+          )}
           
           <div className="products-grid">
-            {getCurrentProducts().map((product) => {
+            {getCurrentProducts.map((product) => {
               const imagenOriginal = product.images && product.images.length > 0 
                 ? product.images[0].url 
                 : product.main_image
               const imagenPrincipal = getOptimizedImageUrl(imagenOriginal)
               const ahorro = calcularAhorro(product)
+              
+              // No mostrar productos sin imagen
+              if (!imagenPrincipal) return null
               
               return (
                 <div 
@@ -168,13 +224,15 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
             })}
           </div>
           
-          <button 
-            className="carousel-arrow carousel-arrow-right" 
-            onClick={nextPage}
-            aria-label="Siguientes productos"
-          >
-            &#8250;
-          </button>
+          {totalPages > 1 && (
+            <button 
+              className="carousel-arrow carousel-arrow-right" 
+              onClick={nextPage}
+              aria-label="Siguientes productos"
+            >
+              &#8250;
+            </button>
+          )}
         </div>
         
         {totalPages > 1 && (

@@ -540,3 +540,42 @@
     font-size: 0.85rem;
   }
 }
+
+/* ==========================================
+   BADGES DE ESTADO
+   ========================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-active {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #81c784;
+}
+
+.badge-paused {
+  background: #fff3e0;
+  color: #f57c00;
+  border: 1px solid #ffb74d;
+}
+
+.badge-closed {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #e57373;
+}
+
+.badge-stock {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+}

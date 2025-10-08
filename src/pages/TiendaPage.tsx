@@ -310,37 +310,44 @@ const TiendaMLPage: React.FC = () => {
             // Si el producto está pausado, el stock efectivo es 0
             const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
             
-            items.push({
-              id: `${producto.ml_id || producto._id}_${variante.color}`,
-              ml_id: producto.ml_id,
-              title: `${producto.title} - ${variante.color || ''}`.trim(),
-              price: variante.price || producto.price,
-              image: getOptimizedImageUrl(imagenVariante),
-              stock: effectiveStock,
-              esVariante: true,
-              variante: variante,
-              productoPadre: producto,
-              categoria: categoria,
-              isPaused: isPaused
-            })
+            // Solo agregar si tiene imagen
+            if (imagenVariante) {
+              items.push({
+                id: `${producto.ml_id || producto._id}_${variante.color}`,
+                ml_id: producto.ml_id,
+                title: `${producto.title} - ${variante.color || ''}`.trim(),
+                price: variante.price || producto.price,
+                image: getOptimizedImageUrl(imagenVariante),
+                stock: effectiveStock,
+                esVariante: true,
+                variante: variante,
+                productoPadre: producto,
+                categoria: categoria,
+                isPaused: isPaused
+              })
+            }
           })
         } else {
           // Si no tiene variantes, mostramos el producto principal
           // Si el producto está pausado, el stock efectivo es 0
           const effectiveStock = isPaused ? 0 : producto.available_quantity;
+          const imagenPrincipal = producto.images[0]?.url || producto.main_image;
           
-          items.push({
-            id: producto.ml_id || producto._id,
-              ml_id: producto.ml_id,
-            title: producto.title,
-            price: producto.price,
-            image: getOptimizedImageUrl(producto.images[0]?.url || producto.main_image),
-            stock: effectiveStock,
-            esVariante: false,
-            productoPadre: producto,
-            categoria: categoria,
-            isPaused: isPaused
-          })
+          // Solo agregar si tiene imagen
+          if (imagenPrincipal) {
+            items.push({
+              id: producto.ml_id || producto._id,
+                ml_id: producto.ml_id,
+              title: producto.title,
+              price: producto.price,
+              image: getOptimizedImageUrl(imagenPrincipal),
+              stock: effectiveStock,
+              esVariante: false,
+              productoPadre: producto,
+              categoria: categoria,
+              isPaused: isPaused
+            })
+          }
         }
       })
       

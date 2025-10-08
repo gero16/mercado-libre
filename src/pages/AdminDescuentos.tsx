@@ -217,6 +217,25 @@ const AdminDescuentos: React.FC = () => {
                     className="producto-imagen"
                   />
                   <div className="producto-info">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <span 
+                        className={`badge ${
+                          producto.status === 'active' ? 'badge-active' : 
+                          producto.status === 'paused' ? 'badge-paused' : 
+                          'badge-closed'
+                        }`}
+                      >
+                        {producto.status === 'active' ? '✓ Activo' : 
+                         producto.status === 'paused' ? '⏸ Pausado' : 
+                         '🔒 Cerrado'}
+                      </span>
+                      <span className="badge badge-stock" style={{
+                        background: producto.available_quantity > 0 ? '#e8f5e9' : '#ffebee',
+                        color: producto.available_quantity > 0 ? '#2e7d32' : '#c62828'
+                      }}>
+                        Stock: {producto.available_quantity}
+                      </span>
+                    </div>
                     <h3 className="producto-titulo">{producto.title}</h3>
                     <div className="producto-precios">
                       <span className="precio-original">${producto.precio_original}</span>
@@ -224,6 +243,20 @@ const AdminDescuentos: React.FC = () => {
                       <span className="badge-descuento">-{producto.porcentaje}%</span>
                     </div>
                     <p className="producto-ahorro">Ahorro: ${producto.ahorro}</p>
+                    {producto.status !== 'active' && (
+                      <p style={{ 
+                        fontSize: '0.85rem', 
+                        color: '#f57c00', 
+                        fontWeight: '600',
+                        margin: '8px 0',
+                        padding: '6px',
+                        background: '#fff3e0',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}>
+                        ⚠️ Este producto no se muestra en la tienda
+                      </p>
+                    )}
                     <button 
                       className="btn btn-danger"
                       onClick={() => handleQuitarDescuento(producto.ml_id)}

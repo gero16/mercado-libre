@@ -217,6 +217,8 @@
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
   flex-shrink: 0;
+  z-index: 10;
+  position: relative;
 }
 
 .discounted-products .carousel-arrow:hover {
@@ -227,6 +229,12 @@
 
 .discounted-products .carousel-arrow:active {
   transform: scale(0.95);
+}
+
+.discounted-products .carousel-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* ==========================================
