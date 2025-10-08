@@ -233,7 +233,7 @@ const TiendaMLPage: React.FC = () => {
   
   // 🚀 Estados para paginación
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(100)
+  const [itemsPerPage, setItemsPerPage] = useState(50)
   const [totalPages, setTotalPages] = useState(1)
   const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
   const [isChangingPage, setIsChangingPage] = useState(false)
@@ -836,7 +836,7 @@ const TiendaMLPage: React.FC = () => {
                       <p style={{ 
                         color: '#d32f2f',
                         fontWeight: '700',
-                        fontSize: '1.4rem',
+                        fontSize: '1rem',
                         margin: '0',
                         lineHeight: '1'
                       }}>
