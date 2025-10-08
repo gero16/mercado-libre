@@ -9,7 +9,6 @@ const AdminCupones: React.FC = () => {
   
   // Estados para crear/editar cupón
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
-  const [editando, setEditando] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     codigo: '',
     descripcion: '',
@@ -59,7 +58,6 @@ const AdminCupones: React.FC = () => {
       monto_minimo_compra: '',
       limite_por_usuario: 1
     })
-    setEditando(null)
     setMostrarFormulario(false)
   }
 
