@@ -831,7 +831,7 @@ const TiendaMLPage: React.FC = () => {
                         margin: '0',
                         lineHeight: '1'
                       }}>
-                        ${precioOriginal}
+                        US$ {precioOriginal}
                       </p>
                       <p style={{ 
                         color: '#d32f2f',
@@ -840,11 +840,11 @@ const TiendaMLPage: React.FC = () => {
                         margin: '0',
                         lineHeight: '1'
                       }}>
-                        ${item.price}
+                        US$ {item.price}
                       </p>
                     </div>
                   ) : (
-                    <p style={{ margin: '0' }}>${item.price}</p>
+                    <p style={{ margin: '0' }}>US$ {item.price}</p>
                   )}
                 </div>
                 <button 

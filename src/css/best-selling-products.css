@@ -114,9 +114,9 @@ body.dark-mode .best-selling-products .section-subtitle {
 }
 
 .best-selling-products .carousel-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 10px;
+  height: 18px;
+  border-radius: 10px;
   border: 2px solid var(--color-primary);
   background: transparent;
   cursor: pointer;

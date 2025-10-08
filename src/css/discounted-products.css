@@ -241,11 +241,11 @@
 }
 
 .discounted-products .carousel-indicator {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 18px;
   background: #e0e0e0;
   border: none;
-  border-radius: 50%;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
@@ -257,8 +257,9 @@
 }
 
 .discounted-products .carousel-indicator.active {
-  width: 36px;
-  border-radius: 6px;
+  width: 10px;
+  height: 24px;
+  border-radius: 10px;
   background: #d32f2f;
 }
 

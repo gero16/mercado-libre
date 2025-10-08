@@ -325,7 +325,7 @@ const DetalleProductoPage: React.FC = () => {
           
 
               <div className="precio-disponibilidad">
-                <h2 className='h2-precio'>${varianteSeleccionada?.price || producto.price}</h2>
+                <h2 className='h2-precio'>US$ {varianteSeleccionada?.price || producto.price}</h2>
                 <p className={`disponibilidad p-precio-detalle ${isProductPaused ? 'paused' : 'available'}`}>
                   {isProductPaused ? 'Producto pausado' : 'Disponible'}
                 </p>
@@ -349,7 +349,7 @@ const DetalleProductoPage: React.FC = () => {
                       onClick={() => handleVarianteChange(variante)}
                     >
                       <p><strong>{variante.color}</strong></p>
-                      <p>${variante.price}</p>
+                      <p>US$ {variante.price}</p>
                     </div>
                   ))}
                 </div>

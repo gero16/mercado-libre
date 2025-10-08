@@ -84,9 +84,9 @@
 }
 
 .carousel-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 10px;
+  height: 18px;
+  border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.8);
   background: transparent;
   cursor: pointer;
@@ -128,8 +128,8 @@
   }
   
   .carousel-dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 14px;
   }
 }
 
