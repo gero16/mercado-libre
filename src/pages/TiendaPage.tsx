@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
@@ -224,6 +224,8 @@ const TiendaMLPage: React.FC = () => {
     (location.state as any)?.categoryFilter || 'mostrar-todo'
   )
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [allProductsLoaded, setAllProductsLoaded] = useState(false)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
     { id: 'mostrar-todo', name: 'Mostrar Todo' },
     { id: 'destacados', name: '⭐ Productos Destacados' },
@@ -231,9 +233,9 @@ const TiendaMLPage: React.FC = () => {
     { id: 'con-descuento', name: '🔥 Con Descuento' }
   ])
   
-  // 🚀 Estados para paginación
+  // 🚀 Estados para paginación (24 items para carga inicial más rápida)
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(50)
+  const [itemsPerPage, setItemsPerPage] = useState(24)
   const [totalPages, setTotalPages] = useState(1)
   const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
   const [isChangingPage, setIsChangingPage] = useState(false)
@@ -264,22 +266,164 @@ const TiendaMLPage: React.FC = () => {
     return url
   }
 
-  // Fetch productos de Mercado Libre desde el backend
+  // Fetch productos de Mercado Libre con caché mejorado
   const fetchProducts = async (): Promise<ProductoML[]> => {
+    const CACHE_KEY = 'ml_productos_cache_v2' // v2 para evitar caché antiguo
+    const CACHE_TIME_KEY = 'ml_productos_cache_time_v2'
+    const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
+    
     try {
+      // 🔍 Verificar caché válido
+      const cachedData = localStorage.getItem(CACHE_KEY)
+      const cacheTime = localStorage.getItem(CACHE_TIME_KEY)
+      
+      if (cachedData && cacheTime) {
+        const cacheAge = Date.now() - parseInt(cacheTime)
+        
+        if (cacheAge < CACHE_DURATION) {
+          try {
+            const parsed = JSON.parse(cachedData)
+            // Validar que sea un array con datos
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              console.log('✅ Usando caché (válido por', Math.round((CACHE_DURATION - cacheAge) / 1000), 'segundos más)')
+              return parsed
+            }
+          } catch (parseError) {
+            console.warn('⚠️ Caché corrupto, limpiando...')
+            localStorage.removeItem(CACHE_KEY)
+            localStorage.removeItem(CACHE_TIME_KEY)
+          }
+        } else {
+          console.log('⏰ Caché expirado, renovando...')
+        }
+      }
+      
+      // Si no hay caché válido, fetch desde API
+      console.log('📡 Cargando productos desde servidor...')
       const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const data = await response.json()
-      console.log('🔍 Productos recibidos:', data)
-      return data || []
+      
+      // Validar respuesta
+      if (!Array.isArray(data)) {
+        console.error('❌ Respuesta inválida del servidor')
+        return []
+      }
+      
+      console.log('✅ Productos cargados:', data.length)
+      
+      // Guardar en caché solo los datos esenciales (comprimido)
+      if (data.length > 0) {
+        try {
+          // Reducir tamaño: guardar solo campos necesarios
+          const compressedData = data.map(p => ({
+            _id: p._id,
+            ml_id: p.ml_id,
+            title: p.title,
+            price: p.price,
+            status: p.status,
+            category_id: p.category_id,
+            available_quantity: p.available_quantity,
+            sold_quantity: p.sold_quantity,
+            images: p.images?.slice(0, 1), // Solo primera imagen
+            main_image: p.main_image,
+            variantes: p.variantes?.map(v => ({
+              color: v.color,
+              size: v.size,
+              price: v.price,
+              stock: v.stock,
+              images: v.images?.slice(0, 1) // Solo primera imagen
+            })),
+            descuento: p.descuento,
+            health: p.health,
+            metrics: {
+              visits: p.metrics?.visits,
+              reviews: {
+                total: p.metrics?.reviews?.total,
+                rating_average: p.metrics?.reviews?.rating_average
+              }
+            }
+          }))
+          
+          const cacheString = JSON.stringify(compressedData)
+          const cacheSizeKB = (cacheString.length / 1024).toFixed(2)
+          
+          localStorage.setItem(CACHE_KEY, cacheString)
+          localStorage.setItem(CACHE_TIME_KEY, Date.now().toString())
+          console.log(`💾 Caché guardado: ${cacheSizeKB}KB (${data.length} productos)`)
+        } catch (storageError) {
+          console.error('❌ No se pudo guardar en caché:', storageError)
+          // Si falla, intentar guardar solo los primeros 500 productos
+          try {
+            const limitedData = data.slice(0, 500).map(p => ({
+              _id: p._id,
+              ml_id: p.ml_id,
+              title: p.title,
+              price: p.price,
+              status: p.status,
+              category_id: p.category_id,
+              available_quantity: p.available_quantity,
+              images: p.images?.slice(0, 1),
+              main_image: p.main_image,
+              variantes: p.variantes?.map(v => ({
+                color: v.color,
+                size: v.size,
+                price: v.price,
+                stock: v.stock,
+                images: v.images?.slice(0, 1)
+              }))
+            }))
+            localStorage.setItem(CACHE_KEY, JSON.stringify(limitedData))
+            localStorage.setItem(CACHE_TIME_KEY, Date.now().toString())
+            console.log('⚠️ Caché parcial guardado: primeros 500 productos')
+          } catch {
+            console.error('❌ Imposible guardar caché, localStorage lleno')
+          }
+        }
+      }
+      
+      return data
     } catch (error) {
-      console.error('Error fetching ML products:', error)
+      console.error('❌ Error cargando productos:', error)
+      
+      // Fallback: intentar usar caché expirado
+      const cachedData = localStorage.getItem(CACHE_KEY)
+      if (cachedData) {
+        try {
+          const parsed = JSON.parse(cachedData)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.log('⚠️ Usando caché expirado por error de red')
+            return parsed
+          }
+        } catch {
+          localStorage.removeItem(CACHE_KEY)
+          localStorage.removeItem(CACHE_TIME_KEY)
+        }
+      }
+      
       return []
     }
   }
 
   useEffect(() => {
     const loadProducts = async () => {
-      const productList = await fetchProducts()
+      const startTime = performance.now()
+      console.log('⏱️ Iniciando carga RÁPIDA (primeros 50 productos)...')
+      
+      // 🚀 FASE 1: Cargar y mostrar solo los primeros 50 productos (RÁPIDO)
+      const allProducts = await fetchProducts()
+      const fetchTime = performance.now()
+      console.log(`📡 Fetch completado en: ${(fetchTime - startTime).toFixed(0)}ms`)
+      console.log('🔍 Total productos recibidos:', allProducts.length)
+      
+      // Procesar solo los primeros 50 para mostrar rápido
+      const first50Products = allProducts.slice(0, 50)
+      console.log('⚡ Procesando primeros 50 productos para carga rápida...')
+      const productList = first50Products
       
       // Procesar productos para crear items únicos para la tienda
       const items: ItemTienda[] = []
@@ -388,7 +532,93 @@ const TiendaMLPage: React.FC = () => {
         ...categoriasFiltro
       ])
       
+      const endTime = performance.now()
+      const totalTime = endTime - startTime
+      console.log(`✅ Carga INICIAL (50 productos) completada en: ${totalTime.toFixed(0)}ms`)
+      console.log(`   - Fetch API: ${(fetchTime - startTime).toFixed(0)}ms`)
+      console.log(`   - Procesamiento: ${(endTime - fetchTime).toFixed(0)}ms`)
+      
       setLoading(false)
+      
+      // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI)
+      if (allProducts.length > 50) {
+        console.log(`🔄 Cargando ${allProducts.length - 50} productos restantes en segundo plano...`)
+        setLoadingMore(true)
+        
+        setTimeout(() => {
+          const backgroundStart = performance.now()
+          const remainingProducts = allProducts.slice(50)
+          const remainingItems: ItemTienda[] = []
+          
+          remainingProducts.forEach(producto => {
+            const categoria = obtenerCategoria(producto.category_id)
+            const isPaused = producto.status === 'paused'
+            
+            if (producto.variantes && producto.variantes.length > 0) {
+              const variantesUnicas = producto.variantes.reduce((unique: Variante[], variante) => {
+                if (!unique.some(v => v.color === variante.color)) {
+                  unique.push(variante);
+                }
+                return unique;
+              }, []);
+              
+              variantesUnicas.forEach(variante => {
+                const imagenVariante = variante.images && variante.images.length > 0 
+                  ? variante.images[0].url 
+                  : producto.images[0]?.url || producto.main_image;
+                
+                const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
+                
+                if (imagenVariante) {
+                  remainingItems.push({
+                    id: `${producto.ml_id || producto._id}_${variante.color}`,
+                    ml_id: producto.ml_id,
+                    title: `${producto.title} - ${variante.color || ''}`.trim(),
+                    price: variante.price || producto.price,
+                    image: getOptimizedImageUrl(imagenVariante),
+                    stock: effectiveStock,
+                    esVariante: true,
+                    variante: variante,
+                    productoPadre: producto,
+                    categoria: categoria,
+                    isPaused: isPaused
+                  })
+                }
+              })
+            } else {
+              const effectiveStock = isPaused ? 0 : producto.available_quantity;
+              const imagenPrincipal = producto.images[0]?.url || producto.main_image;
+              
+              if (imagenPrincipal) {
+                remainingItems.push({
+                  id: producto.ml_id || producto._id,
+                  ml_id: producto.ml_id,
+                  title: producto.title,
+                  price: producto.price,
+                  image: getOptimizedImageUrl(imagenPrincipal),
+                  stock: effectiveStock,
+                  esVariante: false,
+                  productoPadre: producto,
+                  categoria: categoria,
+                  isPaused: isPaused
+                })
+              }
+            }
+          })
+          
+          const backgroundEnd = performance.now()
+          console.log(`✅ Productos restantes cargados en: ${(backgroundEnd - backgroundStart).toFixed(0)}ms`)
+          
+          setItemsTienda(prev => [...prev, ...remainingItems])
+          setFilteredItems(prev => [...prev, ...remainingItems])
+          setLoadingMore(false)
+          setAllProductsLoaded(true)
+          
+          console.log(`🎉 TODOS los productos cargados (${allProducts.length} total)`)
+        }, 100) // Pequeño delay para no bloquear UI
+      } else {
+        setAllProductsLoaded(true)
+      }
     }
     loadProducts()
   }, [])
@@ -814,7 +1044,15 @@ const TiendaMLPage: React.FC = () => {
                     -{porcentajeDescuento}%
                   </div>
                 )}
-                <img src={item.image} alt={item.title} />
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  loading="lazy"
+                  decoding="async"
+                  style={{
+                    willChange: 'auto'
+                  }}
+                />
                 <p>{item.title}</p>
                 <div style={{ 
                   display: 'flex', 

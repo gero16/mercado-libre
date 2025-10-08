@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Caché - Tienda</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .success {
+            color: #28a745;
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        .message {
+            color: #666;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success">✅</div>
+        <h1>Caché Limpiado</h1>
+        <div class="message">
+            <p>El caché de productos ha sido eliminado correctamente.</p>
+            <p>Ahora puedes volver a la tienda y los productos se cargarán desde el servidor.</p>
+        </div>
+        <button onclick="window.close()">Cerrar esta ventana</button>
+        <br><br>
+        <a href="/" style="color: #667eea; text-decoration: none;">← Volver a la tienda</a>
+    </div>
+
+    <script>
+        // Limpiar localStorage
+        localStorage.removeItem('ml_productos_cache');
+        localStorage.removeItem('ml_productos_cache_time');
+        console.log('✅ Caché de productos eliminado');
+        console.log('📝 LocalStorage actual:', localStorage);
+    </script>
+</body>
+</html>
+
