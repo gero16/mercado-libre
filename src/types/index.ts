@@ -77,6 +77,15 @@ export interface ProductoML {
       total: number;
     };
   };
+  // Atributos estructurados de ML
+  attributes?: Array<{
+    id: string;
+    name: string;
+    value_id: string;
+    value_name: string;
+  }>;
+  warranty?: string;
+  condition?: string;
   // Nuevas propiedades para dropshipping
   dias_preparacion?: number;
   dias_envio_estimado?: number;

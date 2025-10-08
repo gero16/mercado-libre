@@ -15,6 +15,7 @@ const DetalleProductoPage: React.FC = () => {
   const [cantidad, setCantidad] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [imagenPrincipalIndex, setImagenPrincipalIndex] = useState(0)
 
   useEffect(() => {
     if (id) {
@@ -70,6 +71,7 @@ const DetalleProductoPage: React.FC = () => {
 
   const handleVarianteChange = (variante: Variante) => {
     setVarianteSeleccionada(variante)
+    setImagenPrincipalIndex(0) // Resetear a la primera imagen
     
     // Seleccionar el primer talle disponible para este color
     if (producto?.variantes) {
@@ -187,15 +189,20 @@ const DetalleProductoPage: React.FC = () => {
     setCartOpen(true) // Abrir el carrito para mostrar el producto agregado
   }
 
+  // Obtener todas las imágenes disponibles
+  const getImagenesDisponibles = (): string[] => {
+    if (varianteSeleccionada && varianteSeleccionada.images && varianteSeleccionada.images.length > 0) {
+      return varianteSeleccionada.images.map(img => img.url);
+    } else if (producto?.images && producto.images.length > 0) {
+      return producto.images.map(img => img.url);
+    }
+    return producto?.main_image ? [producto.main_image] : [];
+  }
+
   // Obtener la imagen principal a mostrar
   const getImagenPrincipal = (): string => {
-    let imagenUrl = '';
-    
-    if (varianteSeleccionada && varianteSeleccionada.images && varianteSeleccionada.images.length > 0) {
-      imagenUrl = varianteSeleccionada.images[0].url;
-    } else {
-      imagenUrl = producto?.images[0]?.url || producto?.main_image || '';
-    }
+    const imagenesDisponibles = getImagenesDisponibles();
+    let imagenUrl = imagenesDisponibles[imagenPrincipalIndex] || imagenesDisponibles[0] || producto?.main_image || '';
     
     // Redimensionar imagen de Mercado Libre a 250x250 (un poco más grande)
     if (imagenUrl.includes('mlb-s1-p.mlstatic.com') || imagenUrl.includes('mlb-s2-p.mlstatic.com')) {
@@ -204,6 +211,11 @@ const DetalleProductoPage: React.FC = () => {
     }
     
     return imagenUrl;
+  }
+
+  // Función para cambiar la imagen principal
+  const handleImagenClick = (index: number) => {
+    setImagenPrincipalIndex(index);
   }
 
   // Verificar si el producto está pausado
@@ -297,8 +309,25 @@ const DetalleProductoPage: React.FC = () => {
 
         <div className="producto-detalle">
           {/* Imagen del producto */}
-          <div className="imagen-producto">
-            <img src={getImagenPrincipal()} alt={producto.title} />
+          <div className="imagen-container">
+            <div className="imagen-producto">
+              <img src={getImagenPrincipal()} alt={producto.title} />
+            </div>
+
+            {/* Galería de miniaturas */}
+            {getImagenesDisponibles().length > 1 && (
+              <div className="galeria-miniaturas">
+                {getImagenesDisponibles().map((imagen, index) => (
+                  <div
+                    key={index}
+                    className={`miniatura ${imagenPrincipalIndex === index ? 'activa' : ''}`}
+                    onClick={() => handleImagenClick(index)}
+                  >
+                    <img src={imagen} alt={`${producto.title} - imagen ${index + 1}`} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Información del producto */}
@@ -379,11 +408,38 @@ const DetalleProductoPage: React.FC = () => {
             )}
 
 
+            {/* Características principales */}
+            {producto.attributes && producto.attributes.length > 0 && (
+              <div className="caracteristicas">
+                <h3>Características</h3>
+                <div className="lista-caracteristicas">
+                  {producto.attributes.slice(0, 8).map((attr) => (
+                    <div key={attr.id} className="caracteristica-item">
+                      <span className="caracteristica-nombre">{attr.name}:</span>
+                      <span className="caracteristica-valor">{attr.value_name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Garantía */}
+            {producto.warranty && (
+              <div className="garantia">
+                <h3>Garantía</h3>
+                <p>{producto.warranty}</p>
+              </div>
+            )}
+
             {/* Descripción */}
             {producto.description && (
               <div className="descripcion">
                 <h3>Descripción</h3>
-                <p>{producto.description}</p>
+                <div className="descripcion-texto">
+                  {producto.description.split('\n').map((linea, index) => (
+                    <p key={index}>{linea || '\u00A0'}</p>
+                  ))}
+                </div>
               </div>
             )}
 
