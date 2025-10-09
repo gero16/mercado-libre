@@ -582,9 +582,69 @@ footer img {
 }
 
 /* Responsive para el enlace de admin */
+/* Responsive para móviles */
 @media (max-width: 768px) {
+  header {
+    height: auto;
+    min-height: 60px;
+    padding: 8px 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    max-width: 35px;
+    margin-left: 5px;
+  }
+
+  .navbar {
+    min-width: unset;
+    width: auto;
+    flex: 1;
+    font-size: 11px;
+  }
+
+  .navbar ul {
+    gap: 4px;
+    margin-right: 5px;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+
+  .navbar ul li a {
+    font-size: 10px;
+    padding: 4px 6px;
+    white-space: nowrap;
+  }
+
+  .carrito {
+    width: 22px;
+    height: 22px;
+  }
+
+  .numero-compras {
+    font-size: 7px;
+    top: -6px;
+    left: -6px;
+  }
+
   .admin-link {
-    padding: 6px 10px !important;
-    font-size: 12px !important;
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .navbar ul {
+    gap: 5px;
+  }
+
+  .navbar ul li a {
+    font-size: 10px;
+    padding: 3px 5px;
   }
 }
