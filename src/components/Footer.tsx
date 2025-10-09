@@ -30,10 +30,18 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="redes-sociales">
-            <img src="/img/instagram.png" alt="logo-instagram" />
-            <img src="/img/facebook.png" alt="logo-facebook" />
-            <img src="/img/whatsapp.png" alt="logo-whatsapp" />
-
+            <a href="https://instagram.com/poppyshopuy" target="_blank" rel="noopener noreferrer" className="social-link">
+              <img src="/img/instagram.png" alt="logo-instagram" />
+              <span>@poppyshopuy</span>
+            </a>
+            <a href="https://facebook.com/poppyshopuy" target="_blank" rel="noopener noreferrer" className="social-link">
+              <img src="/img/facebook.png" alt="logo-facebook" />
+              <span>Poppy Shop Uruguay</span>
+            </a>
+            <a href="https://wa.me/59892701630?text=%C2%A1Hola!%Poppy%20Shop!%Tengo%una%consulta...%" target="_blank" rel="noopener noreferrer" className="social-link">
+              <img src="/img/whatsapp.png" alt="logo-whatsapp" />
+              <span>092 701 630</span>
+            </a>
           </div>
         </div>
       </div>

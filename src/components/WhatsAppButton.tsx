@@ -2,11 +2,10 @@ import React from 'react'
 
 const WhatsAppButton: React.FC = () => {
   // Número de WhatsApp (formato internacional sin +, espacios ni guiones)
-  // Ejemplo: 5491112345678 para Argentina (+54 9 11 1234-5678)
-  const phoneNumber = '5491112345678' // 👈 Cambiar por tu número real
+  const phoneNumber = '59892701630' // Uruguay: 598 + número sin 0
   
-  // Mensaje predeterminado (opcional)
-  const defaultMessage = '¡Hola! Me gustaría obtener más información sobre sus productos.'
+  // Mensaje predeterminado
+  const defaultMessage = '¡Hola! Estoy interesado en sus productos. ¿Podrían brindarme más información?'
   
   // URL de WhatsApp API
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`

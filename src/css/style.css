@@ -434,12 +434,35 @@ footer img {
 
 .redes-sociales {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.redes-sociales img {
-  width: 25px;
-  height: 25px;
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.3s ease;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.social-link:hover {
+  background: rgba(254, 159, 1, 0.1);
+  transform: translateX(5px);
+}
+
+.social-link img {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.social-link span {
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
   /*** PANTALLA DE CARGA ***/
