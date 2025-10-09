@@ -1,5 +1,5 @@
 .instagram-section {
-  padding: 60px 20px;
+  padding: 50px 20px;
   background: #f8f9fa;
   position: relative;
   overflow: hidden;
@@ -28,18 +28,18 @@ body.dark-mode .instagram-section {
 
 .instagram-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 35px;
 }
 
 .instagram-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -49,8 +49,8 @@ body.dark-mode .instagram-title {
 }
 
 .instagram-icon {
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -64,7 +64,7 @@ body.dark-mode .instagram-title {
 }
 
 .instagram-subtitle {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #666;
   font-weight: 400;
 }
@@ -79,6 +79,50 @@ body.dark-mode .instagram-subtitle {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   animation: fadeInUp 0.8s ease-out;
+}
+
+/* Grid para embeds de Instagram */
+.instagram-grid-embeds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Wrapper para cada embed */
+.instagram-embed-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Limitar el tamaño de los embeds de Instagram */
+.instagram-embed-wrapper .instagram-media {
+  max-width: 100% !important;
+  min-width: 280px !important;
+  transform: scale(0.7);
+  transform-origin: top center;
+}
+
+/* Modo compacto - Solo mostrar imagen/video, cortar el resto */
+.instagram-compact .instagram-embed-wrapper {
+  max-height: 320px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.instagram-compact .instagram-media {
+  margin: 0 !important;
+}
+
+/* Estilo para la captura de pantalla mezclada con embeds */
+.instagram-screenshot {
+  height: 100%;
+  min-height: 300px;
 }
 
 @keyframes fadeInUp {
@@ -176,6 +220,19 @@ body.dark-mode .instagram-subtitle {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
   }
+  
+  .instagram-grid-embeds {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .instagram-compact .instagram-embed-wrapper {
+    max-height: 350px;
+  }
+  
+  .instagram-embed-wrapper .instagram-media {
+    transform: scale(0.75);
+  }
 
   .instagram-item:hover {
     transform: translateY(-5px) scale(1.01);
@@ -196,6 +253,19 @@ body.dark-mode .instagram-subtitle {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
+  
+  .instagram-grid-embeds {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .instagram-compact .instagram-embed-wrapper {
+    max-height: 300px;
+  }
+  
+  .instagram-embed-wrapper .instagram-media {
+    transform: scale(0.7);
+  }
 }
 
 /* Tablets y pantallas medianas */
@@ -203,12 +273,58 @@ body.dark-mode .instagram-subtitle {
   .instagram-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  .instagram-grid-embeds {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .instagram-embed-wrapper .instagram-media {
+    transform: scale(0.65);
+  }
+  
+  .instagram-compact .instagram-embed-wrapper {
+    max-height: 280px;
+  }
 }
 
 /* Pantallas grandes */
 @media (min-width: 1025px) {
   .instagram-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .instagram-grid-embeds {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .instagram-embed-wrapper .instagram-media {
+    transform: scale(0.7);
+  }
+  
+  .instagram-compact .instagram-embed-wrapper {
+    max-height: 300px;
+  }
+}
+
+/* Pantallas extra grandes */
+@media (min-width: 1400px) {
+  .instagram-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1000px;
+  }
+  
+  .instagram-grid-embeds {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .instagram-embed-wrapper .instagram-media {
+    transform: scale(0.75);
+  }
+  
+  .instagram-compact .instagram-embed-wrapper {
+    max-height: 320px;
   }
 }
 

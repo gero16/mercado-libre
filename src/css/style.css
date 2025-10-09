@@ -435,13 +435,14 @@ footer img {
 .redes-sociales {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 5px;
+  margin-right: 80px;
 }
 
 .social-link {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   text-decoration: none;
   color: #333;
   transition: all 0.3s ease;
@@ -455,14 +456,15 @@ footer img {
 }
 
 .social-link img {
-  width: 28px;
-  height: 28px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
 .social-link span {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   font-weight: 500;
+  font-family: 'Roboto Slab', serif;
 }
 
   /*** PANTALLA DE CARGA ***/

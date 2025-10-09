@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="footer">
-          <p>© Copyright 2023 / Poppy Shop Uruguay </p>
+          <p>© Copyright 2025 / Poppy Shop Uruguay </p>
        
           <div className="preguntas">
             <p>Terminos y Condiciones</p>
@@ -31,11 +31,11 @@ const Footer: React.FC = () => {
 
           <div className="redes-sociales">
             <a href="https://instagram.com/poppyshopuy" target="_blank" rel="noopener noreferrer" className="social-link">
-              <img src="/img/instagram.png" alt="logo-instagram" />
+              <img src="https://res.cloudinary.com/geronicola/image/upload/v1759325974/dodgeball/adh6vtxq60nmkhunw9n9.png" alt="logo-instagram" />
               <span>@poppyshopuy</span>
             </a>
             <a href="https://facebook.com/poppyshopuy" target="_blank" rel="noopener noreferrer" className="social-link">
-              <img src="/img/facebook.png" alt="logo-facebook" />
+              <img src="https://res.cloudinary.com/geronicola/image/upload/v1759325974/dodgeball/yvzfdz5pyj6fybkv9p96.png" alt="logo-facebook" />
               <span>Poppy Shop Uruguay</span>
             </a>
             <a href="https://wa.me/59892701630?text=%C2%A1Hola!%Poppy%20Shop!%Tengo%una%consulta...%" target="_blank" rel="noopener noreferrer" className="social-link">
