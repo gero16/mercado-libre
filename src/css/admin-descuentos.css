@@ -13,7 +13,7 @@
   margin: 0 auto;
 }
 
-.admin-title {
+.admin-descuentos .admin-title {
   font-size: 2.5rem;
   font-weight: 800;
   color: #2c3e50;
@@ -22,20 +22,17 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* ==========================================
-   MENSAJES
-   ========================================== */
-
-.mensaje {
+/* === MENSAJES === */
+.admin-descuentos .mensaje {
   padding: 15px 20px;
   border-radius: 10px;
   margin-bottom: 30px;
   font-weight: 600;
   text-align: center;
-  animation: slideDown 0.3s ease;
+  animation: slideDownDescuentos 0.3s ease;
 }
 
-@keyframes slideDown {
+@keyframes slideDownDescuentos {
   from {
     opacity: 0;
     transform: translateY(-20px);
@@ -46,24 +43,21 @@
   }
 }
 
-.mensaje-success {
+.admin-descuentos .mensaje-success {
   background: #d4edda;
   color: #155724;
   border: 2px solid #c3e6cb;
 }
 
-.mensaje-error {
+.admin-descuentos .mensaje-error {
   background: #f8d7da;
   color: #721c24;
   border: 2px solid #f5c6cb;
 }
 
-/* ==========================================
-   SECCIONES
-   ========================================== */
-
-.seccion-descuentos-activos,
-.seccion-aplicar-descuentos {
+/* === SECCIONES === */
+.admin-descuentos .seccion-descuentos-activos,
+.admin-descuentos .seccion-aplicar-descuentos {
   background: white;
   border-radius: 20px;
   padding: 30px;
@@ -71,7 +65,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
-.seccion-titulo {
+.admin-descuentos .seccion-titulo {
   font-size: 1.8rem;
   font-weight: 700;
   color: #2c3e50;
@@ -80,24 +74,21 @@
   border-bottom: 3px solid #3498db;
 }
 
-.texto-vacio {
+.admin-descuentos .texto-vacio {
   text-align: center;
   color: #7f8c8d;
   font-size: 1.1rem;
   padding: 40px;
 }
 
-/* ==========================================
-   PRODUCTOS CON DESCUENTO ACTIVO
-   ========================================== */
-
-.productos-grid {
+/* === PRODUCTOS CON DESCUENTO ACTIVO === */
+.admin-descuentos .productos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 25px;
 }
 
-.producto-descuento-card {
+.admin-descuentos .producto-descuento-card {
   background: white;
   border-radius: 15px;
   overflow: hidden;
@@ -106,23 +97,23 @@
   border: 2px solid #ecf0f1;
 }
 
-.producto-descuento-card:hover {
+.admin-descuentos .producto-descuento-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   border-color: #3498db;
 }
 
-.producto-imagen {
+.admin-descuentos .producto-imagen {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
 
-.producto-info {
+.admin-descuentos .producto-info {
   padding: 20px;
 }
 
-.producto-titulo {
+.admin-descuentos .producto-titulo {
   font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
@@ -134,7 +125,7 @@
   -webkit-box-orient: vertical;
 }
 
-.producto-precios {
+.admin-descuentos .producto-precios {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -142,19 +133,19 @@
   flex-wrap: wrap;
 }
 
-.precio-original {
+.admin-descuentos .precio-original {
   text-decoration: line-through;
   color: #95a5a6;
   font-size: 0.9rem;
 }
 
-.precio-descuento {
+.admin-descuentos .precio-descuento {
   font-size: 1.5rem;
   font-weight: 700;
   color: #e74c3c;
 }
 
-.badge-descuento {
+.admin-descuentos .badge-descuento {
   background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
   padding: 5px 12px;
@@ -163,42 +154,39 @@
   font-weight: 700;
 }
 
-.producto-ahorro {
+.admin-descuentos .producto-ahorro {
   color: #27ae60;
   font-weight: 600;
   margin-bottom: 15px;
 }
 
-/* ==========================================
-   CONTROLES
-   ========================================== */
-
-.controles {
+/* === CONTROLES === */
+.admin-descuentos .controles {
   display: flex;
   flex-direction: column;
   gap: 25px;
   margin-bottom: 30px;
 }
 
-.control-grupo {
+.admin-descuentos .control-grupo {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.control-grupo label {
+.admin-descuentos .control-grupo label {
   font-weight: 600;
   color: #2c3e50;
   font-size: 1.1rem;
 }
 
-.input-con-slider {
+.admin-descuentos .input-con-slider {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.slider {
+.admin-descuentos .slider {
   flex: 1;
   height: 8px;
   border-radius: 5px;
@@ -207,7 +195,7 @@
   -webkit-appearance: none;
 }
 
-.slider::-webkit-slider-thumb {
+.admin-descuentos .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 25px;
@@ -218,7 +206,7 @@
   box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
 }
 
-.slider::-moz-range-thumb {
+.admin-descuentos .slider::-moz-range-thumb {
   width: 25px;
   height: 25px;
   border-radius: 50%;
@@ -228,14 +216,14 @@
   border: none;
 }
 
-.porcentaje-valor {
+.admin-descuentos .porcentaje-valor {
   font-size: 1.5rem;
   font-weight: 700;
   color: #3498db;
   min-width: 60px;
 }
 
-.input-buscar {
+.admin-descuentos .input-buscar {
   width: 100%;
   padding: 15px 20px;
   border: 2px solid #ecf0f1;
@@ -244,23 +232,20 @@
   transition: all 0.3s ease;
 }
 
-.input-buscar:focus {
+.admin-descuentos .input-buscar:focus {
   outline: none;
   border-color: #3498db;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-/* ==========================================
-   ACCIONES
-   ========================================== */
-
-.acciones {
+/* === ACCIONES === */
+.admin-descuentos .acciones {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
 }
 
-.btn {
+.admin-descuentos .btn {
   padding: 12px 30px;
   border: none;
   border-radius: 10px;
@@ -272,50 +257,47 @@
   letter-spacing: 0.5px;
 }
 
-.btn:disabled {
+.admin-descuentos .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.btn-primary {
+.admin-descuentos .btn-primary {
   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
-.btn-primary:hover:not(:disabled) {
+.admin-descuentos .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
 }
 
-.btn-secondary {
+.admin-descuentos .btn-secondary {
   background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
 }
 
-.btn-secondary:hover {
+.admin-descuentos .btn-secondary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
 }
 
-.btn-danger {
+.admin-descuentos .btn-danger {
   background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
   width: 100%;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
 }
 
-.btn-danger:hover {
+.admin-descuentos .btn-danger:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
 }
 
-/* ==========================================
-   LISTA DE PRODUCTOS
-   ========================================== */
-
-.productos-lista {
+/* === LISTA DE PRODUCTOS === */
+.admin-descuentos .productos-lista {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -324,21 +306,21 @@
   padding-right: 10px;
 }
 
-.productos-lista::-webkit-scrollbar {
+.admin-descuentos .productos-lista::-webkit-scrollbar {
   width: 8px;
 }
 
-.productos-lista::-webkit-scrollbar-track {
+.admin-descuentos .productos-lista::-webkit-scrollbar-track {
   background: #ecf0f1;
   border-radius: 10px;
 }
 
-.productos-lista::-webkit-scrollbar-thumb {
+.admin-descuentos .productos-lista::-webkit-scrollbar-thumb {
   background: #3498db;
   border-radius: 10px;
 }
 
-.producto-item {
+.admin-descuentos .producto-item {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -350,48 +332,48 @@
   border: 2px solid transparent;
 }
 
-.producto-item:hover {
+.admin-descuentos .producto-item:hover {
   background: #e8f4f8;
   border-color: #3498db;
 }
 
-.producto-item.seleccionado {
+.admin-descuentos .producto-item.seleccionado {
   background: #d4e6f1;
   border-color: #3498db;
 }
 
-.checkbox {
+.admin-descuentos .checkbox {
   width: 20px;
   height: 20px;
   cursor: pointer;
 }
 
-.producto-mini-imagen {
+.admin-descuentos .producto-mini-imagen {
   width: 60px;
   height: 60px;
   object-fit: cover;
   border-radius: 8px;
 }
 
-.producto-detalles {
+.admin-descuentos .producto-detalles {
   flex: 1;
 }
 
-.producto-detalles h4 {
+.admin-descuentos .producto-detalles h4 {
   font-size: 0.95rem;
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 5px;
 }
 
-.producto-precio {
+.admin-descuentos .producto-precio {
   font-size: 1.1rem;
   font-weight: 700;
   color: #27ae60;
   margin: 0;
 }
 
-.badge-activo {
+.admin-descuentos .badge-activo {
   display: inline-block;
   background: #e74c3c;
   color: white;
@@ -402,11 +384,8 @@
   margin-top: 5px;
 }
 
-/* ==========================================
-   INFORMACIÓN DE PAGINACIÓN
-   ========================================== */
-
-.info-paginacion {
+/* === INFORMACIÓN DE PAGINACIÓN === */
+.admin-descuentos .info-paginacion {
   text-align: center;
   margin: 20px 0;
   color: #7f8c8d;
@@ -414,11 +393,8 @@
   font-weight: 500;
 }
 
-/* ==========================================
-   PAGINACIÓN
-   ========================================== */
-
-.paginacion {
+/* === PAGINACIÓN === */
+.admin-descuentos .paginacion {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -428,7 +404,7 @@
   flex-wrap: wrap;
 }
 
-.btn-paginacion {
+.admin-descuentos .btn-paginacion {
   padding: 10px 20px;
   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   color: white;
@@ -441,18 +417,18 @@
   box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
 }
 
-.btn-paginacion:hover:not(:disabled) {
+.admin-descuentos .btn-paginacion:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
-.btn-paginacion:disabled {
+.admin-descuentos .btn-paginacion:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background: #95a5a6;
 }
 
-.numeros-pagina {
+.admin-descuentos .numeros-pagina {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -460,7 +436,7 @@
   justify-content: center;
 }
 
-.numero-pagina {
+.admin-descuentos .numero-pagina {
   width: 40px;
   height: 40px;
   display: flex;
@@ -476,76 +452,27 @@
   transition: all 0.3s ease;
 }
 
-.numero-pagina:hover {
+.admin-descuentos .numero-pagina:hover {
   background: #d4e6f1;
   border-color: #3498db;
   transform: translateY(-2px);
 }
 
-.numero-pagina.activo {
+.admin-descuentos .numero-pagina.activo {
   background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   color: white;
   border-color: #2980b9;
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
-.puntos {
+.admin-descuentos .puntos {
   color: #7f8c8d;
   font-weight: 700;
   padding: 0 5px;
 }
 
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-
-@media (max-width: 768px) {
-  .admin-title {
-    font-size: 2rem;
-  }
-
-  .productos-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .acciones {
-    flex-direction: column;
-  }
-
-  .btn {
-    width: 100%;
-  }
-
-  .productos-lista {
-    max-height: 400px;
-  }
-
-  .paginacion {
-    gap: 10px;
-    padding: 15px 0;
-  }
-
-  .btn-paginacion {
-    padding: 8px 16px;
-    font-size: 0.85rem;
-  }
-
-  .numero-pagina {
-    width: 35px;
-    height: 35px;
-    font-size: 0.85rem;
-  }
-
-  .info-paginacion {
-    font-size: 0.85rem;
-  }
-}
-
-/* ==========================================
-   BADGES DE ESTADO
-   ========================================== */
-
-.badge {
+/* === BADGES DE ESTADO === */
+.admin-descuentos .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -557,25 +484,68 @@
   letter-spacing: 0.5px;
 }
 
-.badge-active {
+.admin-descuentos .badge-active {
   background: #e8f5e9;
   color: #2e7d32;
   border: 1px solid #81c784;
 }
 
-.badge-paused {
+.admin-descuentos .badge-paused {
   background: #fff3e0;
   color: #f57c00;
   border: 1px solid #ffb74d;
 }
 
-.badge-closed {
+.admin-descuentos .badge-closed {
   background: #ffebee;
   color: #c62828;
   border: 1px solid #e57373;
 }
 
-.badge-stock {
+.admin-descuentos .badge-stock {
   font-size: 0.7rem;
   padding: 3px 8px;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .admin-descuentos .admin-title {
+    font-size: 2rem;
+  }
+
+  .admin-descuentos .productos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-descuentos .acciones {
+    flex-direction: column;
+  }
+
+  .admin-descuentos .btn {
+    width: 100%;
+  }
+
+  .admin-descuentos .productos-lista {
+    max-height: 400px;
+  }
+
+  .admin-descuentos .paginacion {
+    gap: 10px;
+    padding: 15px 0;
+  }
+
+  .admin-descuentos .btn-paginacion {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .admin-descuentos .numero-pagina {
+    width: 35px;
+    height: 35px;
+    font-size: 0.85rem;
+  }
+
+  .admin-descuentos .info-paginacion {
+    font-size: 0.85rem;
+  }
 }

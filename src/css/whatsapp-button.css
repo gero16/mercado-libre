@@ -1,0 +1,117 @@
+/* Botón flotante de WhatsApp */
+.whatsapp-float-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: whatsapp-pulse 2s infinite;
+}
+
+.whatsapp-float-button:hover {
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+  animation: none;
+}
+
+.whatsapp-float-button:active {
+  transform: scale(0.95);
+}
+
+/* Icono de WhatsApp */
+.whatsapp-icon {
+  width: 32px;
+  height: 32px;
+  color: #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.whatsapp-float-button:hover .whatsapp-icon {
+  transform: rotate(15deg);
+}
+
+/* Animación de pulso */
+@keyframes whatsapp-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4),
+                0 0 0 0 rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4),
+                0 0 0 10px rgba(37, 211, 102, 0);
+  }
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+  .whatsapp-float-button {
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+  }
+  
+  .whatsapp-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Tema oscuro */
+body.dark-mode .whatsapp-float-button {
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+body.dark-mode .whatsapp-float-button:hover {
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+/* Accesibilidad - Focus visible para navegación por teclado */
+.whatsapp-float-button:focus-visible {
+  outline: 3px solid #25D366;
+  outline-offset: 4px;
+}
+
+/* Animación de entrada cuando se carga la página */
+.whatsapp-float-button {
+  animation: whatsapp-slide-in 0.5s ease-out, whatsapp-pulse 2s infinite 0.5s;
+}
+
+@keyframes whatsapp-slide-in {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Efecto de rebote al hover (opcional - más juguetón) */
+.whatsapp-float-button:hover {
+  animation: whatsapp-bounce 0.6s ease;
+}
+
+@keyframes whatsapp-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1.1);
+  }
+  40% {
+    transform: translateY(-10px) scale(1.1);
+  }
+  60% {
+    transform: translateY(-5px) scale(1.1);
+  }
+}
+

@@ -16,47 +16,47 @@ const CustomerReviews: React.FC = () => {
   const reviews: Review[] = [
     {
       id: 1,
-      name: 'María González',
+      name: 'ALEXISJAC',
       rating: 5,
-      comment: 'Excelente calidad y muy buena atención al cliente. La campera llegó perfecta y antes de lo esperado. Totalmente recomendado!',
-      date: '15 de Noviembre, 2024',
-      product: 'Campera Adidas Originals',
+      comment: 'La mejor experiencia de compra en 10 años de usar ML. Compre el producto a las 14:30. a las 15:30 lo tuve en mis manos, hasta link con rastreo del envio en vivo',
+      date: '01/12/23',
+      product: 'Producto Premium',
       verified: true
     },
     {
       id: 2,
-      name: 'Carlos Rodríguez',
+      name: 'CACA7327065',
       rating: 5,
-      comment: 'Primera vez que compro online y quedé súper satisfecho. El producto es exactamente como se muestra en las fotos.',
-      date: '12 de Noviembre, 2024',
-      product: 'Mochila Champion',
+      comment: 'Excelente el tiempo de entrega, incluso me sorprendió. El lapiz tal cual lo que me dijeron (original, sellado) y funciona perfecto.',
+      date: '20/04/24',
+      product: 'Lápiz Original',
       verified: true
     },
     {
       id: 3,
-      name: 'Ana Martínez',
-      rating: 4,
-      comment: 'Muy buena experiencia de compra. La remera es de excelente calidad, solo tardó un poco más en llegar pero vale la pena.',
-      date: '10 de Noviembre, 2024',
-      product: 'Remera Adidas',
+      name: 'VISUALTECH_UY',
+      rating: 5,
+      comment: 'EXCELENTE: servicio, seriedad y rapidez en respuestas. Tenía incertidumbre al encargar 1 artículo tan caro para traer de USA pero estoy MUY conforme con todo!!',
+      date: '08/06/24',
+      product: 'Artículo USA',
       verified: true
     },
     {
       id: 4,
-      name: 'Luis Fernández',
+      name: 'DUVI7594668',
       rating: 5,
-      comment: 'El gorro es perfecto para el invierno. Muy cálido y de buena calidad. El envío fue súper rápido.',
-      date: '8 de Noviembre, 2024',
-      product: 'Gorro Champion',
+      comment: 'Excelente!! Respondieron a todos mis mensajes y me cambiaron el producto incluso cuando fui yo la que cometí el error. Recomiendo ampliamente!!!!!',
+      date: '28/02/24',
+      product: 'Producto Reemplazado',
       verified: true
     },
     {
       id: 5,
-      name: 'Sofia López',
+      name: 'VETGARCIA',
       rating: 5,
-      comment: 'Increíble atención al cliente y productos de primera calidad. Ya he comprado varias veces y siempre todo perfecto.',
-      date: '5 de Noviembre, 2024',
-      product: 'Campera Adidas Originals',
+      comment: 'Gran profesionalidad en la venta. Responsables y atentos. el producto 10 puntos. Lo recomiendo. Es casi "el tocadisco" que tuvieron nuestros padres. Valio',
+      date: '23/04/24',
+      product: 'Tocadiscos',
       verified: true
     }
   ]
@@ -85,84 +85,80 @@ const CustomerReviews: React.FC = () => {
   }
 
   return (
-    <section className="customer-reviews">
-      <div className="container">
-        <div className="section-header">
-          <h2 className="section-title">💬 Reseñas de Nuestros Clientes</h2>
-          <p className="section-subtitle">Lo que dicen quienes ya compraron con nosotros</p>
+    <section className="customer-reviews-new">
+      <div className="reviews-header">
+        <h2 className="reviews-title">Clientes felices</h2>
+        <div className="heart-icon">❤️</div>
+      </div>
+
+      <div className="rating-section">
+        <div className="rating-left">
+          <span className="rating-label">RESEÑAS</span>
         </div>
-
-        <div className="reviews-container">
-          <button 
-            className="review-nav review-nav-left" 
-            onClick={prevReview}
-            aria-label="Reseña anterior"
-          >
-            &#8249;
-          </button>
-
-          <div className="review-card">
-            <div className="review-header">
-              <div className="reviewer-info">
-                <div className="reviewer-avatar">
-                  {reviews[currentReview].name.charAt(0)}
-                </div>
-                <div className="reviewer-details">
-                  <h3 className="reviewer-name">
-                    {reviews[currentReview].name}
-                    {reviews[currentReview].verified && (
-                      <span className="verified-badge">✓</span>
-                    )}
-                  </h3>
-                  <p className="review-product">{reviews[currentReview].product}</p>
-                  <p className="review-date">{reviews[currentReview].date}</p>
-                </div>
-              </div>
-              
-              <div className="review-rating">
-                {renderStars(reviews[currentReview].rating)}
-              </div>
-            </div>
-            
-            <div className="review-content">
-              <p className="review-comment">"{reviews[currentReview].comment}"</p>
-            </div>
+        <div className="rating-separator"></div>
+        <div className="rating-right">
+          <span className="rating-number">5,0</span>
+          <div className="rating-stars">
+            {renderStars(5)}
           </div>
-
-          <button 
-            className="review-nav review-nav-right" 
-            onClick={nextReview}
-            aria-label="Siguiente reseña"
-          >
-            &#8250;
-          </button>
         </div>
+      </div>
 
-        <div className="review-indicators">
+      <div className="featured-review">
+        <div className="review-header-new">
+          <span className="smiley">😊</span>
+          <span className="review-status">Buena</span>
+          <div className="review-stars-small">
+            {renderStars(5)}
+          </div>
+        </div>
+        
+        <div className="review-text">
+          {reviews[currentReview].comment}
+        </div>
+        
+        <div className="review-footer">
+          <span className="reviewer-name-new">{reviews[currentReview].name}</span>
+          <span className="review-date-new">- {reviews[currentReview].date}</span>
+        </div>
+      </div>
+
+      <div className="brand-section">
+        <div className="brand-logo">
+          <div className="logo-circle">
+            <img src="/img/logo.png" alt="Poppy Shop Logo" className="brand-logo-img" />
+          </div>
+          <div className="brand-name">Poppy Shop</div>
+          <div className="brand-tagline">-LO QUERÉS, LO TENÉS -</div>
+        </div>
+      </div>
+
+      {/* Navegación discreta */}
+      <div className="review-navigation">
+        <button 
+          className="nav-btn nav-prev" 
+          onClick={prevReview}
+          aria-label="Reseña anterior"
+        >
+          ‹
+        </button>
+        <div className="review-indicators-new">
           {reviews.map((_, index) => (
             <button
               key={index}
-              className={`review-indicator ${index === currentReview ? 'active' : ''}`}
+              className={`indicator ${index === currentReview ? 'active' : ''}`}
               onClick={() => goToReview(index)}
               aria-label={`Ir a reseña ${index + 1}`}
             />
           ))}
         </div>
-
-        <div className="reviews-stats">
-          <div className="stat-item">
-            <span className="stat-number">4.8</span>
-            <span className="stat-label">Calificación promedio</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">150+</span>
-            <span className="stat-label">Reseñas positivas</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-number">98%</span>
-            <span className="stat-label">Clientes satisfechos</span>
-          </div>
-        </div>
+        <button 
+          className="nav-btn nav-next" 
+          onClick={nextReview}
+          aria-label="Siguiente reseña"
+        >
+          ›
+        </button>
       </div>
     </section>
   )

@@ -5,8 +5,8 @@ import { CartProvider } from './context/CartContext'
 import { MERCADOPAGO_CONFIG } from './config/mercadopago'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import ThemeToggle from './components/ThemeToggle'
 import PromotionalBanner from './components/PromotionalBanner'
+import WhatsAppButton from './components/WhatsAppButton'
 import HomePage from './pages/HomePage'
 import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
@@ -37,10 +37,11 @@ import './css/featured-products.css' // 🆕 Importar estilos de productos desta
 import './css/discounted-products.css' // 🆕 Importar estilos de productos con descuento
 import './css/best-selling-products.css' // 🆕 Importar estilos de productos más vendidos
 import './css/customer-reviews.css' // 🆕 Importar estilos de reseñas
-import './css/theme-toggle.css' // 🆕 Importar estilos del toggle de tema
+import './css/customer-reviews-new.css' // 🆕 Importar nuevos estilos de reseñas estilo imagen
 import './css/admin-descuentos.css' // 🆕 Importar estilos de administración de descuentos
 import './css/admin-cupones.css' // 🆕 Importar estilos de administración de cupones
 import './css/promotional-banner.css' // 🆕 ÚLTIMO - Importar estilos del banner promocional con máxima prioridad
+import './css/whatsapp-button.css' // 🆕 Importar estilos del botón de WhatsApp
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -53,7 +54,7 @@ function App() {
           
           <Header />
           <PromotionalBanner />
-          <ThemeToggle />
+          <WhatsAppButton />
           
           <main className="main-content">
             <Routes>

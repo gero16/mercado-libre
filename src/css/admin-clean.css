@@ -1,10 +1,8 @@
 /* ========================================
-   ADMIN CLEAN STYLES - ESPECÍFICO PARA ÓRDENES Y CLIENTES
+   ADMIN CLEAN STYLES - ÓRDENES Y CLIENTES
    ======================================== */
 
-/* ========================================
-   LAYOUT PRINCIPAL - ESPECÍFICO PARA PÁGINAS DE ÓRDENES Y CLIENTES
-   ======================================== */
+/* === LAYOUT PRINCIPAL === */
 .admin-page {
   max-width: 1400px;
   margin: 0 auto;
@@ -62,9 +60,7 @@
   box-shadow: 0 6px 20px rgba(88, 166, 255, 0.4);
 }
 
-/* ========================================
-   CONTROLES DE ADMINISTRACIÓN - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === CONTROLES DE ADMINISTRACIÓN === */
 .admin-page .admin-controls {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
@@ -128,9 +124,7 @@
   box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
 }
 
-/* ========================================
-   CONTENIDO PRINCIPAL - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === CONTENIDO PRINCIPAL === */
 .admin-page .admin-content {
   background: linear-gradient(135deg, #21262d 0%, #161b22 100%);
   border-radius: 12px;
@@ -152,9 +146,7 @@
   font-weight: 500;
 }
 
-/* ========================================
-   GRID DE ELEMENTOS - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === GRID DE ELEMENTOS === */
 .admin-page .admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -188,9 +180,7 @@
   border-color: #58a6ff;
 }
 
-/* ========================================
-   ESTADÍSTICAS - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === ESTADÍSTICAS === */
 .admin-page .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -226,7 +216,7 @@
 }
 
 .admin-page .stat-card h3 {
-  color: #8b949e;
+  color: #000000;
   font-size: 12px;
   font-weight: 600;
   margin: 0 0 8px 0;
@@ -237,7 +227,7 @@
 .admin-page .stat-number {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #f0f6fc;
+  color: #000000;
   margin: 0;
   line-height: 1;
 }
@@ -250,9 +240,7 @@
   color: #f85149;
 }
 
-/* ========================================
-   PAGINACIÓN - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === PAGINACIÓN === */
 .admin-page .pagination {
   display: flex;
   justify-content: center;
@@ -292,9 +280,7 @@
   font-weight: 500;
 }
 
-/* ========================================
-   ESTADOS Y BADGES - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === ESTADOS Y BADGES === */
 .admin-page .status-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -329,9 +315,7 @@
   border: 1px solid #8b949e;
 }
 
-/* ========================================
-   BOTONES DE NAVEGACIÓN - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === BOTONES DE NAVEGACIÓN === */
 .admin-page .btn-orden {
   padding: 12px 16px;
   color: white;
@@ -361,9 +345,7 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* ========================================
-   RESPONSIVE DESIGN - ESPECÍFICO PARA ÓRDENES Y CLIENTES
-   ======================================== */
+/* === RESPONSIVE DESIGN === */
 @media (max-width: 768px) {
   .admin-page .admin-controls {
     grid-template-columns: 1fr;
