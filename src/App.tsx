@@ -42,6 +42,7 @@ import './css/admin-descuentos.css' // 🆕 Importar estilos de administración 
 import './css/admin-cupones.css' // 🆕 Importar estilos de administración de cupones
 import './css/promotional-banner.css' // 🆕 ÚLTIMO - Importar estilos del banner promocional con máxima prioridad
 import './css/whatsapp-button.css' // 🆕 Importar estilos del botón de WhatsApp
+import './css/welcome-section.css' // 🆕 Importar estilos de la sección de bienvenida
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })

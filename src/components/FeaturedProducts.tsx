@@ -14,38 +14,32 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
-        const data: ProductoML[] = await response.json()
+        // 🚀 Usar endpoint con paginación para reducir datos
+        const response = await fetch(
+          `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit * 2}` // Pedimos el doble para filtrar
+        )
+        const data = await response.json()
         
-        // Calcular score combinado para cada producto
+        // El endpoint con paginación devuelve {productos: [], pagination: {}}
+        const productos = data.productos || data
+        
+        // Calcular score combinado para cada producto (rapidamente)
         const calcularScore = (producto: ProductoML) => {
           const visitas = producto.metrics?.visits || 0
           const rating = producto.metrics?.reviews.rating_average || 0
           const totalReseñas = producto.metrics?.reviews.total || 0
           const health = producto.health || 0
-          
-          // Fórmula ponderada:
-          // - Visitas tienen peso bajo (mucho volumen)
-          // - Rating tiene peso alto (calidad)
-          // - Total de reseñas indica popularidad
-          // - Health indica salud del producto en ML
           return (visitas * 0.3) + (rating * 10) + (totalReseñas * 3) + (health * 5)
         }
         
         // Filtrar productos activos y ordenar por score
-        const productosDestacados = data
-          .filter(p => p.status !== 'paused' && p.available_quantity > 0)
-          .map(p => ({ ...p, score: calcularScore(p) }))
-          .sort((a, b) => b.score - a.score)
+        const productosDestacados = productos
+          .filter((p: ProductoML) => p.status !== 'paused' && p.available_quantity > 0)
+          .map((p: ProductoML) => ({ ...p, score: calcularScore(p) }))
+          .sort((a: any, b: any) => b.score - a.score)
           .slice(0, limit)
         
-        console.log('⭐ Productos destacados:', productosDestacados.map(p => ({
-          title: p.title,
-          score: p.score,
-          visits: p.metrics?.visits,
-          rating: p.metrics?.reviews.rating_average,
-          reviews: p.metrics?.reviews.total
-        })))
+        console.log('⭐ Productos destacados:', productosDestacados.length, 'productos')
         
         setFeaturedProducts(productosDestacados)
         setLoading(false)
@@ -176,6 +170,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                       src={imagenPrincipal} 
                       alt={product.title}
                       className="product-image"
+                      loading="lazy"
+                      decoding="async"
                     />
                     {tieneDescuento && porcentajeDescuento ? (
                       <div className="product-badge" style={{

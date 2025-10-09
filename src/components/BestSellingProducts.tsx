@@ -14,20 +14,22 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
-        const data: ProductoML[] = await response.json()
+        // 🚀 Usar endpoint con paginación para reducir datos
+        const response = await fetch(
+          `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}`
+        )
+        const data = await response.json()
         
-        // Filtrar productos con ventas y ordenar por cantidad vendida
-        const productosMasVendidos = data
-          .filter(p => p.status !== 'paused' && (p.sold_quantity || 0) > 0)
-          .sort((a, b) => (b.sold_quantity || 0) - (a.sold_quantity || 0))
+        // El endpoint con paginación devuelve {productos: [], pagination: {}}
+        const productos = data.productos || data
+        
+        // Filtrar y ordenar solo lo necesario
+        const productosMasVendidos = productos
+          .filter((p: ProductoML) => p.status !== 'paused' && (p.sold_quantity || 0) > 0)
+          .sort((a: ProductoML, b: ProductoML) => (b.sold_quantity || 0) - (a.sold_quantity || 0))
           .slice(0, limit)
         
-        console.log('🏆 Productos más vendidos:', productosMasVendidos.map(p => ({
-          title: p.title,
-          sold_quantity: p.sold_quantity,
-          price: p.price
-        })))
+        console.log('🏆 Productos más vendidos:', productosMasVendidos.length, 'productos')
         
         setBestSellingProducts(productosMasVendidos)
         setLoading(false)
@@ -165,6 +167,8 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
                       src={imagenPrincipal} 
                       alt={product.title}
                       className="product-image"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="bestseller-badge">
                       <span className="badge-icon">🏆</span>

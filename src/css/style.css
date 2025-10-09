@@ -16,8 +16,8 @@ html {
 
 body {
   font-family: "Open Sans", sans-serif;
-  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
-  color: white;
+  background: #ffffff;
+  color: #333;
   padding: 0px;
   margin: 0px;
   overflow-x: hidden;
@@ -27,13 +27,13 @@ body {
   transition: background 0.3s ease;
 }
 
-/* Modo claro */
+/* Modo claro (por defecto) */
 body.light-mode {
   background: #ffffff;
   color: #333;
 }
 
-/* Modo oscuro (por defecto) */
+/* Modo oscuro */
 body.dark-mode {
   background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
   color: white;
@@ -46,6 +46,10 @@ a {
 }
 
 a {
+  color: #333;
+}
+
+body.dark-mode a {
   color: white;
 }
 

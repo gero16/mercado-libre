@@ -15,33 +15,26 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
   useEffect(() => {
     const fetchDiscountedProducts = async () => {
       try {
-        const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
-        const data: ProductoML[] = await response.json()
+        // 🚀 Usar endpoint con paginación para reducir datos
+        const response = await fetch(
+          `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit * 3}` // Pedimos más para asegurar suficientes con descuento
+        )
+        const data = await response.json()
         
-        console.log('📦 Total de productos recibidos:', data.length)
+        // El endpoint con paginación devuelve {productos: [], pagination: {}}
+        const productos = data.productos || data
         
         // Filtrar productos con descuento activo y con imagen
-        const productosConDescuento = data.filter(p => {
+        const productosConDescuento = productos.filter((p: ProductoML) => {
           const tieneImagen = (p.images && p.images.length > 0 && p.images[0].url) || p.main_image
           const tieneDescuento = p.descuento?.activo === true
           const estaActivo = p.status === 'active'
           const tieneStock = p.available_quantity > 0
           
-          // Log detallado para debugging
-          if (tieneDescuento) {
-            console.log(`📋 ${p.title}:`, {
-              descuento: '✓',
-              imagen: tieneImagen ? '✓' : '✗',
-              status: p.status,
-              stock: p.available_quantity,
-              mostrar: tieneImagen && estaActivo && tieneStock
-            })
-          }
-          
           return tieneDescuento && estaActivo && tieneStock && tieneImagen
         }).slice(0, limit)
         
-        console.log('🔥 Productos con descuento que se mostrarán:', productosConDescuento.length)
+        console.log('🔥 Productos con descuento:', productosConDescuento.length, 'productos')
         
         setDiscountedProducts(productosConDescuento)
         setLoading(false)
@@ -194,6 +187,8 @@ const DiscountedProducts: React.FC<DiscountedProductsProps> = ({ limit = 8 }) =>
                       src={imagenPrincipal} 
                       alt={product.title}
                       className="product-image"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="discount-badge">
                       -{product.descuento?.porcentaje}%

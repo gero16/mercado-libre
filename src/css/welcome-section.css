@@ -1,0 +1,237 @@
+/* ==========================================
+   SECCIÓN DE BIENVENIDA
+   ========================================== */
+
+.welcome-section {
+  padding: 60px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(254, 159, 1, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.welcome-section::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(254, 159, 1, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.welcome-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-content {
+  text-align: center;
+  animation: fadeInUp 0.8s ease;
+}
+
+/* ==========================================
+   BADGE
+   ========================================== */
+
+.welcome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(254, 159, 1, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.badge-icon {
+  font-size: 1.2rem;
+}
+
+/* ==========================================
+   TÍTULOS
+   ========================================== */
+
+.welcome-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 15px;
+  line-height: 1.2;
+}
+
+.welcome-subtitle {
+  font-size: 1.5rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.welcome-description {
+  font-size: 1.1rem;
+  color: #777;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+/* ==========================================
+   CARACTERÍSTICAS
+   ========================================== */
+
+.welcome-features {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.feature-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(254, 159, 1, 0.15);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.feature-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ==========================================
+   ANIMACIONES
+   ========================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 768px) {
+  .welcome-section {
+    padding: 40px 0;
+  }
+  
+  .welcome-title {
+    font-size: 2rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .welcome-description {
+    font-size: 1rem;
+  }
+  
+  .welcome-features {
+    gap: 15px;
+  }
+  
+  .feature-item {
+    min-width: 120px;
+    padding: 15px;
+  }
+  
+  .feature-icon {
+    font-size: 2rem;
+  }
+  
+  .feature-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+  
+  .welcome-features {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .feature-item {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
+  
+  .feature-icon {
+    font-size: 1.8rem;
+  }
+}
+

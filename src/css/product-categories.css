@@ -1,7 +1,7 @@
 /* Sección de categorías de productos */
 .product-categories-section {
   padding: 45px 0;
-  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
+  background: #ffffff;
   margin: 0;
   width: 100%;
   max-width: 100%;
@@ -9,14 +9,14 @@
   transition: background 0.3s ease;
 }
 
-/* Modo claro */
-body.light-mode .product-categories-section {
-  background: #ffffff;
+/* Modo oscuro */
+body.dark-mode .product-categories-section {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%);
 }
 
 /* Títulos de sección */
 .product-categories-section .section-title {
-  color: var(--color-secondary);
+  color: #333;
 }
 
 body.dark-mode .product-categories-section .section-title {
@@ -46,15 +46,15 @@ body.dark-mode .product-categories-section .section-subtitle {
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   height: 400px;
-  background: #2c3e50;
+  background: #f8f9fa;
 }
 
-/* Modo claro */
-body.light-mode .category-card-visual {
-  background: #f8f9fa;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* Modo oscuro */
+body.dark-mode .category-card-visual {
+  background: #2c3e50;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .category-card-visual:hover {
