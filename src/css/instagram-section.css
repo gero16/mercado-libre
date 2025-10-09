@@ -109,7 +109,7 @@ body.dark-mode .instagram-subtitle {
 
 /* Modo compacto - Solo mostrar imagen/video, cortar el resto */
 .instagram-compact .instagram-embed-wrapper {
-  max-height: 320px;
+  max-height: 520px;
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -227,7 +227,7 @@ body.dark-mode .instagram-subtitle {
   }
   
   .instagram-compact .instagram-embed-wrapper {
-    max-height: 350px;
+    max-height: 490px;
   }
   
   .instagram-embed-wrapper .instagram-media {
@@ -260,7 +260,7 @@ body.dark-mode .instagram-subtitle {
   }
   
   .instagram-compact .instagram-embed-wrapper {
-    max-height: 300px;
+    max-height: 450px;
   }
   
   .instagram-embed-wrapper .instagram-media {
@@ -283,7 +283,7 @@ body.dark-mode .instagram-subtitle {
   }
   
   .instagram-compact .instagram-embed-wrapper {
-    max-height: 280px;
+    max-height: 420px;
   }
 }
 
@@ -304,7 +304,7 @@ body.dark-mode .instagram-subtitle {
   }
   
   .instagram-compact .instagram-embed-wrapper {
-    max-height: 300px;
+    max-height: 450px;
   }
 }
 
@@ -324,7 +324,7 @@ body.dark-mode .instagram-subtitle {
   }
   
   .instagram-compact .instagram-embed-wrapper {
-    max-height: 320px;
+    max-height: 500px;
   }
 }
 
