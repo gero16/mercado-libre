@@ -45,6 +45,7 @@ import './css/promotional-banner.css' // 🆕 ÚLTIMO - Importar estilos del ban
 import './css/whatsapp-button.css' // 🆕 Importar estilos del botón de WhatsApp
 import './css/welcome-section.css' // 🆕 Importar estilos de la sección de bienvenida
 import './css/faq.css' // 🆕 Importar estilos de preguntas frecuentes
+import './css/header-dropdown.css' // 🆕 Importar estilos del dropdown del header
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })

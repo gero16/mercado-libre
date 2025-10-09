@@ -1,0 +1,111 @@
+/* ==========================================
+   DROPDOWN DEL NAVBAR
+   ========================================== */
+
+.dropdown-menu {
+  position: relative;
+}
+
+.dropdown-menu > a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Contenido del dropdown */
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  min-width: 250px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 8px 0;
+  z-index: 1000;
+  animation: slideDown 0.3s ease;
+  border: 1px solid #e0e0e0;
+  margin-top: 0;
+}
+
+/* Área invisible para mantener el hover - cubre cualquier espacio */
+.dropdown-content::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: transparent;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Items del dropdown */
+.dropdown-item {
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #333;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+}
+
+.dropdown-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.dropdown-item:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Separador visual */
+.dropdown-item:nth-child(5) {
+  border-top: 1px solid #e0e0e0;
+  margin-top: 5px;
+  padding-top: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dropdown-content {
+    min-width: 220px;
+    right: 0;
+    left: auto;
+  }
+  
+  .dropdown-item {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+}
+
