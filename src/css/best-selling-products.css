@@ -1,6 +1,6 @@
 /* Estilos para la sección de productos más vendidos */
 .best-selling-products {
-  padding: 45px 0;
+  padding: 35px 0;
   background: #ffffff;
   margin: 0;
   width: 100%;
@@ -20,7 +20,7 @@ body.dark-mode .best-selling-products {
 }
 
 .best-selling-products .section-title {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 700;
   color: #333;
   margin-bottom: 15px;
@@ -46,7 +46,7 @@ body.dark-mode .best-selling-products .section-title {
 }
 
 .best-selling-products .section-subtitle {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #6c757d;
   margin: 0;
   font-weight: 400;
@@ -280,7 +280,7 @@ body.dark-mode .best-selling-products .product-card {
 }
 
 .best-selling-products .product-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
@@ -357,7 +357,7 @@ body.dark-mode .best-selling-products .product-name {
 }
 
 .best-selling-products .product-price {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #27ae60;
 }

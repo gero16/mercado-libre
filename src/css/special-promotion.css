@@ -1,6 +1,6 @@
 /* Estilos para la sección de promoción especial */
 .special-promotion {
-  padding: 40px 0;
+  padding: 30px 0;
   margin: 0;
   position: relative;
   overflow: hidden;
@@ -9,7 +9,7 @@
 .promotion-container {
   position: relative;
   border-radius: 20px;
-  padding: 40px;
+  padding: 30px;
   margin: 0 20px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2);
   overflow: hidden;
@@ -26,7 +26,7 @@
 }
 
 .promotion-icon {
-  font-size: 4rem;
+  font-size: 3rem;
   animation: bounce 2s ease-in-out infinite;
   flex-shrink: 0;
 }
@@ -37,7 +37,7 @@
 }
 
 .promotion-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: white;
   margin-bottom: 10px;
@@ -46,7 +46,7 @@
 }
 
 .promotion-subtitle {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: rgba(255,255,255,0.9);
   margin-bottom: 20px;
   font-weight: 400;
@@ -59,9 +59,9 @@
 .discount-text {
   background: rgba(255,255,255,0.2);
   color: white;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: 30px;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   border: 2px solid rgba(255,255,255,0.3);
@@ -79,7 +79,7 @@
 
 .timer-text {
   color: white;
-  font-size: 1rem;
+  font-size: 0.85rem;
   margin-bottom: 15px;
   text-align: center;
   font-weight: 600;
@@ -107,7 +107,7 @@
 
 .time-number {
   display: block;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -136,9 +136,9 @@
   background: rgba(255,255,255,0.95);
   color: #2c3e50;
   border: none;
-  padding: 15px 30px;
+  padding: 12px 25px;
   border-radius: 30px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;

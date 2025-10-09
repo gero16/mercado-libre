@@ -2,7 +2,7 @@
 .customer-reviews-new {
   background: linear-gradient(135deg, var(--color-secondary) 0%, #2c3e50 100%); /* Fondo oscuro como antes */
   color: #fff; /* Texto blanco */
-  padding: 40px 20px;
+  padding: 30px 20px;
   text-align: center;
   font-family: Arial, sans-serif;
   position: relative;
@@ -15,7 +15,7 @@
 }
 
 .reviews-title {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: bold;
   color: #fff; /* Texto blanco */
   margin: 0 0 10px 0;
@@ -24,7 +24,7 @@
 }
 
 .heart-icon {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #ff0000; /* Rojo para el corazón */
 }
 
@@ -34,8 +34,8 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 30px;
-  font-size: 1.5rem;
+  margin-bottom: 25px;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -65,7 +65,7 @@
 .rating-number {
   color: #fff; /* Texto blanco */
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .rating-stars {
@@ -74,7 +74,7 @@
 }
 
 .rating-stars .star {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #ffd700; /* Amarillo dorado para las estrellas */
 }
 
@@ -82,8 +82,8 @@
 .featured-review {
   background: #fff;
   border-radius: 15px;
-  padding: 25px;
-  margin: 0 auto 30px;
+  padding: 20px;
+  margin: 0 auto 25px;
   max-width: 600px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   text-align: left;
@@ -97,13 +97,13 @@
 }
 
 .smiley {
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .review-status {
   color: #000; /* Mantener negro solo en la caja blanca */
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .review-stars-small {
@@ -119,7 +119,7 @@
 
 .review-text {
   color: #000;
-  font-size: 1rem;
+  font-size: 0.9rem;
   line-height: 1.5;
   margin-bottom: 15px;
 }
@@ -174,12 +174,12 @@
 .brand-name {
   color: #fff; /* Texto blanco */
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .brand-tagline {
   color: #fff; /* Texto blanco */
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: bold;
   position: relative;
 }

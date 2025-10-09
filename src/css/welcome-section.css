@@ -3,7 +3,7 @@
    ========================================== */
 
 .welcome-section {
-  padding: 60px 0;
+  padding: 40px 0;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   position: relative;
   overflow: hidden;
@@ -58,7 +58,7 @@
   color: white;
   padding: 8px 20px;
   border-radius: 30px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   margin-bottom: 20px;
   box-shadow: 0 4px 15px rgba(254, 159, 1, 0.3);
@@ -74,25 +74,25 @@
    ========================================== */
 
 .welcome-title {
-  font-size: 3rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: #333;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   line-height: 1.2;
 }
 
 .welcome-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #666;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .welcome-description {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #777;
   max-width: 700px;
-  margin: 0 auto 40px;
+  margin: 0 auto 30px;
   line-height: 1.6;
 }
 
@@ -132,7 +132,7 @@
 }
 
 .feature-text {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #333;
 }

@@ -3,7 +3,7 @@
    ========================================== */
 
 .discounted-products {
-  padding: 60px 0;
+  padding: 35px 0;
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
   position: relative;
   overflow: hidden;
@@ -143,7 +143,7 @@
 }
 
 .discount-product-card .product-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 15px;
@@ -173,7 +173,7 @@
 }
 
 .original-price {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #999;
   text-decoration: line-through;
   font-weight: 500;
@@ -181,7 +181,7 @@
 }
 
 .discount-price {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #d32f2f;
   font-weight: 800;
   line-height: 1;
