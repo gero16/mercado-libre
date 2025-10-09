@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const Footer: React.FC = () => {
   return (
@@ -16,12 +17,16 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="footer">
-          <p>© Copyright 2023 / Tiendita Virtual </p>
+          <p>© Copyright 2023 / Poppy Shop Uruguay </p>
        
           <div className="preguntas">
             <p>Terminos y Condiciones</p>
-            <p>Preguntas Frecuentes</p>
-            <p>Contacto</p>
+            <Link to="/preguntas-frecuentes" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <p>Preguntas Frecuentes</p>
+            </Link>
+            <Link to="/contacto" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <p>Contacto</p>
+            </Link>
           </div>
 
           <div className="redes-sociales">

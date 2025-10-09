@@ -12,6 +12,7 @@ import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
 import CheckoutPage from './pages/CheckoutPage'
 import ContactoPage from './pages/ContactoPage'
+import FAQPage from './pages/FAQPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailurePage from './pages/PaymentFailurePage'
 import PaymentPendingPage from './pages/PaymentPendingPage'
@@ -43,6 +44,7 @@ import './css/admin-cupones.css' // 🆕 Importar estilos de administración de 
 import './css/promotional-banner.css' // 🆕 ÚLTIMO - Importar estilos del banner promocional con máxima prioridad
 import './css/whatsapp-button.css' // 🆕 Importar estilos del botón de WhatsApp
 import './css/welcome-section.css' // 🆕 Importar estilos de la sección de bienvenida
+import './css/faq.css' // 🆕 Importar estilos de preguntas frecuentes
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -65,6 +67,7 @@ function App() {
             <Route path="/producto/:id" element={<DetalleProductoPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/contacto" element={<ContactoPage />} />
+            <Route path="/preguntas-frecuentes" element={<FAQPage />} />
             
             {/* Rutas de administración */}
             <Route path="/admin" element={<AdminPage />} />
