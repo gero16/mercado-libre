@@ -225,10 +225,7 @@ const TiendaMLPage: React.FC = () => {
   )
   const [loading, setLoading] = useState(true)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
-    { id: 'mostrar-todo', name: 'Mostrar Todo' },
-    { id: 'destacados', name: '⭐ Productos Destacados' },
-    { id: 'mas-vendidos', name: '🏆 Más Vendidos' },
-    { id: 'con-descuento', name: '🔥 Con Descuento' }
+    { id: 'mostrar-todo', name: 'Mostrar Todo' }
   ])
   
   // 🚀 Estados para paginación (24 items para carga inicial más rápida)
@@ -422,9 +419,6 @@ const TiendaMLPage: React.FC = () => {
       
       setCategorias([
         { id: 'mostrar-todo', name: 'Mostrar Todo' },
-        { id: 'destacados', name: '⭐ Productos Destacados' },
-        { id: 'mas-vendidos', name: '🏆 Más Vendidos' },
-        { id: 'con-descuento', name: '🔥 Con Descuento' },
         ...categoriasFiltro
       ])
       
@@ -549,44 +543,8 @@ const TiendaMLPage: React.FC = () => {
       )
     }
 
-    // Filtros especiales
-    if (categoryFilter === 'destacados') {
-      // Productos destacados: basado en score combinado (visitas, rating, reseñas, health)
-      const calcularScore = (item: ItemTienda) => {
-        const producto = item.productoPadre
-        if (!producto) return 0
-        
-        const visitas = producto.metrics?.visits || 0
-        const rating = producto.metrics?.reviews.rating_average || 0
-        const totalReseñas = producto.metrics?.reviews.total || 0
-        const health = producto.health || 0
-        
-        return (visitas * 0.3) + (rating * 10) + (totalReseñas * 3) + (health * 5)
-      }
-      
-      filtered = filtered
-        .filter(item => item.productoPadre?.status !== 'paused')
-        .map(item => ({ ...item, score: calcularScore(item) }))
-        .sort((a: any, b: any) => b.score - a.score)
-        .slice(0, 50) // Top 50 destacados
-    } 
-    else if (categoryFilter === 'mas-vendidos') {
-      // Productos más vendidos: ordenados por cantidad vendida
-      filtered = filtered
-        .filter(item => item.productoPadre?.status !== 'paused' && (item.productoPadre?.sold_quantity || 0) > 0)
-        .sort((a, b) => (b.productoPadre?.sold_quantity || 0) - (a.productoPadre?.sold_quantity || 0))
-        .slice(0, 50) // Top 50 más vendidos
-    }
-    else if (categoryFilter === 'con-descuento') {
-      // Productos con descuento: filtrar por productos que tengan descuento activo
-      filtered = filtered.filter(item => {
-        const producto = item.productoPadre
-        return producto?.status !== 'paused' && 
-               producto?.descuento?.activo === true
-      })
-    }
-    else if (categoryFilter !== 'mostrar-todo') {
-      // Filtro por categoría normal
+    // Filtro por categoría
+    if (categoryFilter !== 'mostrar-todo') {
       filtered = filtered.filter(item => item.categoria === categoryFilter)
     }
 
@@ -726,28 +684,17 @@ const TiendaMLPage: React.FC = () => {
                 </section>
 
                 <section className="filtro-categorias centrar-texto">
-                  <div className="categorias-grid-especial">
-                    {categorias.filter(cat => ['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
+                  <div className="categorias-grid">
+                    {categorias.map(category => (
                       <div 
                         key={category.id}
                         className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
                         onClick={() => handleCategoryFilter(category.id)}
                         style={{ cursor: 'pointer' }}
                       >
-                        <span className="categoria-nombre">{category.name}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="categorias-grid" style={{ marginTop: '12px' }}>
-                    {categorias.filter(cat => !['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
-                      <div 
-                        key={category.id}
-                        className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
-                        onClick={() => handleCategoryFilter(category.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
+                        {category.id !== 'mostrar-todo' && (
+                          <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
+                        )}
                         <span className="categoria-nombre">{category.name}</span>
                       </div>
                     ))}
@@ -863,28 +810,17 @@ const TiendaMLPage: React.FC = () => {
               </section>
 
               <section className="filtro-categorias centrar-texto">
-                <div className="categorias-grid-especial">
-                  {categorias.filter(cat => ['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
+                <div className="categorias-grid">
+                  {categorias.map(category => (
                     <div 
                       key={category.id}
                       className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
                       onClick={() => handleCategoryFilter(category.id)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <span className="categoria-nombre">{category.name}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="categorias-grid" style={{ marginTop: '12px' }}>
-                  {categorias.filter(cat => !['mostrar-todo', 'destacados', 'mas-vendidos', 'con-descuento'].includes(cat.id)).map(category => (
-                    <div 
-                      key={category.id}
-                      className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`}
-                      onClick={() => handleCategoryFilter(category.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
+                      {category.id !== 'mostrar-todo' && (
+                        <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
+                      )}
                       <span className="categoria-nombre">{category.name}</span>
                     </div>
                   ))}
