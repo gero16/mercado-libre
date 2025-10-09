@@ -10,13 +10,17 @@ const Header: React.FC = () => {
 
   const categories = [
     { id: 'mostrar-todo', name: '📋 Todos los Productos', icon: '📋' },
-    { id: 'electronica', name: '📱 Electrónica', icon: '📱' },
+    { id: 'electronica', name: '📱 Electrónica y Tecnología', icon: '📱' },
     { id: 'gaming', name: '🎮 Gaming', icon: '🎮' },
-    { id: 'hogar', name: '🏠 Hogar', icon: '🏠' },
-    { id: 'deportes', name: '🏋️ Deportes', icon: '🏋️' },
-    { id: 'mas-vendidos', name: '🏆 Más Vendidos', icon: '🏆' },
-    { id: 'destacados', name: '⭐ Destacados', icon: '⭐' },
-    { id: 'con-descuento', name: '🔥 Con Descuento', icon: '🔥' }
+    { id: 'hogar', name: '🏠 Hogar y Decoración', icon: '🏠' },
+    { id: 'cocina', name: '🍳 Cocina', icon: '🍳' },
+    { id: 'bebes-ninos', name: '👶 Bebés y Niños', icon: '👶' },
+    { id: 'accesorios', name: '🎒 Accesorios', icon: '🎒' },
+    { id: 'drones-foto', name: '🚁 Drones y Fotografía', icon: '🚁' },
+    { id: 'deportes', name: '🏋️ Deportes y Fitness', icon: '🏋️' },
+    { id: 'juguetes-coleccionables', name: '🎭 Juguetes y Coleccionables', icon: '🎭' },
+    { id: 'mascotas', name: '🐾 Mascotas', icon: '🐾' },
+    { id: 'otros', name: '🔧 Otros', icon: '🔧' }
   ]
 
   const handleCategoryClick = (categoryId: string) => {
