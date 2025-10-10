@@ -1,8 +1,57 @@
 import { MERCADOPAGO_CONFIG } from '../config/mercadopago'
 import { PreferenceRequest, PreferenceItem, PayerInfo } from '../types/mercadopago'
 
-// Servicio para crear preferencias de MercadoPago
+// Servicio para crear preferencias de MercadoPago (Checkout Pro)
 export class MercadoPagoService {
+  
+  /**
+   * Crea una preferencia usando Checkout Pro (para cobrar en USD)
+   */
+  static async createCheckoutProPreference(
+    cartItems: any[],
+    customerData: any,
+    cupon_codigo?: string
+  ): Promise<{ preferenceId: string; init_point: string }> {
+    try {
+      const response = await fetch('https://poppy-shop-production.up.railway.app/api/checkout-pro/create-preference-checkout-pro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cartItems: cartItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            cantidad: item.cantidad,
+            price: item.price
+          })),
+          customerData: {
+            name: customerData.name,
+            email: customerData.email,
+            phone: customerData.phone,
+            address: customerData.address
+          },
+          cupon_codigo: cupon_codigo || null
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Error creating preference: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      console.log('✅ Preferencia de Checkout Pro creada:', result)
+      
+      return {
+        preferenceId: result.preferenceId,
+        init_point: result.init_point
+      }
+    } catch (error) {
+      console.error('Error creating Checkout Pro preference:', error)
+      throw error
+    }
+  }
   
   /**
    * Crea una preferencia en MercadoPago
@@ -95,7 +144,7 @@ export class MercadoPagoService {
       id: item.ml_id?.toString() || item.id?.toString() || index.toString(),
       title: item.name || item.title,
       quantity: item.cantidad || item.quantity || 1,
-      currency_id: 'UYU', // Pesos uruguayos - cambia según tu país
+      currency_id: 'USD', // 💵 Dólares estadounidenses
       unit_price: item.price
     }))
   }

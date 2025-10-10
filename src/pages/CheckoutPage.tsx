@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
-import { Payment } from '@mercadopago/sdk-react'
-import { useMercadoPago } from '../hooks/useMercadoPago'
-import { PaymentFormData } from '../types/mercadopago'
+import { MercadoPagoService } from '../services/mercadopago'
 
 interface CustomerData {
   name: string
@@ -36,70 +34,16 @@ const CheckoutPage: React.FC = () => {
     state: '',
   })
 
-  const [showPaymentBrick, setShowPaymentBrick] = useState(false)
-  const [isCreatingPreference, setIsCreatingPreference] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   
   // 🆕 Estados para cupón
   const [codigoCupon, setCodigoCupon] = useState('')
   const [aplicandoCupon, setAplicandoCupon] = useState(false)
   const [mensajeCupon, setMensajeCupon] = useState<{ tipo: 'success' | 'error', texto: string} | null>(null)
-  
-  const {
-    createPreference,
-    getInitialization,
-    getCustomization,
-    onSubmit: originalOnSubmit,
-    onError,
-    onReady,
-    preferenceId,
-    isLoading: _mpLoading,
-    error: _mpError
-  } = useMercadoPago()
-
-  // Efecto para controlar el scroll del body cuando el modal está abierto
-  useEffect(() => {
-    if (showPaymentBrick) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    // Cleanup al desmontar el componente
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [showPaymentBrick])
-
-  // Efecto para cerrar el modal con la tecla Escape
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showPaymentBrick) {
-        setShowPaymentBrick(false)
-      }
-    }
-
-    if (showPaymentBrick) {
-      document.addEventListener('keydown', handleEscapeKey)
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey)
-    }
-  }, [showPaymentBrick])
 
   useEffect(() => {
     setCartOpen(false)
   }, [])
-
-  // 🆕 Crear un wrapper para onSubmit que pase los datos del carrito y cliente
-  const handlePaymentSubmit = useCallback(async ({ formData, selectedPaymentMethod }: any) => {
-    console.log('💳 Datos del pago recibidos:', formData)
-    console.log('🛒 Items del carrito:', cartItems)
-    console.log('👤 Datos del cliente:', customerData)
-    
-    // Llamar al onSubmit original pasando los datos adicionales
-    return originalOnSubmit({ formData, selectedPaymentMethod } as PaymentFormData, cartItems, customerData)
-  }, [originalOnSubmit, cartItems, customerData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -168,19 +112,29 @@ const CheckoutPage: React.FC = () => {
     }
 
     try {
-      setIsCreatingPreference(true)
+      setIsProcessing(true)
       
-      // Crear preferencia en MercadoPago
-      await createPreference(cartItems, customerData)
+      console.log('🛒 Creando preferencia de Checkout Pro...')
+      console.log('Items:', cartItems)
+      console.log('Customer:', customerData)
+      console.log('Cupón:', cuponAplicado?.cupon?.codigo)
       
-      // Mostrar el Payment Brick
-      setShowPaymentBrick(true)
+      // Crear preferencia de Checkout Pro
+      const { init_point } = await MercadoPagoService.createCheckoutProPreference(
+        cartItems,
+        customerData,
+        cuponAplicado?.cupon?.codigo
+      )
       
-    } catch (error) {
+      console.log('✅ Preferencia creada, redirigiendo a:', init_point)
+      
+      // Redirigir a MercadoPago para completar el pago
+      window.location.href = init_point
+      
+    } catch (error: any) {
       console.error('Error creating preference:', error)
-      alert('Error creando la preferencia de pago. Por favor intenta nuevamente.')
-    } finally {
-      setIsCreatingPreference(false)
+      alert(error.message || 'Error creando la preferencia de pago. Por favor intenta nuevamente.')
+      setIsProcessing(false)
     }
   }
 
@@ -299,51 +253,25 @@ const CheckoutPage: React.FC = () => {
             <div className="form-actions">
                 <button 
                   type="submit" 
-                className="btn-orden"
-                  disabled={isCreatingPreference}
+                  className="btn-orden"
+                  disabled={isProcessing}
+                  style={{
+                    backgroundColor: isProcessing ? '#ccc' : '',
+                    cursor: isProcessing ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                {isCreatingPreference ? 'Creando preferencia...' : 'Proceder al Pago'}
+                  {isProcessing ? '🔄 Procesando...' : '💳 Pagar con MercadoPago (USD)'}
                 </button>
+                <p style={{
+                  marginTop: '10px',
+                  fontSize: '0.9rem',
+                  color: '#666',
+                  textAlign: 'center'
+                }}>
+                  Serás redirigido a MercadoPago para completar tu pago en USD
+                </p>
             </div>
           </form>
-          
-          {/* Modal de Payment Brick de MercadoPago */}
-          {showPaymentBrick && preferenceId && (
-            <div className="payment-modal-overlay" onClick={() => setShowPaymentBrick(false)}>
-              <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="payment-modal-header">
-                  <h2>Selecciona tu método de pago</h2>
-                  <button 
-                    className="payment-modal-close"
-                    onClick={() => setShowPaymentBrick(false)}
-                    title="Cerrar"
-                  >
-                    ×
-                  </button>
-                </div>
-                
-                <div id="paymentBrick_container">
-                  <Payment
-                    initialization={getInitialization(cartTotalConDescuento, preferenceId)}
-                    customization={getCustomization()}
-                    onSubmit={handlePaymentSubmit}
-                    onReady={onReady}
-                    onError={onError}
-                  />
-                </div>
-                
-                <div className="payment-modal-actions">
-                  <button 
-                    type="button" 
-                    className="btn-orden volver"
-                    onClick={() => setShowPaymentBrick(false)}
-                  >
-                    Volver a datos del cliente
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Resumen del pedido */}
