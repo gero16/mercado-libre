@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
+import SEO from '../components/SEO'
 import '../css/detalleProducto.css'
 
 const DetalleProductoPage: React.FC = () => {
@@ -297,15 +298,51 @@ const DetalleProductoPage: React.FC = () => {
     )
   }
 
+  // Preparar datos para SEO
+  const getProductUrl = () => `https://mercado-libre-roan.vercel.app/producto/${id}`
+  const getProductImage = () => getImagenPrincipal()
+  const getProductDescription = () => {
+    if (producto.description) {
+      // Tomar solo los primeros 155 caracteres para la meta descripción
+      return producto.description.substring(0, 155) + (producto.description.length > 155 ? '...' : '')
+    }
+    return `${producto.title} - Disponible en nuestra tienda virtual con envío a todo el país.`
+  }
+
   return (
-    <div className="container">
-      <div className="detalle-producto">
-        {/* Breadcrumb */}
-        <nav className="breadcrumb">
-          <a href="/">Inicio</a> / 
-          <a href="/tienda-ml">Productos</a> / 
-          <span>{producto.title}</span>
-        </nav>
+    <>
+      {/* SEO Component - Metadatos dinámicos para cada producto */}
+      <SEO
+        title={`${producto.title} - Tienda Virtual`}
+        description={getProductDescription()}
+        keywords={`${producto.title}, ${producto.categoria || 'productos'}, comprar online, envío rápido`}
+        image={getProductImage()}
+        url={getProductUrl()}
+        type="product"
+        price={varianteSeleccionada?.price || producto.price}
+        currency="USD"
+        availability={isProductPaused || getStockVariante() <= 0 ? 'out of stock' : 'in stock'}
+        productSchema={{
+          name: producto.title,
+          image: getProductImage(),
+          description: producto.description || producto.title,
+          price: varianteSeleccionada?.price || producto.price,
+          currency: 'USD',
+          availability: isProductPaused || getStockVariante() <= 0 ? 'out of stock' : 'in stock',
+          brand: producto.attributes?.find((attr: any) => attr.name === 'Marca')?.value_name || 'Tienda Virtual',
+          category: producto.categoria || 'general',
+          sku: producto.ml_id || producto._id
+        }}
+      />
+
+      <div className="container">
+        <div className="detalle-producto">
+          {/* Breadcrumb */}
+          <nav className="breadcrumb">
+            <a href="/">Inicio</a> / 
+            <a href="/tienda-ml">Productos</a> / 
+            <span>{producto.title}</span>
+          </nav>
 
         <div className="producto-detalle">
           {/* Imagen del producto */}
@@ -480,8 +517,9 @@ const DetalleProductoPage: React.FC = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

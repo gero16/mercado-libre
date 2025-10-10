@@ -1,0 +1,33 @@
+# Robots.txt para Tienda Virtual
+User-agent: *
+Allow: /
+Allow: /tienda-ml
+Allow: /producto/
+Allow: /contacto
+Allow: /preguntas-frecuentes
+
+# Bloquear rutas administrativas
+Disallow: /admin
+Disallow: /admin/*
+
+# Bloquear rutas de pago (no indexables)
+Disallow: /payment-success
+Disallow: /payment-failure
+Disallow: /payment-pending
+Disallow: /checkout
+
+# Sitemap
+Sitemap: https://mercado-libre-roan.vercel.app/sitemap.xml
+Sitemap: https://poppy-shop-production.up.railway.app/api/sitemap.xml
+
+# Rastreadores específicos
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl-delay para bots agresivos
+User-agent: *
+Crawl-delay: 10
+

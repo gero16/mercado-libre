@@ -10,7 +10,7 @@ const WhatsAppButton: React.FC = () => {
   // URL de WhatsApp API
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`
   
-  const handleClick = () => {
+  const handleClick = (): void => {
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
   }
   
