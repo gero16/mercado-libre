@@ -99,7 +99,7 @@ const SEO: React.FC<SEOProps> = ({
         existingScript.remove()
       }
 
-      const schema = {
+      const schema: any = {
         '@context': 'https://schema.org/',
         '@type': 'Product',
         name: productSchema.name,
@@ -119,18 +119,18 @@ const SEO: React.FC<SEOProps> = ({
 
       // Agregar campos opcionales
       if (productSchema.brand) {
-        schema['brand'] = {
+        schema.brand = {
           '@type': 'Brand',
           name: productSchema.brand
         }
       }
 
       if (productSchema.category) {
-        schema['category'] = productSchema.category
+        schema.category = productSchema.category
       }
 
       if (productSchema.sku) {
-        schema['sku'] = productSchema.sku
+        schema.sku = productSchema.sku
       }
 
       const script = document.createElement('script')
