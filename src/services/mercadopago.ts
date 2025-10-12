@@ -13,7 +13,13 @@ export class MercadoPagoService {
     cupon_codigo?: string
   ): Promise<{ preferenceId: string; init_point: string }> {
     try {
-      const response = await fetch('https://poppy-shop-production.up.railway.app/api/checkout-pro/create-preference-checkout-pro', {
+      // 🧪 TEMPORAL: Usar backend local para pruebas
+      // Cambiar a Railway cuando esté desplegado: https://poppy-shop-production.up.railway.app
+      const backendUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://poppy-shop-production.up.railway.app' 
+        : 'http://localhost:3000';
+      
+      const response = await fetch(`${backendUrl}/api/checkout-pro/create-preference-checkout-pro`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

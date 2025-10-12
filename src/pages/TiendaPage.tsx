@@ -223,6 +223,7 @@ const TiendaMLPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState(
     (location.state as any)?.categoryFilter || 'mostrar-todo'
   )
+  const [stockFilter, setStockFilter] = useState(false)
   const [loading, setLoading] = useState(true)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
     { id: 'mostrar-todo', name: 'Mostrar Todo' }
@@ -551,6 +552,11 @@ const TiendaMLPage: React.FC = () => {
     // Filtro por precio
     filtered = filtered.filter(item => item.price >= priceFilter)
 
+    // Filtro por stock
+    if (stockFilter) {
+      filtered = filtered.filter(item => item.stock > 0 && !item.isPaused)
+    }
+
     setFilteredItems(filtered)
     
     // 🚀 Calcular paginación
@@ -569,7 +575,7 @@ const TiendaMLPage: React.FC = () => {
     const itemsForCurrentPage = filtered.slice(startIndex, endIndex)
     
     setPaginatedItems(itemsForCurrentPage)
-  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, currentPage, itemsPerPage])
+  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, currentPage, itemsPerPage])
 
   const handleProductClick = (item: ItemTienda) => {
     // Usar ml_id en lugar de _id para buscar el producto
@@ -680,6 +686,71 @@ const TiendaMLPage: React.FC = () => {
                       />
                       <span id="mostrar-precio">${priceFilter}</span>
                     </div>
+                  </div>
+                </section>
+
+                {/* Buscador */}
+                <section className="centrar-texto" style={{ marginTop: '20px', marginBottom: '20px' }}>
+                  <h3 className="precios-titulo">Buscar Productos</h3>
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    marginTop: '10px'
+                  }}>
+                    <input
+                      type="text"
+                      placeholder="🔍 Buscar..."
+                      value={searchQuery}
+                      disabled
+                      style={{
+                        width: '100%',
+                        padding: '10px 35px 10px 12px',
+                        fontSize: '14px',
+                        border: '2px solid #ddd',
+                        borderRadius: '20px',
+                        outline: 'none',
+                        backgroundColor: '#f5f5f5',
+                        cursor: 'not-allowed'
+                      }}
+                    />
+                  </div>
+                </section>
+
+                {/* Filtro de Stock */}
+                <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '12px',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '12px',
+                    opacity: 0.6,
+                    cursor: 'not-allowed'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id="stock-filter-loading"
+                      checked={stockFilter}
+                      disabled
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        cursor: 'not-allowed'
+                      }}
+                    />
+                    <label 
+                      htmlFor="stock-filter-loading" 
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        userSelect: 'none',
+                        color: '#333'
+                      }}
+                    >
+                      📦 Solo productos en stock
+                    </label>
                   </div>
                 </section>
 
@@ -807,6 +878,51 @@ const TiendaMLPage: React.FC = () => {
                     }
                   </div>
                 )}
+              </section>
+
+              {/* Filtro de Stock */}
+              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  border: stockFilter ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  boxShadow: stockFilter ? '0 4px 12px rgba(254, 159, 1, 0.2)' : 'none'
+                }}
+                onClick={() => setStockFilter(!stockFilter)}
+                >
+                  <input
+                    type="checkbox"
+                    id="stock-filter"
+                    checked={stockFilter}
+                    onChange={(e) => setStockFilter(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--color-primary)'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <label 
+                    htmlFor="stock-filter" 
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      color: stockFilter ? 'var(--color-primary)' : '#333'
+                    }}
+                  >
+                    📦 Solo productos en stock
+                  </label>
+                </div>
               </section>
 
               <section className="filtro-categorias centrar-texto">
