@@ -1,5 +1,5 @@
   .header {
-  z-index: 90;
+  z-index: 999;
   position: fixed;
   top: 0;
 
@@ -249,4 +249,5 @@
         opacity: 0.5;
       }
     }
+
   

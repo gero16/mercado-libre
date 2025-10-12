@@ -7,6 +7,8 @@ const Header: React.FC = () => {
   const { cartItemCount, setCartOpen, cartOpen } = useCart()
   const navigate = useNavigate()
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
 
   const categories = [
     { id: 'mostrar-todo', name: '📋 Todos los Productos', icon: '📋' },
@@ -26,6 +28,25 @@ const Header: React.FC = () => {
   const handleCategoryClick = (categoryId: string) => {
     navigate('/tienda-ml', { state: { categoryFilter: categoryId } })
     setShowCategoriesDropdown(false)
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/tienda-ml?search=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery('') // Limpiar el campo después de buscar
+      setSearchOpen(false) // Cerrar el buscador después de buscar
+    }
+  }
+
+  const toggleSearch = () => {
+    setSearchOpen(!searchOpen)
+    if (!searchOpen) {
+      // Enfocar el input cuando se abre
+      setTimeout(() => {
+        document.getElementById('search-input')?.focus()
+      }, 100)
+    }
   }
 
   return (
@@ -64,6 +85,86 @@ const Header: React.FC = () => {
             
             <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
             <li><NavLink to="/admin" className={({ isActive }) => isActive ? 'admin-link active' : 'admin-link'}>Admin</NavLink></li>
+            
+            {/* Buscador colapsable */}
+            <li style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {searchOpen && (
+                <form 
+                  onSubmit={handleSearch}
+                  style={{
+                    position: 'absolute',
+                    right: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    animation: 'slideInRight 0.3s ease',
+                    background: 'white',
+                    padding: '5px',
+                    borderRadius: '25px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                    zIndex: 10000
+                  }}
+                >
+                  <input
+                    id="search-input"
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      padding: '8px 15px',
+                      fontSize: '14px',
+                      border: '2px solid var(--color-primary)',
+                      borderRadius: '20px',
+                      outline: 'none',
+                      width: '250px',
+                      transition: 'all 0.3s ease'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: '8px 15px',
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '13px',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Buscar
+                  </button>
+                </form>
+              )}
+              <button
+                onClick={toggleSearch}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  padding: '5px 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--color-primary)'
+                  e.currentTarget.style.transform = 'scale(1.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'white'
+                  e.currentTarget.style.transform = 'scale(1)'
+                }}
+                title="Buscar productos"
+              >
+                🔍
+              </button>
+            </li>
             
             <li>
               <button 

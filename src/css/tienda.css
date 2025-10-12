@@ -1,7 +1,7 @@
 /*** Tienda de Productos ***/
 
 .header {
-  z-index: 90;
+  z-index: 999;
   position: fixed;
   top: 0;
   

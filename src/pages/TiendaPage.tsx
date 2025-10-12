@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -216,9 +216,14 @@ interface ItemTienda {
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
+  
+  // Obtener término de búsqueda de la URL si existe
+  const urlSearchQuery = searchParams.get('search') || ''
+  
   const [itemsTienda, setItemsTienda] = useState<ItemTienda[]>([])
   const [filteredItems, setFilteredItems] = useState<ItemTienda[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(urlSearchQuery)
   const [priceFilter, setPriceFilter] = useState(0)
   const [categoryFilter, setCategoryFilter] = useState(
     (location.state as any)?.categoryFilter || 'mostrar-todo'
@@ -237,6 +242,15 @@ const TiendaMLPage: React.FC = () => {
   const [isChangingPage, setIsChangingPage] = useState(false)
   
   const { addToCart } = useCart()
+
+  // 🔍 Efecto para actualizar searchQuery cuando cambie el parámetro de la URL
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || ''
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch)
+      setCurrentPage(1) // Reset a la primera página cuando se busca desde el navbar
+    }
+  }, [searchParams])
 
   // 🆕 Función para optimizar imágenes de ML (usar versiones más pequeñas)
   const getOptimizedImageUrl = (url: string) => {

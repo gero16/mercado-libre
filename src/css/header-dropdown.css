@@ -4,6 +4,7 @@
 
 .dropdown-menu {
   position: relative;
+  z-index: 1000;
 }
 
 .dropdown-menu > a {
@@ -24,7 +25,7 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   padding: 8px 0;
-  z-index: 1000;
+  z-index: 9999;
   animation: slideDown 0.3s ease;
   border: 1px solid #e0e0e0;
   margin-top: 0;
