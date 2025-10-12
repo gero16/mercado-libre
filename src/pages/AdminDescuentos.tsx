@@ -134,6 +134,36 @@ const AdminDescuentos: React.FC = () => {
     }
   }
 
+  const handleRepararDescuentos = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres reparar todos los descuentos? Esto recalculará los precios de productos con descuentos mal configurados.')) {
+      return
+    }
+
+    try {
+      mostrarMensaje('success', 'Reparando descuentos, por favor espera...')
+      
+      const response = await fetch('https://poppy-shop-production.up.railway.app/api/descuentos/reparar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        mostrarMensaje('success', `Reparación completada: ${data.reparados} productos reparados, ${data.ya_correctos} ya estaban correctos`)
+        fetchProductos()
+        fetchProductosConDescuento()
+      } else {
+        mostrarMensaje('error', 'Error al reparar descuentos')
+      }
+    } catch (error) {
+      console.error('Error reparando descuentos:', error)
+      mostrarMensaje('error', 'Error al reparar descuentos')
+    }
+  }
+
   const productosFiltrados = productos.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -197,12 +227,55 @@ const AdminDescuentos: React.FC = () => {
 
         {/* Sección: Productos con descuento activo */}
         <section className="seccion-descuentos-activos">
-          <h2 className="seccion-titulo">
-            🔥 Productos con Descuento Activo 
-            <span style={{ fontSize: '1rem', fontWeight: 'normal', marginLeft: '10px', color: '#7f8c8d' }}>
-              ({productosConDescuento.length} producto{productosConDescuento.length !== 1 ? 's' : ''})
-            </span>
-          </h2>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '15px',
+            marginBottom: '20px'
+          }}>
+            <h2 className="seccion-titulo" style={{ margin: 0 }}>
+              🔥 Productos con Descuento Activo 
+              <span style={{ fontSize: '1rem', fontWeight: 'normal', marginLeft: '10px', color: '#7f8c8d' }}>
+                ({productosConDescuento.length} producto{productosConDescuento.length !== 1 ? 's' : ''})
+              </span>
+            </h2>
+            
+            {productosConDescuento.length > 0 && (
+              <button 
+                className="btn btn-warning"
+                onClick={handleRepararDescuentos}
+                style={{
+                  background: '#ff9800',
+                  color: 'white',
+                  padding: '10px 20px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = '#fb8c00'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 152, 0, 0.4)'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = '#ff9800'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.3)'
+                }}
+              >
+                🔧 Reparar Descuentos
+              </button>
+            )}
+          </div>
           
           {productosConDescuento.length === 0 ? (
             <p className="texto-vacio">No hay productos con descuento activo</p>

@@ -326,9 +326,6 @@ const TiendaMLPage: React.FC = () => {
         const categoria = obtenerCategoria(producto.category_id)
         const isPaused = producto.status === 'paused'
         
-        // 🔍 DEBUG: Log para verificar el status
-       // console.log(`🔍 Producto: ${producto.title}, Status: "${producto.status}", isPaused: ${isPaused}`)
-        
         // Si el producto tiene variantes, mostramos solo la primera variante de cada combinación única
         if (producto.variantes && producto.variantes.length > 0) {
           // Agrupar variantes por color para evitar duplicados
