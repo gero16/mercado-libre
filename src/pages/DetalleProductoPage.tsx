@@ -385,10 +385,22 @@ const DetalleProductoPage: React.FC = () => {
           <div className="info-producto">
             <h1>{producto.title}</h1>
             
-            {/* Mostrar badge de estado si está pausado */}
+            {/* Mostrar badge de estado si está pausado o sin stock */}
             {isProductPaused && (
               <div className="product-status-badge paused">
                 <span>⚠️ Producto Pausado</span>
+              </div>
+            )}
+            
+            {!isProductPaused && getStockVariante() === 0 && (
+              <div className="product-status-badge sin-stock">
+                <span>❌ Sin Stock Disponible</span>
+              </div>
+            )}
+            
+            {producto.status === 'closed' && (
+              <div className="product-status-badge cerrado">
+                <span>🔴 Producto Cerrado en MercadoLibre</span>
               </div>
             )}
 
@@ -417,8 +429,20 @@ const DetalleProductoPage: React.FC = () => {
                 ) : (
                   <h2 className='h2-precio'>US$ {precioBase.toFixed(2)}</h2>
                 )}
-                <p className={`disponibilidad p-precio-detalle ${isProductPaused ? 'paused' : 'available'}`}>
-                  {isProductPaused ? 'Producto pausado' : 'Disponible'}
+                <p className={`disponibilidad p-precio-detalle ${
+                  isProductPaused ? 'paused' : 
+                  getStockVariante() === 0 ? 'sin-stock' : 
+                  getStockVariante() <= 5 ? 'poco-stock' : 
+                  'available'
+                }`}>
+                  {isProductPaused 
+                    ? 'Producto pausado' 
+                    : getStockVariante() === 0 
+                      ? 'Sin stock' 
+                      : getStockVariante() <= 5 
+                        ? `Últimas ${getStockVariante()} unidades`
+                        : `Disponible (${getStockVariante()} unidades)`
+                  }
                 </p>
               </div>
               

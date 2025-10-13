@@ -190,7 +190,7 @@
 /* === BADGE DE ESTADO COMPACTO === */
 .product-status-badge {
   display: inline-block;
-  margin: 0;
+  margin: 0 0 6px 0;
 }
 
 .product-status-badge.paused span {
@@ -198,10 +198,32 @@
   color: #dc2626;
   padding: 2px 6px;
   border-radius: 8px;
-  font-size: 11px; /* Aumentado de 9px */
+  font-size: 11px;
   font-weight: 600;
   border: 1px solid #fecaca;
   box-shadow: 0 1px 2px rgba(220, 38, 38, 0.15);
+}
+
+.product-status-badge.sin-stock span {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #fbbf24;
+  box-shadow: 0 1px 2px rgba(251, 191, 36, 0.15);
+}
+
+.product-status-badge.cerrado span {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #475569;
+  box-shadow: 0 1px 2px rgba(30, 41, 59, 0.2);
 }
 
 /* === INFORMACIÓN DE DROPSHIPPING COMPACTA === */
@@ -317,6 +339,24 @@
   padding: 1px 4px;
   border-radius: 6px;
   font-weight: 600;
+  font-size: 8px;
+}
+
+.disponibilidad.poco-stock {
+  color: #d97706;
+  background: rgba(217, 119, 6, 0.1);
+  padding: 1px 4px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 8px;
+}
+
+.disponibilidad.sin-stock {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.15);
+  padding: 1px 4px;
+  border-radius: 6px;
+  font-weight: 700;
   font-size: 8px;
 }
 
