@@ -689,6 +689,39 @@
   box-shadow: 0 2px 4px rgba(107, 114, 128, 0.15);
 }
 
+.btn-mercadolibre {
+  flex: 1;
+  padding: 6px 8px;
+  background: linear-gradient(135deg, #FFE600 0%, #FFC107 100%);
+  color: #1a1a1a;
+  border: 1px solid #FFD700;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(255, 230, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-mercadolibre::before {
+  content: '🛒 ';
+  font-size: 12px;
+}
+
+.btn-mercadolibre:hover {
+  background: linear-gradient(135deg, #FFC107 0%, #FFB300 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(255, 230, 0, 0.4);
+  border-color: #FFB300;
+}
+
+.btn-mercadolibre:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(255, 230, 0, 0.3);
+}
+
 /* === RESPONSIVE COMPACTO === */
 @media (max-width: 768px) {
   .detalle-producto {

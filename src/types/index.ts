@@ -61,6 +61,7 @@ export interface ProductoML {
   price: number;
   status: string;
   title: string;
+  permalink?: string; // URL de la publicación en MercadoLibre
   variantes: Variante[];
   cantidad?: number;
   description?: string;

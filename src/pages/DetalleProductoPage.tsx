@@ -223,7 +223,7 @@ const DetalleProductoPage: React.FC = () => {
   const isProductPaused = producto?.status === 'paused'
 
   // Verificar si es producto de dropshipping
-  const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 14
+  const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 10
   const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
 
   // Función helper para obtener el stock de una variante específica
@@ -498,6 +498,17 @@ const DetalleProductoPage: React.FC = () => {
               <button onClick={() => navigate('/tienda-ml')} className="btn-volver">
                 Volver a la tienda
               </button>
+
+              {/* Botón para ver en MercadoLibre */}
+              {producto.permalink && (
+                <button 
+                  onClick={() => window.open(producto.permalink, '_blank')}
+                  className="btn-mercadolibre"
+                  title="Ver publicación en MercadoLibre"
+                >
+                  Ver en MercadoLibre
+                </button>
+              )}
 
             </div>
           </div>
