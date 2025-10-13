@@ -774,6 +774,23 @@
   box-shadow: 0 1px 2px rgba(255, 230, 0, 0.3);
 }
 
+/* === MENSAJE PRODUCTO CERRADO === */
+.producto-cerrado-info {
+  flex: 1;
+  padding: 6px 8px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.producto-cerrado-info p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #dc2626;
+}
+
 /* === RESPONSIVE COMPACTO === */
 @media (max-width: 768px) {
   .detalle-producto {

@@ -524,8 +524,8 @@ const DetalleProductoPage: React.FC = () => {
                 Volver a la tienda
               </button>
 
-              {/* Botón para ver en MercadoLibre */}
-              {producto.permalink && (
+              {/* Botón para ver en MercadoLibre - Solo si está activo */}
+              {producto.permalink && producto.status !== 'closed' && producto.status !== 'inactive' && (
                 <button 
                   onClick={() => window.open(producto.permalink, '_blank')}
                   className="btn-mercadolibre"
@@ -533,6 +533,13 @@ const DetalleProductoPage: React.FC = () => {
                 >
                   Ver en MercadoLibre
                 </button>
+              )}
+              
+              {/* Mensaje si el producto está cerrado */}
+              {producto.status === 'closed' && (
+                <div className="producto-cerrado-info">
+                  <p>⚠️ Producto cerrado en MercadoLibre</p>
+                </div>
               )}
 
             </div>

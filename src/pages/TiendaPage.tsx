@@ -359,13 +359,19 @@ const TiendaMLPage: React.FC = () => {
             // Si el producto está pausado, el stock efectivo es 0
             const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
             
+            // Calcular precio con descuento si está activo
+            const precioBase = variante.price || producto.price;
+            const tieneDescuento = producto.descuento?.activo || false;
+            const porcentaje = producto.descuento?.porcentaje || 0;
+            const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+            
             // Solo agregar si tiene imagen
             if (imagenVariante) {
               items.push({
                 id: `${producto.ml_id || producto._id}_${variante.color}`,
                 ml_id: producto.ml_id,
                 title: `${producto.title} - ${variante.color || ''}`.trim(),
-                price: variante.price || producto.price,
+                price: precioConDescuento,
                 image: getOptimizedImageUrl(imagenVariante),
                 stock: effectiveStock,
                 esVariante: true,
@@ -382,13 +388,19 @@ const TiendaMLPage: React.FC = () => {
           const effectiveStock = isPaused ? 0 : producto.available_quantity;
           const imagenPrincipal = producto.images[0]?.url || producto.main_image;
           
+          // Calcular precio con descuento si está activo
+          const precioBase = producto.price;
+          const tieneDescuento = producto.descuento?.activo || false;
+          const porcentaje = producto.descuento?.porcentaje || 0;
+          const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+          
           // Solo agregar si tiene imagen
           if (imagenPrincipal) {
             items.push({
               id: producto.ml_id || producto._id,
                 ml_id: producto.ml_id,
               title: producto.title,
-              price: producto.price,
+              price: precioConDescuento,
               image: getOptimizedImageUrl(imagenPrincipal),
               stock: effectiveStock,
               esVariante: false,
@@ -494,12 +506,18 @@ const TiendaMLPage: React.FC = () => {
                 
                 const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
                 
+                // Calcular precio con descuento si está activo
+                const precioBase = variante.price || producto.price;
+                const tieneDescuento = producto.descuento?.activo || false;
+                const porcentaje = producto.descuento?.porcentaje || 0;
+                const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+                
                 if (imagenVariante) {
                   remainingItems.push({
                     id: `${producto.ml_id || producto._id}_${variante.color}`,
                     ml_id: producto.ml_id,
                     title: `${producto.title} - ${variante.color || ''}`.trim(),
-                    price: variante.price || producto.price,
+                    price: precioConDescuento,
                     image: getOptimizedImageUrl(imagenVariante),
                     stock: effectiveStock,
                     esVariante: true,
@@ -514,12 +532,18 @@ const TiendaMLPage: React.FC = () => {
               const effectiveStock = isPaused ? 0 : producto.available_quantity;
               const imagenPrincipal = producto.images[0]?.url || producto.main_image;
               
+              // Calcular precio con descuento si está activo
+              const precioBase = producto.price;
+              const tieneDescuento = producto.descuento?.activo || false;
+              const porcentaje = producto.descuento?.porcentaje || 0;
+              const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+              
               if (imagenPrincipal) {
                 remainingItems.push({
                   id: producto.ml_id || producto._id,
                   ml_id: producto.ml_id,
                   title: producto.title,
-                  price: producto.price,
+                  price: precioConDescuento,
                   image: getOptimizedImageUrl(imagenPrincipal),
                   stock: effectiveStock,
                   esVariante: false,
