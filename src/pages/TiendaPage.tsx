@@ -1015,6 +1015,8 @@ const TiendaMLPage: React.FC = () => {
             const tieneDescuento = item.productoPadre?.descuento?.activo
             const precioOriginal = item.productoPadre?.descuento?.precio_original
             const porcentajeDescuento = item.productoPadre?.descuento?.porcentaje
+            const productoCerrado = item.productoPadre?.status === 'closed'
+            const sinStock = item.stock === 0
             
             return (
               <div 
@@ -1045,6 +1047,42 @@ const TiendaMLPage: React.FC = () => {
                     -{porcentajeDescuento}%
                   </div>
                 )}
+                
+                {productoCerrado && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '10px',
+                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontWeight: '700',
+                    fontSize: '0.75rem',
+                    boxShadow: '0 3px 10px rgba(30, 41, 59, 0.4)',
+                    zIndex: 2
+                  }}>
+                    🔴 CERRADO
+                  </div>
+                )}
+                
+                {!productoCerrado && sinStock && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '10px',
+                    background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                    color: '#1a1a1a',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontWeight: '700',
+                    fontSize: '0.75rem',
+                    boxShadow: '0 3px 10px rgba(251, 191, 36, 0.4)',
+                    zIndex: 2
+                  }}>
+                    ❌ SIN STOCK
+                  </div>
+                )}
                 <img 
                   src={item.image} 
                   alt={item.title}
@@ -1055,6 +1093,37 @@ const TiendaMLPage: React.FC = () => {
                   }}
                 />
                 <p>{item.title}</p>
+                
+                {productoCerrado && (
+                  <div style={{
+                    padding: '4px 8px',
+                    background: 'rgba(30, 41, 59, 0.1)',
+                    border: '1px solid #334155',
+                    borderRadius: '6px',
+                    margin: '5px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#1e293b'
+                  }}>
+                    ⚠️ Cerrado en ML
+                  </div>
+                )}
+                
+                {!productoCerrado && sinStock && (
+                  <div style={{
+                    padding: '4px 8px',
+                    background: 'rgba(251, 191, 36, 0.15)',
+                    border: '1px solid #fbbf24',
+                    borderRadius: '6px',
+                    margin: '5px 10px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#92400e'
+                  }}>
+                    ❌ Sin stock
+                  </div>
+                )}
+                
                 <div style={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
@@ -1096,9 +1165,16 @@ const TiendaMLPage: React.FC = () => {
                 <button 
                   className="add"
                   onClick={(e) => handleAddToCart(e, item)}
-                  disabled={item.stock <= 0 || item.isPaused}
+                  disabled={item.stock <= 0 || item.isPaused || productoCerrado}
                 >
-                  {item.isPaused ? 'Pausado' : item.stock <= 0 ? 'Sin Stock' : 'Agregar Carrito'}
+                  {productoCerrado 
+                    ? 'Cerrado' 
+                    : item.isPaused 
+                      ? 'Pausado' 
+                      : item.stock <= 0 
+                        ? 'Sin Stock' 
+                        : 'Agregar Carrito'
+                  }
                 </button>
               </div>
             )
