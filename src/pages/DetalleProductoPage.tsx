@@ -168,6 +168,13 @@ const DetalleProductoPage: React.FC = () => {
 
     // Convertir a formato compatible con el carrito
     const productIdBase = producto.ml_id || producto._id
+    
+    // Calcular precio con descuento para el carrito
+    const precioParaCarrito = varianteExacta?.price || producto.price
+    const precioFinalCarrito = tieneDescuento 
+      ? precioParaCarrito * (1 - porcentajeDescuento / 100)
+      : precioParaCarrito
+    
     const cartProduct = {
       id: varianteExacta 
         ? `${productIdBase}_${varianteExacta.color}_${varianteExacta.size}` // ID único para la variante
@@ -177,7 +184,7 @@ const DetalleProductoPage: React.FC = () => {
         : producto.title,
       image: imagenVariante,
       category: producto.categoria || 'general',
-      price: varianteExacta?.price || producto.price,
+      price: precioFinalCarrito,
       stock: stockDisponible,
       cantidad: cantidad,
       color: varianteExacta?.color,
@@ -225,6 +232,13 @@ const DetalleProductoPage: React.FC = () => {
   // Verificar si es producto de dropshipping
   const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 10
   const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
+
+  // Calcular precio con descuento si está activo
+  const tieneDescuento = producto?.descuento?.activo || false
+  const porcentajeDescuento = producto?.descuento?.porcentaje || 0
+  const precioOriginal = producto?.descuento?.precio_original || producto?.price || 0
+  const precioBase = varianteSeleccionada?.price || producto?.price || 0
+  const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentajeDescuento / 100) : precioBase
 
   // Función helper para obtener el stock de una variante específica
   const getStockVariante = (): number => {
@@ -319,14 +333,14 @@ const DetalleProductoPage: React.FC = () => {
         image={getProductImage()}
         url={getProductUrl()}
         type="product"
-        price={varianteSeleccionada?.price || producto.price}
+        price={precioConDescuento}
         currency="USD"
         availability={isProductPaused || getStockVariante() <= 0 ? 'out of stock' : 'in stock'}
         productSchema={{
           name: producto.title,
           image: getProductImage(),
           description: producto.description || producto.title,
-          price: varianteSeleccionada?.price || producto.price,
+          price: precioConDescuento,
           currency: 'USD',
           availability: isProductPaused || getStockVariante() <= 0 ? 'out of stock' : 'in stock',
           brand: producto.attributes?.find((attr: any) => attr.name === 'Marca')?.value_name || 'Tienda Virtual',
@@ -391,7 +405,18 @@ const DetalleProductoPage: React.FC = () => {
           
 
               <div className="precio-disponibilidad">
-                <h2 className='h2-precio'>US$ {varianteSeleccionada?.price || producto.price}</h2>
+                {tieneDescuento ? (
+                  <div className="precio-con-descuento">
+                    <div className="precio-descuento-header">
+                      <span className="badge-descuento">-{porcentajeDescuento}%</span>
+                      <p className="precio-original-tachado">US$ {precioBase.toFixed(2)}</p>
+                    </div>
+                    <h2 className='h2-precio precio-rebajado'>US$ {precioConDescuento.toFixed(2)}</h2>
+                    <p className="ahorro-texto">¡Ahorras US$ {(precioBase - precioConDescuento).toFixed(2)}!</p>
+                  </div>
+                ) : (
+                  <h2 className='h2-precio'>US$ {precioBase.toFixed(2)}</h2>
+                )}
                 <p className={`disponibilidad p-precio-detalle ${isProductPaused ? 'paused' : 'available'}`}>
                   {isProductPaused ? 'Producto pausado' : 'Disponible'}
                 </p>
