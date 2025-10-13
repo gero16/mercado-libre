@@ -363,7 +363,9 @@ const TiendaMLPage: React.FC = () => {
             const precioBase = variante.price || producto.price;
             const tieneDescuento = producto.descuento?.activo || false;
             const porcentaje = producto.descuento?.porcentaje || 0;
-            const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+            const precioConDescuento = tieneDescuento 
+              ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 
+              : precioBase;
             
             // Solo agregar si tiene imagen
             if (imagenVariante) {
@@ -392,7 +394,9 @@ const TiendaMLPage: React.FC = () => {
           const precioBase = producto.price;
           const tieneDescuento = producto.descuento?.activo || false;
           const porcentaje = producto.descuento?.porcentaje || 0;
-          const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+          const precioConDescuento = tieneDescuento 
+            ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 
+            : precioBase;
           
           // Solo agregar si tiene imagen
           if (imagenPrincipal) {
@@ -1062,7 +1066,7 @@ const TiendaMLPage: React.FC = () => {
                     boxShadow: '0 3px 10px rgba(30, 41, 59, 0.4)',
                     zIndex: 2
                   }}>
-                    🔴 CERRADO
+                    CERRADO
                   </div>
                 )}
                 
@@ -1080,7 +1084,7 @@ const TiendaMLPage: React.FC = () => {
                     boxShadow: '0 3px 10px rgba(251, 191, 36, 0.4)',
                     zIndex: 2
                   }}>
-                    ❌ SIN STOCK
+                    SIN STOCK
                   </div>
                 )}
                 <img 
@@ -1105,7 +1109,7 @@ const TiendaMLPage: React.FC = () => {
                     fontWeight: '600',
                     color: '#1e293b'
                   }}>
-                    ⚠️ Cerrado en ML
+                    Cerrado en ML
                   </div>
                 )}
                 
@@ -1120,7 +1124,7 @@ const TiendaMLPage: React.FC = () => {
                     fontWeight: '600',
                     color: '#92400e'
                   }}>
-                    ❌ Sin stock
+                    Sin stock
                   </div>
                 )}
                 

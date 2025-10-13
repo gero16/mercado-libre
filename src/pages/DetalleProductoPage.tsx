@@ -172,7 +172,7 @@ const DetalleProductoPage: React.FC = () => {
     // Calcular precio con descuento para el carrito
     const precioParaCarrito = varianteExacta?.price || producto.price
     const precioFinalCarrito = tieneDescuento 
-      ? precioParaCarrito * (1 - porcentajeDescuento / 100)
+      ? Math.round(precioParaCarrito * (1 - porcentajeDescuento / 100) * 100) / 100
       : precioParaCarrito
     
     const cartProduct = {
@@ -238,7 +238,9 @@ const DetalleProductoPage: React.FC = () => {
   const porcentajeDescuento = producto?.descuento?.porcentaje || 0
   const precioOriginal = producto?.descuento?.precio_original || producto?.price || 0
   const precioBase = varianteSeleccionada?.price || producto?.price || 0
-  const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentajeDescuento / 100) : precioBase
+  const precioConDescuento = tieneDescuento 
+    ? Math.round(precioBase * (1 - porcentajeDescuento / 100) * 100) / 100 
+    : precioBase
 
   // Función helper para obtener el stock de una variante específica
   const getStockVariante = (): number => {
@@ -388,19 +390,19 @@ const DetalleProductoPage: React.FC = () => {
             {/* Mostrar badge de estado si está pausado o sin stock */}
             {isProductPaused && (
               <div className="product-status-badge paused">
-                <span>⚠️ Producto Pausado</span>
+                <span>Producto Pausado</span>
               </div>
             )}
             
             {!isProductPaused && getStockVariante() === 0 && (
               <div className="product-status-badge sin-stock">
-                <span>❌ Sin Stock Disponible</span>
+                <span>Sin Stock Disponible</span>
               </div>
             )}
             
             {producto.status === 'closed' && (
               <div className="product-status-badge cerrado">
-                <span>🔴 Producto Cerrado en MercadoLibre</span>
+                <span>Producto Cerrado en MercadoLibre</span>
               </div>
             )}
 
@@ -562,7 +564,7 @@ const DetalleProductoPage: React.FC = () => {
               {/* Mensaje si el producto está cerrado */}
               {producto.status === 'closed' && (
                 <div className="producto-cerrado-info">
-                  <p>⚠️ Producto cerrado en MercadoLibre</p>
+                  <p>Producto cerrado en MercadoLibre</p>
                 </div>
               )}
 
