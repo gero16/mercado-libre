@@ -17,6 +17,7 @@ const DetalleProductoPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [imagenPrincipalIndex, setImagenPrincipalIndex] = useState(0)
+  const [miniaturaStartIndex, setMiniaturaStartIndex] = useState(0)
 
   useEffect(() => {
     if (id) {
@@ -226,12 +227,26 @@ const DetalleProductoPage: React.FC = () => {
     setImagenPrincipalIndex(index);
   }
 
+  // Constantes para el carrusel de miniaturas
+  const MINIATURAS_VISIBLES = 6
+  
+  // Funciones para navegar el carrusel de miniaturas
+  const handlePrevMiniatura = () => {
+    setMiniaturaStartIndex(prev => Math.max(0, prev - 1))
+  }
+
+  const handleNextMiniatura = () => {
+    const imagenesDisponibles = getImagenesDisponibles()
+    const maxStart = Math.max(0, imagenesDisponibles.length - MINIATURAS_VISIBLES)
+    setMiniaturaStartIndex(prev => Math.min(maxStart, prev + 1))
+  }
+
   // Verificar si el producto está pausado
   const isProductPaused = producto?.status === 'paused'
 
   // Verificar si es producto de dropshipping
-  const isDropshipping = producto?.dropshipping?.dias_preparacion && producto.dropshipping.dias_preparacion > 10
   const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
+  const isDropshipping = Boolean(diasPreparacion) && diasPreparacion > 10
 
   // Calcular precio con descuento si está activo
   const tieneDescuento = producto?.descuento?.activo || false
@@ -367,18 +382,47 @@ const DetalleProductoPage: React.FC = () => {
               <img src={getImagenPrincipal()} alt={producto.title} />
             </div>
 
-            {/* Galería de miniaturas */}
+            {/* Galería de miniaturas con carrusel */}
             {getImagenesDisponibles().length > 1 && (
-              <div className="galeria-miniaturas">
-                {getImagenesDisponibles().map((imagen, index) => (
-                  <div
-                    key={index}
-                    className={`miniatura ${imagenPrincipalIndex === index ? 'activa' : ''}`}
-                    onClick={() => handleImagenClick(index)}
+              <div className="galeria-miniaturas-container">
+                {getImagenesDisponibles().length > MINIATURAS_VISIBLES && (
+                  <button 
+                    className="miniatura-nav-btn prev" 
+                    onClick={handlePrevMiniatura}
+                    disabled={miniaturaStartIndex === 0}
+                    aria-label="Imágenes anteriores"
                   >
-                    <img src={imagen} alt={`${producto.title} - imagen ${index + 1}`} />
-                  </div>
-                ))}
+                    &#8249;
+                  </button>
+                )}
+                
+                <div className="galeria-miniaturas">
+                  {getImagenesDisponibles()
+                    .slice(miniaturaStartIndex, miniaturaStartIndex + MINIATURAS_VISIBLES)
+                    .map((imagen, relativeIndex) => {
+                      const absoluteIndex = miniaturaStartIndex + relativeIndex
+                      return (
+                        <div
+                          key={absoluteIndex}
+                          className={`miniatura ${imagenPrincipalIndex === absoluteIndex ? 'activa' : ''}`}
+                          onClick={() => handleImagenClick(absoluteIndex)}
+                        >
+                          <img src={imagen} alt={`${producto.title} - imagen ${absoluteIndex + 1}`} />
+                        </div>
+                      )
+                    })}
+                </div>
+
+                {getImagenesDisponibles().length > MINIATURAS_VISIBLES && (
+                  <button 
+                    className="miniatura-nav-btn next" 
+                    onClick={handleNextMiniatura}
+                    disabled={miniaturaStartIndex >= getImagenesDisponibles().length - MINIATURAS_VISIBLES}
+                    aria-label="Imágenes siguientes"
+                  >
+                    &#8250;
+                  </button>
+                )}
               </div>
             )}
           </div>
