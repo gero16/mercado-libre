@@ -1,0 +1,35 @@
+{
+  "name": "Tienda Virtual - Productos de Calidad",
+  "short_name": "Tienda Virtual",
+  "description": "Descubre nuestra tienda virtual con la mejor selección de productos de calidad. Ropa deportiva, accesorios y más.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/public/img/icono.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/public/img/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "retail"],
+  "shortcuts": [
+    {
+      "name": "Ver Tienda",
+      "short_name": "Tienda",
+      "description": "Ver todos los productos",
+      "url": "/tienda",
+      "icons": [{ "src": "/public/img/icono.png", "sizes": "192x192" }]
+    }
+  ]
+}
+
