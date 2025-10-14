@@ -245,8 +245,24 @@ const DetalleProductoPage: React.FC = () => {
   const isProductPaused = producto?.status === 'paused'
 
   // Verificar si es producto de dropshipping
-  const diasPreparacion = producto?.dropshipping?.dias_preparacion || 0
-  const isDropshipping = Boolean(diasPreparacion) && diasPreparacion > 10
+  const isDropshipping = producto?.tipo_venta === 'dropshipping'
+  const diasPreparacion = producto?.dropshipping?.dias_preparacion || producto?.dias_preparacion || 0
+  const diasEnvio = producto?.dropshipping?.dias_envio_estimado || producto?.dias_envio_estimado || 0
+  const diasTotales = diasPreparacion + diasEnvio
+  
+  // 🔍 DEBUG: Verificar información de dropshipping
+  if (producto) {
+    console.log('🔍 DEBUG Producto:', {
+      ml_id: producto.ml_id,
+      title: producto.title,
+      tipo_venta: producto.tipo_venta,
+      isDropshipping: isDropshipping,
+      diasPreparacion: diasPreparacion,
+      diasEnvio: diasEnvio,
+      diasTotales: diasTotales,
+      dropshipping: producto.dropshipping
+    })
+  }
 
   // Calcular precio con descuento si está activo
   const tieneDescuento = producto?.descuento?.activo || false
@@ -449,10 +465,10 @@ const DetalleProductoPage: React.FC = () => {
             )}
 
             {/* Mostrar información de dropshipping si aplica */}
-            {isDropshipping && (
+            {isDropshipping && diasTotales > 0 && (
               <div className="dropshipping-info">
                 <div className="tiempo-entrega">
-                  <h4>🚚 Tiempo de envío: {diasPreparacion} días</h4>
+                  <h4>🚚 Tiempo de envío: {diasTotales} días</h4>
                 </div>
               </div>
             )}

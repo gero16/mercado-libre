@@ -293,11 +293,6 @@
   gap: 3px;
 }
 
-.tiempo-entrega h4::before {
-  content: "🚚";
-  font-size: 9px;
-}
-
 /* === PRECIO Y DISPONIBILIDAD COMPACTO === */
 .precio-disponibilidad {
   margin: 0;
