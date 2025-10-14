@@ -352,14 +352,14 @@ const DetalleProductoPage: React.FC = () => {
         type="product"
         price={precioConDescuento}
         currency="USD"
-        availability={isProductPaused || getStockVariante() <= 0 ? 'out of stock' : 'in stock'}
+        availability={getStockVariante() <= 0 || isProductPaused ? 'out of stock' : 'in stock'}
         productSchema={{
           name: producto.title,
           image: getProductImage(),
           description: producto.description || producto.title,
           price: precioConDescuento,
           currency: 'USD',
-          availability: isProductPaused || getStockVariante() <= 0 ? 'out of stock' : 'in stock',
+          availability: getStockVariante() <= 0 || isProductPaused ? 'out of stock' : 'in stock',
           brand: producto.attributes?.find((attr: any) => attr.name === 'Marca')?.value_name || 'Tienda Virtual',
           category: producto.categoria || 'general',
           sku: producto.ml_id || producto._id
@@ -431,18 +431,16 @@ const DetalleProductoPage: React.FC = () => {
           <div className="info-producto">
             <h1>{producto.title}</h1>
             
-            {/* Mostrar badge de estado si está pausado o sin stock */}
-            {isProductPaused && (
-              <div className="product-status-badge paused">
-                <span>Producto Pausado</span>
-              </div>
-            )}
-            
-            {!isProductPaused && getStockVariante() === 0 && (
+            {/* Mostrar badge de estado - prioridad: sin stock > pausado */}
+            {getStockVariante() === 0 ? (
               <div className="product-status-badge sin-stock">
                 <span>Sin Stock Disponible</span>
               </div>
-            )}
+            ) : isProductPaused ? (
+              <div className="product-status-badge paused">
+                <span>Producto Pausado</span>
+              </div>
+            ) : null}
             
             {producto.status === 'closed' && (
               <div className="product-status-badge cerrado">
@@ -475,21 +473,21 @@ const DetalleProductoPage: React.FC = () => {
                 ) : (
                   <h2 className='h2-precio'>US$ {precioBase.toFixed(2)}</h2>
                 )}
-                <p className={`disponibilidad p-precio-detalle ${
-                  isProductPaused ? 'paused' : 
-                  getStockVariante() === 0 ? 'sin-stock' : 
-                  getStockVariante() <= 5 ? 'poco-stock' : 
-                  'available'
-                }`}>
-                  {isProductPaused 
-                    ? 'Producto pausado' 
-                    : getStockVariante() === 0 
-                      ? 'Sin stock' 
+                {/* Solo mostrar disponibilidad si hay stock */}
+                {getStockVariante() > 0 && (
+                  <p className={`disponibilidad p-precio-detalle ${
+                    isProductPaused ? 'paused' : 
+                    getStockVariante() <= 5 ? 'poco-stock' : 
+                    'available'
+                  }`}>
+                    {isProductPaused 
+                      ? 'Producto pausado (con stock)'
                       : getStockVariante() <= 5 
                         ? `Últimas ${getStockVariante()} unidades`
                         : `Disponible (${getStockVariante()} unidades)`
-                  }
-                </p>
+                    }
+                  </p>
+                )}
               </div>
               
 
@@ -580,12 +578,12 @@ const DetalleProductoPage: React.FC = () => {
               <button
                 className="btn-agregar-carrito"
                 onClick={handleAgregarAlCarrito}
-                disabled={isProductPaused || getStockVariante() <= 0}
+                disabled={getStockVariante() <= 0 || isProductPaused}
               >
-                {isProductPaused 
-                  ? 'Producto Pausado' 
-                  : getStockVariante() <= 0
-                    ? 'Sin Stock' 
+                {getStockVariante() <= 0
+                  ? 'Sin Stock' 
+                  : isProductPaused 
+                    ? 'Producto Pausado' 
                     : 'Agregar al Carrito'
                 }
               </button>
