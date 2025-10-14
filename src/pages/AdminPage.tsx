@@ -30,6 +30,7 @@ interface AdminItem {
   es_stock_fisico?: boolean; // Flex o entrega 1-7 días
   proveedor?: string;
   pais_origen?: string;
+  destacado?: boolean;  // 🆕 Campo para productos destacados
 }
 
 const AdminPage: React.FC = () => {
@@ -40,6 +41,7 @@ const AdminPage: React.FC = () => {
   const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
   const [filterDelivery, setFilterDelivery] = useState<'all' | 'fast' | 'slow'>('all')
+  const [filterDestacado, setFilterDestacado] = useState<'all' | 'destacados' | 'no-destacados'>('all')  // 🆕 Filtro de destacados
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'delivery'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
@@ -123,7 +125,8 @@ const AdminPage: React.FC = () => {
           es_entrega_larga: esEntregaLarga,
           es_stock_fisico: esStockFisico,
           proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
-          pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado'
+          pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
+          destacado: producto.destacado || false  // 🆕 Campo destacado
         })
         
         // Agregar cada variante como un item separado
@@ -167,7 +170,8 @@ const AdminPage: React.FC = () => {
               es_entrega_larga: variantEsEntregaLarga,
               es_stock_fisico: variantEsStockFisico,
               proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
-              pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado'
+              pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
+              destacado: producto.destacado || false  // 🆕 Campo destacado (hereda del producto padre)
             })
           })
         }
@@ -198,6 +202,10 @@ const AdminPage: React.FC = () => {
       // Filtro por tiempo de entrega
       if (filterDelivery === 'fast' && item.es_entrega_larga) return false
       if (filterDelivery === 'slow' && !item.es_entrega_larga) return false
+      
+      // 🆕 Filtro por destacado (solo aplica a productos, no variantes)
+      if (filterDestacado === 'destacados' && (!item.destacado || item.esVariante)) return false
+      if (filterDestacado === 'no-destacados' && (item.destacado || item.esVariante)) return false
       
       return true
     })
@@ -242,7 +250,44 @@ const AdminPage: React.FC = () => {
   // 🆕 Resetear página cuando cambien los filtros
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, filterType, filterStatus, filterDelivery, sortBy, sortOrder])
+  }, [searchTerm, filterType, filterStatus, filterDelivery, filterDestacado, sortBy, sortOrder])
+
+  // 🆕 Función para marcar/desmarcar producto como destacado
+  const toggleDestacado = async (item: AdminItem) => {
+    try {
+      const nuevoEstado = !item.destacado
+      
+      // Llamar al endpoint para actualizar en el backend
+      const response = await fetch(
+        `https://poppy-shop-production.up.railway.app/ml/productos/${item.productId}/destacado`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ destacado: nuevoEstado })
+        }
+      )
+      
+      if (!response.ok) {
+        throw new Error('Error al actualizar producto destacado')
+      }
+      
+      // Actualizar el estado local
+      setAdminItems(prevItems =>
+        prevItems.map(i =>
+          i.productId === item.productId
+            ? { ...i, destacado: nuevoEstado }
+            : i
+        )
+      )
+      
+      alert(`Producto ${nuevoEstado ? 'marcado como destacado' : 'desmarcado como destacado'} exitosamente`)
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error al actualizar el producto. Por favor, intenta de nuevo.')
+    }
+  }
 
   // Comentamos las funciones no utilizadas
   // const handleEditProduct = (item: AdminItem) => {
@@ -372,6 +417,26 @@ const AdminPage: React.FC = () => {
             </select>
           </div>
           
+          {/* 🆕 Filtro de destacados */}
+          <div className="destacado-section">
+            <select
+              value={filterDestacado}
+              onChange={(e) => setFilterDestacado(e.target.value as 'all' | 'destacados' | 'no-destacados')}
+              className="admin-select"
+              style={{
+                borderColor: filterDestacado === 'destacados' ? '#fbbf24' : undefined,
+                background: filterDestacado === 'destacados' 
+                  ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' 
+                  : undefined,
+                fontWeight: filterDestacado === 'destacados' ? '600' : undefined
+              }}
+            >
+              <option value="all">Todos</option>
+              <option value="destacados">⭐ Solo Destacados</option>
+              <option value="no-destacados">☆ No Destacados</option>
+            </select>
+          </div>
+          
           <div className="sort-section">
             <select
               value={sortBy}
@@ -477,6 +542,24 @@ const AdminPage: React.FC = () => {
               Self Service (~7 días)
             </div>
           </div>
+          {/* 🆕 Tarjeta de productos destacados */}
+          <div 
+            className="stat-card" 
+            style={{
+              background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+              borderColor: '#fbbf24',
+              cursor: 'pointer'
+            }}
+            onClick={() => setFilterDestacado(filterDestacado === 'destacados' ? 'all' : 'destacados')}
+          >
+            <h3 style={{ color: '#854d0e' }}>⭐ Destacados</h3>
+            <span className="stat-number" style={{ color: '#92400e' }}>
+              {adminItems.filter(item => !item.esVariante && item.destacado).length}
+            </span>
+            <div className="stat-subtitle" style={{ color: '#a16207' }}>
+              Click para {filterDestacado === 'destacados' ? 'ver todos' : 'filtrar'}
+            </div>
+          </div>
         </div>
 
         {/* Lista de productos paginada */}
@@ -546,6 +629,61 @@ const AdminPage: React.FC = () => {
                         </span>
                       )}
                     </div>
+                    
+                    {/* 🆕 Toggle para marcar como destacado */}
+                    {!item.esVariante && (
+                      <div className="product-featured-toggle" style={{
+                        marginTop: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <button
+                          onClick={() => toggleDestacado(item)}
+                          className={`btn-toggle-destacado ${item.destacado ? 'destacado-activo' : ''}`}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: item.destacado ? '2px solid #fbbf24' : '2px solid #e5e7eb',
+                            background: item.destacado 
+                              ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)' 
+                              : 'white',
+                            color: item.destacado ? 'white' : '#6b7280',
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!item.destacado) {
+                              e.currentTarget.style.borderColor = '#fbbf24'
+                              e.currentTarget.style.background = '#fef3c7'
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!item.destacado) {
+                              e.currentTarget.style.borderColor = '#e5e7eb'
+                              e.currentTarget.style.background = 'white'
+                            }
+                          }}
+                        >
+                          <span>{item.destacado ? '⭐' : '☆'}</span>
+                          {item.destacado ? 'Destacado' : 'Marcar destacado'}
+                        </button>
+                        {item.destacado && (
+                          <span style={{
+                            fontSize: '0.75rem',
+                            color: '#f59e0b',
+                            fontWeight: '500'
+                          }}>
+                            Este producto se mostrará en la sección destacados
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="product-details">

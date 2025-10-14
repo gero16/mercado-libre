@@ -95,6 +95,7 @@ export interface ProductoML {
     tags?: string[];
   };
   // Nuevas propiedades para dropshipping
+  tipo_venta?: 'stock_fisico' | 'dropshipping' | 'mixto';
   dias_preparacion?: number;
   dias_envio_estimado?: number;
   proveedor?: string;
@@ -120,6 +121,8 @@ export interface ProductoML {
     fecha_inicio?: string;
     fecha_fin?: string;
   };
+  // 🆕 Producto destacado (selección manual)
+  destacado?: boolean;
 }
 
 export interface OrderML {

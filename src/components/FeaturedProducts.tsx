@@ -14,34 +14,42 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        // 🚀 Usar endpoint con paginación para reducir datos
+        // 🆕 Obtener TODOS los productos y filtrar los destacados en el frontend
+        // (Solución temporal mientras el backend se actualiza en Railway)
         const response = await fetch(
-          `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit * 2}` // Pedimos el doble para filtrar
+          `https://poppy-shop-production.up.railway.app/ml/productos`
         )
-        const data = await response.json()
         
-        // El endpoint con paginación devuelve {productos: [], pagination: {}}
-        const productos = data.productos || data
-        
-        // Calcular score combinado para cada producto (rapidamente)
-        const calcularScore = (producto: ProductoML) => {
-          const visitas = producto.metrics?.visits || 0
-          const rating = producto.metrics?.reviews.rating_average || 0
-          const totalReseñas = producto.metrics?.reviews.total || 0
-          const health = producto.health || 0
-          return (visitas * 0.3) + (rating * 10) + (totalReseñas * 3) + (health * 5)
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`)
         }
         
-        // Filtrar productos activos y ordenar por score
-        const productosDestacados = productos
-          .filter((p: ProductoML) => p.status !== 'paused' && p.available_quantity > 0)
-          .map((p: ProductoML) => ({ ...p, score: calcularScore(p) }))
-          .sort((a: any, b: any) => b.score - a.score)
-          .slice(0, limit)
+        const data = await response.json()
+        const productos = data.productos || data
         
-        console.log('⭐ Productos destacados:', productosDestacados.length, 'productos')
+        console.log('📦 Estructura de respuesta:', Array.isArray(productos) ? 'Array directo' : 'Objeto anidado')
+        console.log('⭐ Total productos obtenidos:', productos.length)
         
-        setFeaturedProducts(productosDestacados)
+        // 🎯 Filtrar SOLO productos marcados manualmente como destacados
+        const productosDestacadosManuales = productos.filter((p: ProductoML) => 
+          p.destacado === true && 
+          p.status !== 'paused' && 
+          p.available_quantity > 0
+        )
+        
+        console.log('🎯 Productos destacados manualmente:', productosDestacadosManuales.length)
+        console.log('📝 Títulos de destacados:', productosDestacadosManuales.map((p: ProductoML) => p.title))
+        
+        // Si hay productos destacados manualmente, usarlos
+        // Si no, mostrar sección vacía o usar los primeros productos activos
+        if (productosDestacadosManuales.length > 0) {
+          setFeaturedProducts(productosDestacadosManuales.slice(0, limit))
+        } else {
+          // Si no hay destacados, no mostrar nada (o puedes usar automáticos)
+          setFeaturedProducts([])
+          console.log('⚠️ No hay productos destacados. Marca productos desde /admin')
+        }
+        
         setLoading(false)
       } catch (error) {
         console.error('Error cargando productos destacados:', error)

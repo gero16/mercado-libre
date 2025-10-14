@@ -229,6 +229,7 @@ const TiendaMLPage: React.FC = () => {
     (location.state as any)?.categoryFilter || 'mostrar-todo'
   )
   const [stockFilter, setStockFilter] = useState(false)
+  const [pedidoFilter, setPedidoFilter] = useState(false)
   const [loading, setLoading] = useState(true)
   const [categorias, setCategorias] = useState<{id: string, name: string, count?: number}[]>([
     { id: 'mostrar-todo', name: 'Mostrar Todo' }
@@ -596,6 +597,11 @@ const TiendaMLPage: React.FC = () => {
       filtered = filtered.filter(item => item.stock > 0 && !item.isPaused)
     }
 
+    // Filtro por productos a pedido (dropshipping)
+    if (pedidoFilter) {
+      filtered = filtered.filter(item => item.productoPadre?.tipo_venta === 'dropshipping')
+    }
+
     setFilteredItems(filtered)
     
     // 🚀 Calcular paginación
@@ -614,7 +620,7 @@ const TiendaMLPage: React.FC = () => {
     const itemsForCurrentPage = filtered.slice(startIndex, endIndex)
     
     setPaginatedItems(itemsForCurrentPage)
-  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, currentPage, itemsPerPage])
+  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, pedidoFilter, currentPage, itemsPerPage])
 
   const handleProductClick = (item: ItemTienda) => {
     // Usar ml_id en lugar de _id para buscar el producto
@@ -755,43 +761,81 @@ const TiendaMLPage: React.FC = () => {
                   </div>
                 </section>
 
-                {/* Filtro de Stock */}
-                <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    padding: '12px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '12px',
-                    opacity: 0.6,
-                    cursor: 'not-allowed'
-                  }}>
-                    <input
-                      type="checkbox"
-                      id="stock-filter-loading"
-                      checked={stockFilter}
-                      disabled
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        cursor: 'not-allowed'
-                      }}
-                    />
-                    <label 
-                      htmlFor="stock-filter-loading" 
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        userSelect: 'none',
-                        color: '#333'
-                      }}
-                    >
-                      📦 Solo productos en stock
-                    </label>
-                  </div>
-                </section>
+              {/* Filtro de Stock */}
+              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '12px',
+                  opacity: 0.6,
+                  cursor: 'not-allowed'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="stock-filter-loading"
+                    checked={stockFilter}
+                    disabled
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'not-allowed'
+                    }}
+                  />
+                  <label 
+                    htmlFor="stock-filter-loading" 
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      userSelect: 'none',
+                      color: '#333'
+                    }}
+                  >
+                    📦 Solo productos en stock
+                  </label>
+                </div>
+              </section>
+
+              {/* Filtro de Productos a Pedido */}
+              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '12px',
+                  opacity: 0.6,
+                  cursor: 'not-allowed'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="pedido-filter-loading"
+                    checked={pedidoFilter}
+                    disabled
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'not-allowed'
+                    }}
+                  />
+                  <label 
+                    htmlFor="pedido-filter-loading" 
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      userSelect: 'none',
+                      color: '#333'
+                    }}
+                  >
+                    🚚 Solo productos a pedido
+                  </label>
+                </div>
+              </section>
 
                 <section className="filtro-categorias centrar-texto">
                   <div className="categorias-grid">
@@ -960,6 +1004,51 @@ const TiendaMLPage: React.FC = () => {
                     }}
                   >
                     📦 Solo productos en stock
+                  </label>
+                </div>
+              </section>
+
+              {/* Filtro de Productos a Pedido */}
+              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  border: pedidoFilter ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  boxShadow: pedidoFilter ? '0 4px 12px rgba(254, 159, 1, 0.2)' : 'none'
+                }}
+                onClick={() => setPedidoFilter(!pedidoFilter)}
+                >
+                  <input
+                    type="checkbox"
+                    id="pedido-filter"
+                    checked={pedidoFilter}
+                    onChange={(e) => setPedidoFilter(e.target.checked)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--color-primary)'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <label 
+                    htmlFor="pedido-filter" 
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      color: pedidoFilter ? 'var(--color-primary)' : '#333'
+                    }}
+                  >
+                    🚚 Solo productos a pedido
                   </label>
                 </div>
               </section>
