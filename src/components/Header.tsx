@@ -12,17 +12,34 @@ const Header: React.FC = () => {
 
   const categories = [
     { id: 'mostrar-todo', name: '📋 Todos los Productos', icon: '📋' },
-    { id: 'electronica', name: '📱 Electrónica y Tecnología', icon: '📱' },
+    { id: 'ereaders', name: '📚 E-readers y Kindle', icon: '📚' },
+    { id: 'audio-parlantes', name: '🎵 Audio y Parlantes', icon: '🎵' },
+    { id: 'smartwatches', name: '⌚ Smartwatches', icon: '⌚' },
+    { id: 'asistentes-virtuales', name: '🏠 Asistentes Virtuales', icon: '🏠' },
+    { id: 'seguridad-hogar', name: '🔔 Seguridad Hogar', icon: '🔔' },
+    { id: 'memorias-storage', name: '💾 Memorias y Almacenamiento', icon: '💾' },
+    { id: 'electronica', name: '📱 Electrónica', icon: '📱' },
     { id: 'gaming', name: '🎮 Gaming', icon: '🎮' },
-    { id: 'hogar', name: '🏠 Hogar y Decoración', icon: '🏠' },
+    { id: 'camping-outdoor', name: '🏕️ Camping y Outdoor', icon: '🏕️' },
+    { id: 'descanso-almohadas', name: '😴 Descanso y Almohadas', icon: '😴' },
+    { id: 'hogar', name: '🏠 Hogar', icon: '🏠' },
     { id: 'cocina', name: '🍳 Cocina', icon: '🍳' },
     { id: 'bebes-ninos', name: '👶 Bebés y Niños', icon: '👶' },
-    { id: 'accesorios', name: '🎒 Accesorios', icon: '🎒' },
+    { id: 'tarjetas-coleccionables', name: '🎴 Tarjetas Coleccionables', icon: '🎴' },
+    { id: 'mochilas-bolsos', name: '🎒 Mochilas y Bolsos', icon: '🎒' },
+    { id: 'accesorios', name: '✏️ Accesorios', icon: '✏️' },
     { id: 'drones-foto', name: '🚁 Drones y Fotografía', icon: '🚁' },
     { id: 'deportes', name: '🏋️ Deportes y Fitness', icon: '🏋️' },
-    { id: 'juguetes-coleccionables', name: '🎭 Juguetes y Coleccionables', icon: '🎭' },
+    { id: 'figuras-accion', name: '🗡️ Figuras de Acción', icon: '🗡️' },
+    { id: 'harry-potter', name: '🪄 Harry Potter', icon: '🪄' },
     { id: 'mascotas', name: '🐾 Mascotas', icon: '🐾' },
-    { id: 'otros', name: '🔧 Otros', icon: '🔧' }
+    { id: 'piscina-jardin', name: '🏊 Piscina y Jardín', icon: '🏊' },
+    { id: 'cuidado-personal', name: '💇 Cuidado Personal', icon: '💇' },
+    { id: 'herramientas', name: '🔧 Herramientas', icon: '🔧' },
+    { id: 'audio-musica', name: '🎵 Audio y Música', icon: '🎵' },
+    { id: 'ciencia-educacion', name: '🔭 Ciencia y Educación', icon: '🔭' },
+    { id: 'artes-marciales', name: '🥋 Artes Marciales', icon: '🥋' },
+    { id: 'otros', name: '📦 Otros', icon: '📦' }
   ]
 
   const handleCategoryClick = (categoryId: string) => {

@@ -10,27 +10,41 @@ import '../styles/tienda-improved.css'
 
 // Mapeo de categorías de ML a categorías GENERALES
 const mapeoCategorias: Record<string, string> = {
-  // 📱 ELECTRÓNICA Y TECNOLOGÍA
-  'MLU163646': 'electronica',
-  'MLU163764': 'electronica',
-  'MLU163765': 'electronica',
-  'MLU163771': 'electronica',
-  'MLU168248': 'electronica',
-  'MLU3697': 'electronica',
-  'MLU409415': 'electronica',
-  'MLU5072': 'electronica',
+  // 📚 E-READERS Y KINDLE
+  'MLU163646': 'ereaders',
+  'MLU163764': 'ereaders',
+  'MLU163765': 'ereaders',
+  'MLU163771': 'ereaders',
+  
+  // 🎵 AUDIO Y PARLANTES
+  'MLU168248': 'audio-parlantes',
+  'MLU3697': 'audio-parlantes',
+  'MLU5072': 'audio-parlantes',
+  'MLU4075': 'audio-parlantes',
+  'MLU116559': 'audio-parlantes',
+  
+  // ⌚ SMARTWATCHES
+  'MLU117113': 'smartwatches',
+  'MLU1442': 'smartwatches',
+  'MLU431680': 'smartwatches',
+  
+  // 🏠 ASISTENTES VIRTUALES
+  'MLU409415': 'asistentes-virtuales',
+  
+  // 🔔 SEGURIDAD HOGAR
+  'MLU36566': 'seguridad-hogar',
+  'MLU71938': 'seguridad-hogar',
+  'MLU10553': 'seguridad-hogar',
+  
+  // 💾 MEMORIAS Y ALMACENAMIENTO
+  'MLU70969': 'memorias-storage',
+  'MLU6336': 'memorias-storage',
+  
+  // 📱 ELECTRÓNICA Y TECNOLOGÍA (resto)
   'MLU1055': 'electronica',
-  'MLU1442': 'electronica',
-  'MLU117113': 'electronica',
-  'MLU36566': 'electronica',
-  'MLU71938': 'electronica',
-  'MLU10553': 'electronica',
-  'MLU116559': 'electronica',
-  'MLU4075': 'electronica',
   'MLU12953': 'electronica',
   'MLU14407': 'electronica',
   'MLU1676': 'electronica',
-  'MLU431680': 'electronica',
   'MLU434342': 'electronica',
   'MLU5549': 'electronica',
   'MLU1915': 'electronica',
@@ -51,8 +65,6 @@ const mapeoCategorias: Record<string, string> = {
   'MLU176997': 'electronica',
   'MLU178391': 'electronica',
   'MLU165337': 'electronica',
-  'MLU70969': 'electronica',
-  'MLU6336': 'electronica',
   
   // 🎮 GAMING
   'MLU6344': 'gaming',
@@ -64,25 +76,32 @@ const mapeoCategorias: Record<string, string> = {
   'MLU443583': 'gaming',
   'MLU439534': 'gaming',
   'MLU448173': 'gaming',
+  'MLU1152': 'gaming',
   
-  // 🏠 HOGAR Y DECORACIÓN
-  'MLU12201': 'hogar',
-  'MLU7969': 'hogar',
+  // 🏕️ CAMPING Y OUTDOOR
+  'MLU12201': 'camping-outdoor',
+  'MLU400173': 'camping-outdoor',
+  
+  // 😴 DESCANSO Y ALMOHADAS
+  'MLU7969': 'descanso-almohadas',
+  'MLU438004': 'descanso-almohadas',
+  'MLU436268': 'descanso-almohadas',
+  'MLU456110': 'descanso-almohadas',
+  'MLU186068': 'descanso-almohadas',
+  
+  // 🔇 MÁQUINAS RUIDO BLANCO Y RELAJACIÓN
   'MLU40398': 'hogar',
+  
+  // 🏠 HOGAR Y DECORACIÓN (resto)
   'MLU205198': 'hogar',
   'MLU43687': 'hogar',
   'MLU442888': 'hogar',
   'MLU442952': 'hogar',
   'MLU416658': 'hogar',
-  'MLU436268': 'hogar',
-  'MLU456110': 'hogar',
-  'MLU186068': 'hogar',
-  'MLU438004': 'hogar',
   'MLU177716': 'hogar',
   'MLU457532': 'hogar',
   'MLU388628': 'hogar',
   'MLU387931': 'hogar',
-  'MLU400173': 'hogar',
   'MLU413493': 'hogar',
   'MLU414208': 'hogar',
   'MLU168223': 'hogar',
@@ -111,13 +130,18 @@ const mapeoCategorias: Record<string, string> = {
   'MLU457852': 'bebes-ninos',
   'MLU429242': 'bebes-ninos',
   
-  // 🎒 ACCESORIOS Y MOCHILAS
-  'MLU190994': 'accesorios',
-  'MLU442981': 'accesorios',
+  // 🎴 TARJETAS COLECCIONABLES
+  'MLU442981': 'tarjetas-coleccionables',
+  
+  // 🎒 MOCHILAS Y BOLSOS
+  'MLU190994': 'mochilas-bolsos',
+  'MLU26538': 'mochilas-bolsos',
+  
+  // ✏️ ACCESORIOS (resto)
   'MLU187975': 'accesorios',
-  'MLU26538': 'accesorios',
   'MLU158838': 'accesorios',
   'MLU434789': 'accesorios',
+  'MLU163766': 'accesorios',
   
   // 🚁 DRONES Y FOTOGRAFÍA
   'MLU178089': 'drones-foto',
@@ -134,57 +158,108 @@ const mapeoCategorias: Record<string, string> = {
   'MLU413593': 'deportes',
   'MLU206537': 'deportes',
   
-  // 🎭 JUGUETES Y COLECCIONABLES
-  'MLU176854': 'juguetes-coleccionables',
-  'MLU455859': 'juguetes-coleccionables',
-  'MLU412670': 'juguetes-coleccionables',
+  // 🗡️ FIGURAS DE ACCIÓN
+  'MLU176854': 'figuras-accion',
+  'MLU110854': 'figuras-accion',
+  
+  // 🪄 HARRY POTTER Y COLECCIONABLES
+  'MLU455859': 'harry-potter',
+  'MLU412670': 'harry-potter',
   
   // 🐾 MASCOTAS
   'MLU159067': 'mascotas',
   'MLU435781': 'mascotas',
   'MLU443444': 'mascotas',
   
-  // 🔧 HERRAMIENTAS Y OTROS
-  'MLU5824': 'otros',
-  'MLU70061': 'otros',
-  'MLU172030': 'otros',
-  'MLU202844': 'otros',
+  // 🏊 PISCINA Y JARDÍN
+  'MLU172030': 'piscina-jardin',
+  
+  // 💇 CUIDADO PERSONAL
+  'MLU70061': 'cuidado-personal',
+  'MLU381270': 'cuidado-personal',
+  
+  // 🔧 HERRAMIENTAS
+  'MLU5824': 'herramientas',
+  'MLU457091': 'herramientas',
+  'MLU202844': 'herramientas',
+  
+  // 🎵 AUDIO Y MÚSICA
+  'MLU52047': 'audio-musica',
+  'MLU442785': 'audio-musica',
+  
+  // 🔭 CIENCIA Y EDUCACIÓN
+  'MLU4702': 'ciencia-educacion',
+  
+  // 🥋 ARTES MARCIALES
+  'MLU443331': 'artes-marciales',
+  'MLU443332': 'artes-marciales',
+  
+  // 🔧 OTROS
   'MLU379647': 'otros',
-  'MLU4702': 'otros',
-  'MLU52047': 'otros',
-  'MLU443331': 'otros',
-  'MLU443332': 'otros',
-  'MLU457091': 'otros',
 }
 
 // Nombres legibles de categorías GENERALES con iconos
 const nombresCategoriasGenerales: Record<string, string> = {
-  'electronica': 'Electrónica y Tecnología',
+  'ereaders': 'E-readers y Kindle',
+  'audio-parlantes': 'Audio y Parlantes',
+  'smartwatches': 'Smartwatches',
+  'asistentes-virtuales': 'Asistentes Virtuales',
+  'seguridad-hogar': 'Seguridad Hogar',
+  'memorias-storage': 'Memorias y Almacenamiento',
+  'electronica': 'Electrónica',
   'gaming': 'Gaming',
-  'hogar': 'Hogar y Decoración',
+  'camping-outdoor': 'Camping y Outdoor',
+  'descanso-almohadas': 'Descanso y Almohadas',
+  'hogar': 'Hogar',
   'cocina': 'Cocina',
   'bebes-ninos': 'Bebés y Niños',
+  'tarjetas-coleccionables': 'Tarjetas Coleccionables',
+  'mochilas-bolsos': 'Mochilas y Bolsos',
   'accesorios': 'Accesorios',
   'drones-foto': 'Drones y Fotografía',
   'deportes': 'Deportes y Fitness',
-  'juguetes-coleccionables': 'Juguetes y Coleccionables',
+  'figuras-accion': 'Figuras de Acción',
+  'harry-potter': 'Harry Potter',
   'mascotas': 'Mascotas',
+  'piscina-jardin': 'Piscina y Jardín',
+  'cuidado-personal': 'Cuidado Personal',
+  'herramientas': 'Herramientas',
+  'audio-musica': 'Audio y Música',
+  'ciencia-educacion': 'Ciencia y Educación',
+  'artes-marciales': 'Artes Marciales',
   'otros': 'Otros',
 }
 
 // Iconos para cada categoría
 const iconosCategoriasGenerales: Record<string, string> = {
+  'ereaders': '📚',
+  'audio-parlantes': '🎵',
+  'smartwatches': '⌚',
+  'asistentes-virtuales': '🏠',
+  'seguridad-hogar': '🔔',
+  'memorias-storage': '💾',
   'electronica': '📱',
   'gaming': '🎮',
+  'camping-outdoor': '🏕️',
+  'descanso-almohadas': '😴',
   'hogar': '🏠',
   'cocina': '🍳',
   'bebes-ninos': '👶',
-  'accesorios': '🎒',
+  'tarjetas-coleccionables': '🎴',
+  'mochilas-bolsos': '🎒',
+  'accesorios': '✏️',
   'drones-foto': '🚁',
   'deportes': '🏋️',
-  'juguetes-coleccionables': '🎭',
+  'figuras-accion': '🗡️',
+  'harry-potter': '🪄',
   'mascotas': '🐾',
-  'otros': '🔧',
+  'piscina-jardin': '🏊',
+  'cuidado-personal': '💇',
+  'herramientas': '🔧',
+  'audio-musica': '🎵',
+  'ciencia-educacion': '🔭',
+  'artes-marciales': '🥋',
+  'otros': '📦',
 }
 
 // Función para obtener categoría general
