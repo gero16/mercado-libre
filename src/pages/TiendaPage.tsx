@@ -1113,20 +1113,6 @@ const TiendaMLPage: React.FC = () => {
                   </div>
                 )}
                 
-                {!productoCerrado && sinStock && (
-                  <div style={{
-                    padding: '4px 8px',
-                    background: 'rgba(251, 191, 36, 0.15)',
-                    border: '1px solid #fbbf24',
-                    borderRadius: '6px',
-                    margin: '5px 10px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    color: '#92400e'
-                  }}>
-                    Sin stock
-                  </div>
-                )}
                 
                 <div style={{ 
                   display: 'flex', 
