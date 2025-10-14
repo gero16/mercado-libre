@@ -121,6 +121,11 @@ export interface ProductoML {
     fecha_inicio?: string;
     fecha_fin?: string;
   };
+  // 🆕 DESCUENTO NATIVO DE MERCADOLIBRE
+  descuento_ml?: {
+    original_price: number; // Precio original en ML antes del descuento
+    deal_ids?: string[]; // IDs de ofertas/promociones de ML
+  };
   // 🆕 Producto destacado (selección manual)
   destacado?: boolean;
 }

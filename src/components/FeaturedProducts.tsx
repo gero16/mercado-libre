@@ -104,7 +104,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   }
 
   const renderStars = (rating?: number) => {
-    if (!rating) return null
+    if (!rating || rating === 0) return null
     const fullStars = Math.floor(rating)
     const hasHalfStar = rating % 1 !== 0
     
@@ -165,6 +165,12 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
               const tieneDescuento = product.descuento?.activo
               const precioOriginal = product.descuento?.precio_original
               const porcentajeDescuento = product.descuento?.porcentaje
+              // Descuento de MercadoLibre
+              const tieneDescuentoML = !!product.descuento_ml?.original_price
+              const precioOriginalML = product.descuento_ml?.original_price
+              const porcentajeDescuentoML = precioOriginalML 
+                ? Math.round(((precioOriginalML - product.price) / precioOriginalML) * 100)
+                : 0
               
               return (
                 <div 
@@ -181,12 +187,21 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                       loading="lazy"
                       decoding="async"
                     />
-                    {tieneDescuento && porcentajeDescuento ? (
+                    {(tieneDescuento && porcentajeDescuento) || tieneDescuentoML ? (
                       <div className="product-badge" style={{
-                        background: 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
-                        boxShadow: '0 4px 15px rgba(211, 47, 47, 0.4)'
+                        background: tieneDescuentoML
+                          ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)'
+                          : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
+                        color: tieneDescuentoML ? '#000' : 'white',
+                        boxShadow: tieneDescuentoML
+                          ? '0 4px 15px rgba(255, 230, 0, 0.4)'
+                          : '0 4px 15px rgba(211, 47, 47, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
                       }}>
-                        -{porcentajeDescuento}%
+                        {tieneDescuentoML && <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>ML</span>}
+                        -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
                       </div>
                     ) : (
                       <div className="product-badge">
@@ -197,10 +212,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                   
                   <div className="product-info">
                     <h3 className="product-name">{product.title}</h3>
-                    {product.metrics?.reviews.rating_average && 
+                    {(product.metrics?.reviews.rating_average && product.metrics.reviews.rating_average > 0) && 
                       renderStars(product.metrics.reviews.rating_average)}
                     <div className="product-price-container">
-                      {tieneDescuento && precioOriginal ? (
+                      {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ 
                             textDecoration: 'line-through', 
@@ -208,7 +223,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                             fontSize: '1rem',
                             lineHeight: '1'
                           }}>
-                            {formatPrice(precioOriginal)}
+                            {formatPrice(tieneDescuentoML ? precioOriginalML! : precioOriginal)}
                           </span>
                           <span className="product-price" style={{ 
                             color: '#d32f2f',

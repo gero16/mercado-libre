@@ -86,7 +86,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
   }
 
   const renderStars = (rating?: number) => {
-    if (!rating) return null
+    if (!rating || rating === 0) return null
     const fullStars = Math.floor(rating)
     const hasHalfStar = rating % 1 !== 0
     
@@ -99,7 +99,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
         {[...Array(5 - Math.ceil(rating))].map((_, i) => (
           <span key={i} className="star empty">★</span>
         ))}
-        <span className="rating-number">({rating})</span>
+        <span className="rating-number">({rating.toFixed(1)})</span>
       </div>
     )
   }
@@ -148,12 +148,21 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
               // Calcular el índice global del producto
               const globalIndex = currentPage * productsPerPage + index
               
+              // Descuentos
+              const tieneDescuento = product.descuento?.activo
+              const porcentajeDescuento = product.descuento?.porcentaje || 0
+              const tieneDescuentoML = !!product.descuento_ml?.original_price
+              const precioOriginalML = product.descuento_ml?.original_price
+              const porcentajeDescuentoML = precioOriginalML 
+                ? Math.round(((precioOriginalML - product.price) / precioOriginalML) * 100)
+                : 0
+              
               return (
                 <div 
                   key={product._id} 
                   className="product-card"
                   onClick={() => handleProductClick(product)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', position: 'relative' }}
                 >
                   <div className={`bestseller-rank ${globalIndex === 0 ? 'gold-medal' : globalIndex === 1 ? 'silver-medal' : globalIndex === 2 ? 'bronze-medal' : ''}`}>
                     {globalIndex === 0 && '🥇'}
@@ -161,6 +170,33 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
                     {globalIndex === 2 && '🥉'}
                     {globalIndex > 2 && `#${globalIndex + 1}`}
                   </div>
+                  
+                  {/* Badge de descuento */}
+                  {(tieneDescuento && porcentajeDescuento || tieneDescuentoML) && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      background: tieneDescuentoML 
+                        ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)' // Amarillo de MercadoLibre
+                        : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)', // Rojo para descuentos web
+                      color: tieneDescuentoML ? '#000' : 'white',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      fontWeight: '700',
+                      fontSize: '0.75rem',
+                      boxShadow: tieneDescuentoML 
+                        ? '0 3px 10px rgba(255, 230, 0, 0.4)'
+                        : '0 3px 10px rgba(211, 47, 47, 0.4)',
+                      zIndex: 3,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      {tieneDescuentoML && <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>ML</span>}
+                      -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
+                    </div>
+                  )}
                   
                   <div className="product-image-container">
                     <img 
@@ -178,10 +214,31 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
                   
                   <div className="product-info">
                     <h3 className="product-name">{product.title}</h3>
-                    {product.metrics?.reviews.rating_average && 
-                      renderStars(product.metrics.reviews.rating_average)}
+                    {(() => {
+                      const rating = product.metrics?.reviews?.rating_average
+                      // Debug: mostrar solo si hay rating válido
+                      if (rating && rating > 0) {
+                        return renderStars(rating)
+                      }
+                      return null
+                    })()}
                     <div className="product-price-container">
-                      <span className="product-price">{formatPrice(product.price)}</span>
+                      {product.descuento_ml?.original_price ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ 
+                            textDecoration: 'line-through', 
+                            color: '#999',
+                            fontSize: '0.9rem'
+                          }}>
+                            {formatPrice(product.descuento_ml.original_price)}
+                          </span>
+                          <span className="product-price" style={{ color: '#d32f2f', fontWeight: '700' }}>
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="product-price">{formatPrice(product.price)}</span>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import PromotionalBanner from './components/PromotionalBanner'
 import WhatsAppButton from './components/WhatsAppButton'
+import ScrollToTop from './components/ScrollToTop'
 import HomePage from './pages/HomePage'
 import TiendaPage from './pages/TiendaPage'
 import DetalleProductoPage from './pages/DetalleProductoPage'
@@ -54,6 +55,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
+        <ScrollToTop />
         <div className="App">
           
           <Header />

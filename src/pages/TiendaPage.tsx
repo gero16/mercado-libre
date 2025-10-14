@@ -1183,6 +1183,12 @@ const TiendaMLPage: React.FC = () => {
             const tieneDescuento = item.productoPadre?.descuento?.activo
             const precioOriginal = item.productoPadre?.descuento?.precio_original
             const porcentajeDescuento = item.productoPadre?.descuento?.porcentaje
+            // Descuento de MercadoLibre
+            const tieneDescuentoML = !!item.productoPadre?.descuento_ml?.original_price
+            const precioOriginalML = item.productoPadre?.descuento_ml?.original_price
+            const porcentajeDescuentoML = precioOriginalML 
+              ? Math.round(((precioOriginalML - item.price) / precioOriginalML) * 100)
+              : 0
             const productoCerrado = item.productoPadre?.status === 'closed'
             const sinStock = item.stock === 0
             
@@ -1198,21 +1204,29 @@ const TiendaMLPage: React.FC = () => {
                   position: 'relative'
                 }}
               >
-                {tieneDescuento && porcentajeDescuento && (
+                {(tieneDescuento && porcentajeDescuento || tieneDescuentoML) && (
                   <div style={{
                     position: 'absolute',
                     top: '10px',
                     right: '10px',
-                    background: 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
-                    color: 'white',
+                    background: tieneDescuentoML 
+                      ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)' // Amarillo de MercadoLibre
+                      : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)', // Rojo para descuentos web
+                    color: tieneDescuentoML ? '#000' : 'white',
                     padding: '8px 15px',
                     borderRadius: '25px',
                     fontWeight: '800',
                     fontSize: '0.9rem',
-                    boxShadow: '0 4px 15px rgba(211, 47, 47, 0.4)',
-                    zIndex: 2
+                    boxShadow: tieneDescuentoML 
+                      ? '0 4px 15px rgba(255, 230, 0, 0.4)'
+                      : '0 4px 15px rgba(211, 47, 47, 0.4)',
+                    zIndex: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
                   }}>
-                    -{porcentajeDescuento}%
+                    {tieneDescuentoML && <span style={{ fontSize: '0.85rem' }}>ML</span>}
+                    -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
                   </div>
                 )}
                 
@@ -1285,7 +1299,7 @@ const TiendaMLPage: React.FC = () => {
                   gap: '5px',
                   margin: '10px 0'
                 }}>
-                  {tieneDescuento && precioOriginal ? (
+                  {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
                     <div style={{ 
                       display: 'flex', 
                       alignItems: 'center', 
@@ -1300,7 +1314,7 @@ const TiendaMLPage: React.FC = () => {
                         margin: '0',
                         lineHeight: '1'
                       }}>
-                        US$ {precioOriginal}
+                        US$ {tieneDescuentoML ? precioOriginalML?.toFixed(2) : precioOriginal}
                       </p>
                       <p style={{ 
                         color: '#d32f2f',
