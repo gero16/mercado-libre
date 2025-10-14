@@ -223,7 +223,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                             fontSize: '1rem',
                             lineHeight: '1'
                           }}>
-                            {formatPrice(tieneDescuentoML ? precioOriginalML! : precioOriginal)}
+                            {formatPrice(tieneDescuentoML ? (precioOriginalML ?? 0) : (precioOriginal ?? 0))}
                           </span>
                           <span className="product-price" style={{ 
                             color: '#d32f2f',
