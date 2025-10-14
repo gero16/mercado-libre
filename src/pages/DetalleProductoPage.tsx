@@ -267,7 +267,6 @@ const DetalleProductoPage: React.FC = () => {
   // Calcular precio con descuento si está activo
   const tieneDescuento = producto?.descuento?.activo || false
   const porcentajeDescuento = producto?.descuento?.porcentaje || 0
-  const precioOriginal = producto?.descuento?.precio_original || producto?.price || 0
   const precioBase = varianteSeleccionada?.price || producto?.price || 0
   const precioConDescuento = tieneDescuento 
     ? Math.round(precioBase * (1 - porcentajeDescuento / 100) * 100) / 100 
