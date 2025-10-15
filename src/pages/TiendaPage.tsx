@@ -328,6 +328,18 @@ const TiendaMLPage: React.FC = () => {
     }
   }, [searchParams])
 
+  // 🆕 Mostrar loader cuando cambia la categoría desde el navbar (location.state)
+  useEffect(() => {
+    const newCategory = (location.state as any)?.categoryFilter
+    if (newCategory && newCategory !== categoryFilter) {
+      setIsChangingPage(true)
+      setCategoryFilter(newCategory)
+      setCurrentPage(1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setTimeout(() => setIsChangingPage(false), 300)
+    }
+  }, [location.state])
+
   // 🆕 Función para optimizar imágenes de ML (usar versiones más pequeñas)
   const getOptimizedImageUrl = (url: string) => {
     if (!url) return url
@@ -746,7 +758,11 @@ const TiendaMLPage: React.FC = () => {
   }
 
   const handleCategoryFilter = (categoryId: string) => {
+    setIsChangingPage(true)
     setCategoryFilter(categoryId)
+    setCurrentPage(1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => setIsChangingPage(false), 300)
   }
 
   const handlePriceFilter = (price: number) => {
