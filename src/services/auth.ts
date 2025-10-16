@@ -10,7 +10,14 @@ export interface LoginResponse {
   user: AuthUser
 }
 
-const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:3000'
+const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
+const isBrowser = typeof window !== 'undefined'
+const isLocalhost = isBrowser && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+)
+// Preferir variable de entorno; si no está, elegir Railway en producción y localhost en desarrollo
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost ? 'http://localhost:3000' : PROD_BACKEND)
 
 export const AuthService = {
   async login(email: string, password: string): Promise<LoginResponse> {
