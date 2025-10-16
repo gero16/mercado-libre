@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { ProductoML } from '../types'
 import '../css/admin-descuentos.css'
+import { AuthService } from '../services/auth'
 
 interface ProductoConSeleccion extends ProductoML {
   seleccionado?: boolean
@@ -85,6 +86,7 @@ const AdminDescuentos: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...AuthService.getAuthHeader()
         },
         body: JSON.stringify({
           product_ids: productosSeleccionados,
@@ -113,6 +115,7 @@ const AdminDescuentos: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...AuthService.getAuthHeader()
         },
         body: JSON.stringify({
           product_ids: [ml_id]
@@ -146,6 +149,7 @@ const AdminDescuentos: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...AuthService.getAuthHeader()
         }
       })
 

@@ -47,50 +47,57 @@ import './css/whatsapp-button.css' // 🆕 Importar estilos del botón de WhatsA
 import './css/welcome-section.css' // 🆕 Importar estilos de la sección de bienvenida
 import './css/faq.css' // 🆕 Importar estilos de preguntas frecuentes
 import './css/header-dropdown.css' // 🆕 Importar estilos del dropdown del header
+import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
+import LoginPage from './pages/LoginPage'
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
-        <ScrollToTop />
-        <div className="App">
-          
-          <Header />
-          <PromotionalBanner />
-          <WhatsAppButton />
-          
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-            {/* Tienda antigua desde BD - Route path="/tienda" element={<TiendaPage />} />} */ }
-            <Route path="/tienda-ml" element={<TiendaPage />} />
-            <Route path="/producto/:id" element={<DetalleProductoPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/contacto" element={<ContactoPage />} />
-            <Route path="/preguntas-frecuentes" element={<FAQPage />} />
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="App">
             
-            {/* Rutas de administración */}
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/dropshipping" element={<AdminDropshippingPage />} />
-            <Route path="/admin/orders" element={<AdminOrdersPage />} />
-            <Route path="/admin/clientes" element={<AdminClientesPage />} /> {/* 🆕 Ruta de clientes */}
-            <Route path="/admin/descuentos" element={<AdminDescuentos />} /> {/* 🆕 Ruta de descuentos */}
-            <Route path="/admin/cupones" element={<AdminCupones />} /> {/* 🆕 Ruta de cupones */}
+            <Header />
+            <PromotionalBanner />
+            <WhatsAppButton />
             
-            {/* Rutas de resultado de pago */}
-            <Route path="/payment-success" element={<PaymentSuccessPage />} />
-            <Route path="/payment-failure" element={<PaymentFailurePage />} />
-            <Route path="/payment-pending" element={<PaymentPendingPage />} />
-            </Routes>
-          </main>
-          
-          <Footer />
-        </div>
-      </Router>
-    </CartProvider>
+            <main className="main-content">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+              {/* Tienda antigua desde BD - Route path="/tienda" element={<TiendaPage />} />} */ }
+              <Route path="/tienda-ml" element={<TiendaPage />} />
+              <Route path="/producto/:id" element={<DetalleProductoPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/contacto" element={<ContactoPage />} />
+              <Route path="/preguntas-frecuentes" element={<FAQPage />} />
+
+              <Route path="/login" element={<LoginPage />} />
+              
+              {/* Rutas de administración protegidas */}
+              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+              <Route path="/admin/dropshipping" element={<ProtectedRoute><AdminDropshippingPage /></ProtectedRoute>} />
+              <Route path="/admin/orders" element={<ProtectedRoute><AdminOrdersPage /></ProtectedRoute>} />
+              <Route path="/admin/clientes" element={<ProtectedRoute><AdminClientesPage /></ProtectedRoute>} /> {/* 🆕 Ruta de clientes */}
+              <Route path="/admin/descuentos" element={<ProtectedRoute><AdminDescuentos /></ProtectedRoute>} /> {/* 🆕 Ruta de descuentos */}
+              <Route path="/admin/cupones" element={<ProtectedRoute><AdminCupones /></ProtectedRoute>} /> {/* 🆕 Ruta de cupones */}
+              
+              {/* Rutas de resultado de pago */}
+              <Route path="/payment-success" element={<PaymentSuccessPage />} />
+              <Route path="/payment-failure" element={<PaymentFailurePage />} />
+              <Route path="/payment-pending" element={<PaymentPendingPage />} />
+              </Routes>
+            </main>
+            
+            <Footer />
+          </div>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   )
 }
 

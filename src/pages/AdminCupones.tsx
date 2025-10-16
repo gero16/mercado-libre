@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Cupon } from '../types'
 import '../css/admin-cupones.css'
+import { AuthService } from '../services/auth'
 
 const AdminCupones: React.FC = () => {
   const [cupones, setCupones] = useState<Cupon[]>([])
@@ -69,6 +70,7 @@ const AdminCupones: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...AuthService.getAuthHeader()
         },
         body: JSON.stringify({
           ...formData,
@@ -96,7 +98,10 @@ const AdminCupones: React.FC = () => {
   const handleToggleCupon = async (id: string) => {
     try {
       const response = await fetch(`https://poppy-shop-production.up.railway.app/api/cupones/toggle/${id}`, {
-        method: 'PATCH'
+        method: 'PATCH',
+        headers: {
+          ...AuthService.getAuthHeader()
+        }
       })
 
       const data = await response.json()
@@ -118,7 +123,10 @@ const AdminCupones: React.FC = () => {
 
     try {
       const response = await fetch(`https://poppy-shop-production.up.railway.app/api/cupones/eliminar/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          ...AuthService.getAuthHeader()
+        }
       })
 
       const data = await response.json()
