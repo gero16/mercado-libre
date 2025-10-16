@@ -663,12 +663,18 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     let filtered = itemsTienda
 
+    const normalize = (s: string) => s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+
     // Filtro por búsqueda de texto
     if (searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(item => 
-        item.title.toLowerCase().includes(query)
-      )
+      const query = normalize(searchQuery)
+      filtered = filtered.filter(item => {
+        const titleNorm = normalize(item.title)
+        return titleNorm.includes(query)
+      })
     }
 
     // Filtro por categoría
