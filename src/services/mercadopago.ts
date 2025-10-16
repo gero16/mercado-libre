@@ -1,5 +1,6 @@
 import { MERCADOPAGO_CONFIG } from '../config/mercadopago'
 import { PreferenceRequest, PreferenceItem, PayerInfo } from '../types/mercadopago'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 
 // Servicio para crear preferencias de MercadoPago (Checkout Pro)
 export class MercadoPagoService {
@@ -12,6 +13,9 @@ export class MercadoPagoService {
     customerData: any,
     cupon_codigo?: string
   ): Promise<{ preferenceId: string; init_point: string }> {
+    if (FEATURE_FLAGS.DISABLE_CHECKOUT) {
+      throw new Error('Checkout deshabilitado temporalmente')
+    }
     try {
       // 🧪 TEMPORAL: Usar backend local para pruebas
       // Cambiar a Railway cuando esté desplegado: https://poppy-shop-production.up.railway.app
@@ -111,6 +115,9 @@ export class MercadoPagoService {
    * Procesa el pago usando el formulario del Payment Brick
    */
   static async processPayment(formData: any, cartItems?: any[], customerData?: any): Promise<any> {
+    if (FEATURE_FLAGS.DISABLE_CHECKOUT) {
+      throw new Error('Checkout deshabilitado temporalmente')
+    }
     try {
       // Preparar los datos para enviar al backend
       const paymentData = {

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useCart } from '../context/CartContext'
 import { Link } from 'react-router-dom'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 
 const ShoppingCart: React.FC = () => {
   const { 
@@ -77,9 +78,17 @@ const ShoppingCart: React.FC = () => {
       </div>
     
       <div className="div-comprar">
-        <button className="comprar">
-          <Link to="/checkout">Comprar</Link>
-        </button>
+        {FEATURE_FLAGS.DISABLE_CHECKOUT ? (
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <button className="comprar" disabled style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+              Compras deshabilitadas temporalmente
+            </button>
+          </div>
+        ) : (
+          <button className="comprar">
+            <Link to="/checkout">Comprar</Link>
+          </button>
+        )}
       </div>
     </div>
   )

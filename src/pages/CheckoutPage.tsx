@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 import { MercadoPagoService } from '../services/mercadopago'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 
 interface CustomerData {
   name: string
@@ -140,6 +141,18 @@ const CheckoutPage: React.FC = () => {
 
   const handleGoBack = () => {
     navigate('/tienda')
+  }
+
+  if (FEATURE_FLAGS.DISABLE_CHECKOUT) {
+    return (
+      <main className="container" style={{ padding: '40px 20px', maxWidth: 720 }}>
+        <h1>Checkout temporalmente deshabilitado</h1>
+        <p>
+          Por mantenimiento, el proceso de compra está deshabilitado momentáneamente. Por favor, vuelve a intentarlo más tarde.
+        </p>
+        <button className="btn btn-primary" onClick={() => navigate('/tienda-ml')}>Volver a la tienda</button>
+      </main>
+    )
   }
 
   if (cartItems.length === 0) {
