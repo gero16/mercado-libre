@@ -43,10 +43,9 @@ const ProductsSkeleton = ({ title }: { title: string }) => (
 const HomePage: React.FC = () => {
   // Array de imágenes para el carrusel
   const carouselImages = [
-    '/img/consola-valve-2.webp',
-    '/img/banner.png', 
-    '/img/runnin.jpg',
-    '/img/portada4.jpg'
+    'https://res.cloudinary.com/geronicola/image/upload/v1760638045/poppy-shop/t3zmgekkg7izzobjdyhp.jpg',
+    'https://res.cloudinary.com/geronicola/image/upload/v1760638046/poppy-shop/zj0hhjklbxvz8bdndn3p.jpg',
+    'https://res.cloudinary.com/geronicola/image/upload/v1760638046/poppy-shop/tuvq3i5ugkxamhaqssyj.jpg'
   ]
 
   return (
