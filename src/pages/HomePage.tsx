@@ -43,9 +43,9 @@ const ProductsSkeleton = ({ title }: { title: string }) => (
 const HomePage: React.FC = () => {
   // Array de imágenes para el carrusel
   const carouselImages = [
-    'https://res.cloudinary.com/geronicola/image/upload/v1760638045/poppy-shop/t3zmgekkg7izzobjdyhp.jpg',
-    'https://res.cloudinary.com/geronicola/image/upload/v1760638046/poppy-shop/zj0hhjklbxvz8bdndn3p.jpg',
-    'https://res.cloudinary.com/geronicola/image/upload/v1760638046/poppy-shop/tuvq3i5ugkxamhaqssyj.jpg'
+    'https://res.cloudinary.com/geronicola/image/upload/v1760638797/poppy-shop/q2l0fkzp85v6hiiomcgc.png',
+    'https://res.cloudinary.com/geronicola/image/upload/v1760638796/poppy-shop/fdshlrd4xbh9w2up72kw.png',
+    'https://res.cloudinary.com/geronicola/image/upload/v1760638797/poppy-shop/yx7dr9n6seqqhqedvkfz.png'
   ]
 
   return (
