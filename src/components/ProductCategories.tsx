@@ -60,7 +60,7 @@ const ProductCategories: React.FC = () => {
   useEffect(() => {
     const fetchCategoryImages = async () => {
       try {
-        const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+        const response = await fetch('/ml/productos')
         const productos: ProductoML[] = await response.json()
         
         // Mapeo de categorías ML a categorías generales

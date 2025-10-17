@@ -12,12 +12,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(AuthService.getStoredUser())
+  const [token, setToken] = useState<string | null>(AuthService.getToken())
 
   useEffect(() => {
     const t = AuthService.getToken()
-    if (t) setToken(t)
+    if (t) {
+      setToken(t)
+      if (typeof (AuthService as any).me === 'function') {
+        ;(AuthService as any).me().then(({ user }: { user: AuthUser }) => {
+          setUser(user)
+        }).catch(() => {
+          // Mantener sesión con datos locales si /auth/me falla
+        })
+      }
+    }
   }, [])
 
   const login = async (email: string, password: string) => {

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 import { productsCache } from '../services/productsCache'
@@ -9,6 +10,7 @@ import { MAPEO_CATEGORIAS, NOMBRES_CATEGORIAS, ICONOS_CATEGORIAS } from '../util
 const Header: React.FC = () => {
   const { cartItemCount, setCartOpen, cartOpen } = useCart()
   const navigate = useNavigate()
+  const { isAuthenticated, logout } = useAuth()
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -124,6 +126,16 @@ const Header: React.FC = () => {
             </li>
             
             <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
+            {isAuthenticated && (
+              <li>
+                <button 
+                  onClick={() => { logout(); navigate('/') }}
+                  style={{ background: 'none', border: '2px solid white', color: 'white', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Cerrar sesión
+                </button>
+              </li>
+            )}
             
             {/* Buscador colapsable */}
             <li style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
