@@ -82,6 +82,7 @@ const HomePage: React.FC = () => {
         discount="Hasta 50% OFF"
         endDate="31 de Octubre"
         theme="halloween"
+        linkTo="/eventos/halloween"
       />
       
       {/* Sección de productos destacados - Carga solo cuando esté cerca del viewport */}
