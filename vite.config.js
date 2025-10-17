@@ -10,6 +10,25 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/ml': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/auth': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
   build: {
     rollupOptions: {
       input: {

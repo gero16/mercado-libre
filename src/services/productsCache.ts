@@ -31,7 +31,7 @@ class ProductsCacheService {
     this.loading = true
 
     try {
-      const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+      const response = await fetch('/ml/productos')
       const data: ProductoML[] = await response.json()
       
       this.cache = data

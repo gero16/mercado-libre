@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 import { productsCache } from '../services/productsCache'
@@ -12,11 +12,16 @@ const Header: React.FC = () => {
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const location = useLocation()
 
   const [productos, setProductos] = useState<ProductoML[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
 
   useEffect(() => {
+    if (location.pathname === '/login') {
+      setLoadingCategories(false)
+      return
+    }
     let mounted = true
     const load = async () => {
       try {
@@ -29,7 +34,7 @@ const Header: React.FC = () => {
     }
     load()
     return () => { mounted = false }
-  }, [])
+  }, [location.pathname])
 
   // Construir categorías dinámicas con conteo > 0
   const dynamicCategories = useMemo(() => {
