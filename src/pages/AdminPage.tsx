@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
+import { EventService } from '../services/event'
+import { AuthService } from '../services/auth'
 
 // Interfaz para items de administración
 interface AdminItem {
@@ -286,6 +288,24 @@ const AdminPage: React.FC = () => {
     } catch (error) {
       console.error('Error:', error)
       alert('Error al actualizar el producto. Por favor, intenta de nuevo.')
+    }
+  }
+
+  // 🆕 Agregar/Remover producto de evento especial (ej: halloween)
+  const toggleEvento = async (item: AdminItem, slug: string) => {
+    try {
+      const token = AuthService.getToken() || ''
+      const productId = item.productId
+      const estaEnEvento = (item.productoPadre as any)?.eventos_especiales?.includes(slug)
+      if (estaEnEvento) {
+        await EventService.removeFromEvent(slug, [productId], token)
+        alert(`Removido de ${slug}`)
+      } else {
+        await EventService.addToEvent(slug, [productId], token)
+        alert(`Agregado a ${slug}`)
+      }
+    } catch (e: any) {
+      alert(e.message || 'Error actualizando evento')
     }
   }
 
@@ -672,6 +692,23 @@ const AdminPage: React.FC = () => {
                         >
                           <span>{item.destacado ? '⭐' : '☆'}</span>
                           {item.destacado ? 'Destacado' : 'Marcar destacado'}
+                        </button>
+                        <button
+                          onClick={() => toggleEvento(item, 'halloween')}
+                          className="btn-toggle-evento"
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: '2px solid #8b5cf6',
+                            background: 'white',
+                            color: '#6b21a8',
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          🎃 Halloween
                         </button>
                         {item.destacado && (
                           <span style={{
