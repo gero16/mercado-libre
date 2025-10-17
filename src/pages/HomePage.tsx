@@ -8,6 +8,7 @@ import InstagramSection from '../components/InstagramSection'
 import LazySection from '../components/LazySection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
+import SpecialEventProducts from '../components/SpecialEventProducts'
 
 // 🚀 Lazy loading solo para componentes que están más abajo en la página
 const FeaturedProducts = lazy(() => import('../components/FeaturedProducts'))
@@ -64,6 +65,9 @@ const HomePage: React.FC = () => {
         subtitle="Emprendimiento uruguayo con años de experiencia"
         description="Somos una tienda en línea comprometida en ofrecer una amplia gama de productos de cualquier parte del mundo. Nuestro propósito es hacer de tus deseos, realidad, por eso nos encargamos de todo para que puedas tener eso que tanto querés."
       />
+
+      {/* Productos especiales de Halloween */}
+      <SpecialEventProducts slug="halloween" title="🎃 Selección Halloween" />
 
       {/* Sección de productos más vendidos - Carga inmediata (above the fold) */}
       <BestSellingProducts limit={8} />
