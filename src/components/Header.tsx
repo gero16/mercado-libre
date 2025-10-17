@@ -124,7 +124,6 @@ const Header: React.FC = () => {
             </li>
             
             <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
-            <li><NavLink to="/admin" className={({ isActive }) => isActive ? 'admin-link active' : 'admin-link'}>Admin</NavLink></li>
             
             {/* Buscador colapsable */}
             <li style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
