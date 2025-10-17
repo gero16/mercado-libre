@@ -54,7 +54,7 @@ const AdminPage: React.FC = () => {
   // Fetch productos de Mercado Libre desde el backend
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
-      const response = await fetch('https://poppy-shop-production.up.railway.app/ml/productos')
+      const response = await fetch('/ml/productos')
       const data = await response.json()
       console.log('Productos para admin:', data)
       return data || []
@@ -261,7 +261,7 @@ const AdminPage: React.FC = () => {
       
       // Llamar al endpoint para actualizar en el backend
       const response = await fetch(
-        `https://poppy-shop-production.up.railway.app/ml/productos/${item.productId}/destacado`,
+        `/ml/productos/${item.productId}/destacado`,
         {
           method: 'PUT',
           headers: {
