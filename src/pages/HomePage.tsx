@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import ImageCarousel from '../components/ImageCarousel'
 import SpecialPromotion from '../components/SpecialPromotion'
 import ProductCategories from '../components/ProductCategories'
@@ -9,6 +9,7 @@ import LazySection from '../components/LazySection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
 import SpecialEventProducts from '../components/SpecialEventProducts'
+import { EventService } from '../services/event'
 
 // 🚀 Lazy loading solo para componentes que están más abajo en la página
 const FeaturedProducts = lazy(() => import('../components/FeaturedProducts'))
@@ -49,6 +50,20 @@ const HomePage: React.FC = () => {
     'https://res.cloudinary.com/geronicola/image/upload/v1760638797/poppy-shop/yx7dr9n6seqqhqedvkfz.png'
   ]
 
+  // Evento activo (dinámico desde backend)
+  const [activeEvent, setActiveEvent] = useState<{ slug: string; titulo: string; theme?: string; fecha_fin?: string; subtitle?: string; discount_text?: string } | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    EventService.listActive()
+      .then(res => {
+        const ev = (res.eventos || [])[0] || null
+        if (mounted) setActiveEvent(ev)
+      })
+      .catch(() => {})
+    return () => { mounted = false }
+  }, [])
+
   return (
     <>
       {/* Carrusel de imágenes principal */}
@@ -66,8 +81,21 @@ const HomePage: React.FC = () => {
         description="Somos una tienda en línea comprometida en ofrecer una amplia gama de productos de cualquier parte del mundo. Nuestro propósito es hacer de tus deseos, realidad, por eso nos encargamos de todo para que puedas tener eso que tanto querés."
       />
 
-      {/* Productos especiales de Halloween */}
-      <SpecialEventProducts slug="halloween" title="🎃 Selección Halloween" />
+      {/* Evento activo dinámico */}
+      {activeEvent && (
+        <>
+          <SpecialEventProducts slug={activeEvent.slug} title={`Selección ${activeEvent.titulo}`} />
+          <SpecialPromotion 
+            title={`${(activeEvent.theme || '').toLowerCase() === 'halloween' ? '🎃 ' : ''}${activeEvent.titulo}`}
+            subtitle={activeEvent.subtitle || ((activeEvent.theme || '').toLowerCase() === 'halloween' ? '¡No te pierdas las mejores ofertas de Halloween!' : 'Ofertas por tiempo limitado')}
+            discount={activeEvent.discount_text || 'Hasta 50% OFF'}
+            endDate={activeEvent.fecha_fin ? new Date(activeEvent.fecha_fin).toLocaleDateString('es-UY', { day: 'numeric', month: 'long' }) : ''}
+            theme={((activeEvent.theme || 'summer') as any)}
+            linkTo={`/eventos/${activeEvent.slug}`}
+            deadline={activeEvent.fecha_fin}
+          />
+        </>
+      )}
 
       {/* Sección de productos más vendidos - Carga inmediata (above the fold) */}
       <BestSellingProducts limit={8} />
@@ -75,15 +103,7 @@ const HomePage: React.FC = () => {
       {/* Sección de categorías de productos */}
       <ProductCategories />
 
-      {/* Sección especial de promoción */}
-      <SpecialPromotion 
-        title="🎃 Halloween Sale"
-        subtitle="¡No te pierdas las mejores ofertas de Halloween!"
-        discount="Hasta 50% OFF"
-        endDate="31 de Octubre"
-        theme="halloween"
-        linkTo="/eventos/halloween"
-      />
+      {/* Si no hay evento activo, se omitirá la promo dinámica */}
       
       {/* Sección de productos destacados - Carga solo cuando esté cerca del viewport */}
       <LazySection 

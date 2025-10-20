@@ -23,6 +23,7 @@ import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminClientesPage from './pages/AdminClientesPage' // 🆕 Importar página de clientes
 import AdminDescuentos from './pages/AdminDescuentos' // 🆕 Importar página de descuentos
 import AdminCupones from './pages/AdminCupones' // 🆕 Importar página de cupones
+import AdminEventos from './pages/AdminEventos'
 import EventPage from './pages/EventPage'
 import './css/style.css'
 import './css/index.css'
@@ -87,6 +88,7 @@ function App() {
               <Route path="/admin/clientes" element={<ProtectedRoute><AdminClientesPage /></ProtectedRoute>} /> {/* 🆕 Ruta de clientes */}
               <Route path="/admin/descuentos" element={<ProtectedRoute><AdminDescuentos /></ProtectedRoute>} /> {/* 🆕 Ruta de descuentos */}
               <Route path="/admin/cupones" element={<ProtectedRoute><AdminCupones /></ProtectedRoute>} /> {/* 🆕 Ruta de cupones */}
+              <Route path="/admin/eventos" element={<ProtectedRoute><AdminEventos /></ProtectedRoute>} /> {/* 🆕 Ruta de eventos */}
               
               {/* Rutas de resultado de pago */}
               <Route path="/payment-success" element={<PaymentSuccessPage />} />

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 interface SpecialPromotionProps {
@@ -8,6 +8,7 @@ interface SpecialPromotionProps {
   endDate: string
   theme: 'halloween' | 'blackfriday' | 'summer' | 'winter'
   linkTo?: string
+  deadline?: string | Date // ISO/Date para countdown real
 }
 
 const SpecialPromotion: React.FC<SpecialPromotionProps> = ({ 
@@ -16,9 +17,32 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
   discount, 
   endDate, 
   theme,
-  linkTo
+  linkTo,
+  deadline
 }) => {
   const navigate = useNavigate()
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+
+  // Calcular countdown si hay deadline
+  useEffect(() => {
+    if (!deadline) return
+    const target = new Date(deadline).getTime()
+    if (isNaN(target)) return
+    const tick = () => {
+      const now = Date.now()
+      const diff = Math.max(0, target - now)
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+      setTimeLeft({ days, hours, minutes, seconds })
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [deadline])
+
+  const pad = (n: number) => n.toString().padStart(2, '0')
   const getThemeStyles = () => {
     switch (theme) {
       case 'halloween':
@@ -76,22 +100,22 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
               <p className="timer-text">¡Termina el {endDate}!</p>
               <div className="countdown">
                 <div className="time-unit">
-                  <span className="time-number">07</span>
+                  <span className="time-number">{pad(timeLeft.days)}</span>
                   <span className="time-label">Días</span>
                 </div>
                 <div className="time-separator">:</div>
                 <div className="time-unit">
-                  <span className="time-number">23</span>
+                  <span className="time-number">{pad(timeLeft.hours)}</span>
                   <span className="time-label">Horas</span>
                 </div>
                 <div className="time-separator">:</div>
                 <div className="time-unit">
-                  <span className="time-number">45</span>
+                  <span className="time-number">{pad(timeLeft.minutes)}</span>
                   <span className="time-label">Min</span>
                 </div>
                 <div className="time-separator">:</div>
                 <div className="time-unit">
-                  <span className="time-number">30</span>
+                  <span className="time-number">{pad(timeLeft.seconds)}</span>
                   <span className="time-label">Seg</span>
                 </div>
               </div>

@@ -387,6 +387,16 @@ const AdminPage: React.FC = () => {
           >
            ↳ Gestionar Cupones 🎟️
           </button>
+          <button 
+            onClick={() => navigate("/admin/eventos")}
+            className="btn-orden"
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+              color: 'white'
+            }}
+          >
+           ↳ Gestionar Eventos 🎉
+          </button>
         </div>
 
         {/* Controles de filtrado y búsqueda */}
