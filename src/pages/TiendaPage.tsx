@@ -1298,20 +1298,7 @@ const TiendaMLPage: React.FC = () => {
                 />
                 <p>{item.title}</p>
                 
-                {productoCerrado && (
-                  <div style={{
-                    padding: '4px 8px',
-                    background: 'rgba(30, 41, 59, 0.1)',
-                    border: '1px solid #334155',
-                    borderRadius: '6px',
-                    margin: '5px 10px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    color: '#1e293b'
-                  }}>
-                    Cerrado en ML
-                  </div>
-                )}
+                {/* Quitar cartel gris inferior; solo mantener badges superiores */}
                 
                 
                 <div style={{ 
@@ -1352,20 +1339,15 @@ const TiendaMLPage: React.FC = () => {
                     <p style={{ margin: '0' }}>US$ {item.price}</p>
                   )}
                 </div>
-                <button 
-                  className="add"
-                  onClick={(e) => handleAddToCart(e, item)}
-                  disabled={item.stock <= 0 || item.isPaused || productoCerrado}
-                >
-                  {productoCerrado 
-                    ? 'Cerrado' 
-                    : item.isPaused 
-                      ? 'Pausado' 
-                      : item.stock <= 0 
-                        ? 'Sin Stock' 
-                        : 'Agregar Carrito'
-                  }
-                </button>
+                {/* Ocultar botón cuando no se puede comprar; mantener solo badges superiores */}
+                {!(productoCerrado || item.stock <= 0 || item.isPaused) && (
+                  <button 
+                    className="add"
+                    onClick={(e) => handleAddToCart(e, item)}
+                  >
+                    Agregar Carrito
+                  </button>
+                )}
               </div>
             )
           })}

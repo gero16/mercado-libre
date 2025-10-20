@@ -396,7 +396,11 @@ const AdminEventos: React.FC = () => {
                       ) : (
                         <span style={{ fontWeight: 700 }}>{formatUSD(p.price)}</span>
                       )}
-                      {p.status && <span style={{ fontSize: 12, color: p.status === 'active' ? '#16a34a' : '#ef4444' }}>{p.status}</span>}
+                      {p.status && (
+                        <span style={{ fontSize: 12, color: p.status === 'active' ? '#16a34a' : '#6b7280' }}>
+                          {p.status === 'paused' ? 'Sin stock' : p.status}
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>{p.ml_id}</div>
                   </div>
