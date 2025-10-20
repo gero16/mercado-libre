@@ -22,6 +22,7 @@ const AdminEventos: React.FC = () => {
   const [slugSeleccionado, setSlugSeleccionado] = useState<string>('')
   const [productosInput, setProductosInput] = useState('')
   const [discountPct, setDiscountPct] = useState<number>(10)
+  const [resultadoAccion, setResultadoAccion] = useState<string | null>(null)
   const token = AuthService.getToken() || ''
 
   const load = async () => {
@@ -201,8 +202,16 @@ const AdminEventos: React.FC = () => {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-          <button className="btn-orden" onClick={agregarProductos}>Agregar</button>
-          <button className="btn-orden" onClick={removerProductos} style={{ background: '#fee2e2', color: '#b91c1c' }}>Remover</button>
+          <button className="btn-orden" onClick={async () => {
+            setResultadoAccion(null)
+            await agregarProductos()
+            setResultadoAccion('✅ Productos agregados al evento')
+          }}>Agregar</button>
+          <button className="btn-orden" onClick={async () => {
+            setResultadoAccion(null)
+            await removerProductos()
+            setResultadoAccion('✅ Productos removidos del evento')
+          }} style={{ background: '#fee2e2', color: '#b91c1c' }}>Remover</button>
           <button 
             className="btn-orden" 
             onClick={async () => {
@@ -215,8 +224,15 @@ const AdminEventos: React.FC = () => {
                 headers: { 'Content-Type': 'application/json', ...AuthService.getAuthHeader() },
                 body: JSON.stringify({ product_ids: ids, porcentaje, fecha_fin: eventos.find(e => e.slug===slugSeleccionado)?.fecha_fin })
               })
-              if (!res.ok) return alert('Error aplicando descuento')
-              alert('Descuento aplicado a productos ingresados')
+              if (!res.ok) {
+                const txt = await res.text()
+                setResultadoAccion(`❌ Error aplicando descuento: ${txt}`)
+                return
+              }
+              const data = await res.json()
+              const ok = (data.resultados || []).filter((r: any) => r.success).length
+              const fail = (data.resultados || []).filter((r: any) => !r.success).length
+              setResultadoAccion(`✅ Descuento aplicado a ingresados: ${ok} ok, ${fail} fallidos`)
             }}
             style={{ background: '#ecfdf5', color: '#065f46' }}
           >Aplicar descuento a ingresados</button>
@@ -233,8 +249,15 @@ const AdminEventos: React.FC = () => {
                 headers: { 'Content-Type': 'application/json', ...AuthService.getAuthHeader() },
                 body: JSON.stringify({ product_ids: ids, porcentaje, fecha_fin: ev?.fecha_fin })
               })
-              if (!res.ok) return alert('Error aplicando descuento')
-              alert('Descuento aplicado a todos los productos del evento')
+              if (!res.ok) {
+                const txt = await res.text()
+                setResultadoAccion(`❌ Error aplicando descuento al evento: ${txt}`)
+                return
+              }
+              const data = await res.json()
+              const ok = (data.resultados || []).filter((r: any) => r.success).length
+              const fail = (data.resultados || []).filter((r: any) => !r.success).length
+              setResultadoAccion(`✅ Descuento aplicado al evento: ${ok} ok, ${fail} fallidos`)
             }}
             style={{ background: '#ecfdf5', color: '#065f46' }}
           >Aplicar descuento a evento</button>
@@ -250,12 +273,46 @@ const AdminEventos: React.FC = () => {
                 headers: { 'Content-Type': 'application/json', ...AuthService.getAuthHeader() },
                 body: JSON.stringify({ product_ids: ids })
               })
-              if (!res.ok) return alert('Error quitando descuento')
-              alert('Descuento quitado de todos los productos del evento')
+              if (!res.ok) {
+                const txt = await res.text()
+                setResultadoAccion(`❌ Error quitando descuento del evento: ${txt}`)
+                return
+              }
+              const data = await res.json()
+              const ok = (data.resultados || []).filter((r: any) => r.success).length
+              const fail = (data.resultados || []).filter((r: any) => !r.success).length
+              setResultadoAccion(`✅ Quitar descuento: ${ok} ok, ${fail} fallidos`)
             }}
             style={{ background: '#fee2e2', color: '#b91c1c' }}
           >Quitar descuento del evento</button>
+          <button 
+            className="btn-orden" 
+            onClick={async () => {
+              if (!slugSeleccionado) return alert('Selecciona un evento')
+              const ev = eventos.find(e => e.slug === slugSeleccionado)
+              const ids = ev?.productos_ml_ids || []
+              if (ids.length === 0) return alert('Este evento no tiene productos asociados')
+              const res = await fetch(`${(import.meta as any).env?.VITE_BACKEND_URL || 'https://poppy-shop-production.up.railway.app'}/api/descuentos/reparar-ids`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...AuthService.getAuthHeader() },
+                body: JSON.stringify({ product_ids: ids })
+              })
+              if (!res.ok) {
+                const txt = await res.text()
+                setResultadoAccion(`❌ Error reparando descuentos: ${txt}`)
+                return
+              }
+              const data = await res.json()
+              setResultadoAccion(`🔧 Reparación: ${data.reparados} reparados, ${data.yaCorrectos} ya correctos`)
+            }}
+          >Reparar descuentos del evento</button>
         </div>
+
+        {resultadoAccion && (
+          <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: '#f3f4f6' }}>
+            {resultadoAccion}
+          </div>
+        )}
 
         {eventoSeleccionado && (
           <div style={{ marginTop: 20 }}>

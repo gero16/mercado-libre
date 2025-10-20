@@ -5,6 +5,11 @@ import ProductCard from '../components/ProductCard'
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
 
+const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
+const isBrowser = typeof window !== 'undefined'
+const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost ? 'http://localhost:3000' : PROD_BACKEND)
+
 const EventPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const [productos, setProductos] = useState<ProductoML[]>([])
@@ -16,7 +21,7 @@ const EventPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`/api/eventos/${slug}/productos`)
+        const res = await fetch(`${API_BASE_URL}/api/eventos/${slug}/productos`)
         const data = await res.json()
         if (data?.success) {
           setProductos(data.productos || [])

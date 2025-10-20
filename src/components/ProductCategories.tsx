@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { ProductoML } from '../types'
 import '../css/product-categories.css'
 
+const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
+const isBrowser = typeof window !== 'undefined'
+const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost ? 'http://localhost:3000' : PROD_BACKEND)
+
 interface Category {
   id: string
   name: string
@@ -60,7 +65,7 @@ const ProductCategories: React.FC = () => {
   useEffect(() => {
     const fetchCategoryImages = async () => {
       try {
-        const response = await fetch('/ml/productos')
+        const response = await fetch(`${API_BASE_URL}/ml/productos`)
         const productos: ProductoML[] = await response.json()
         
         // Mapeo de categorías ML a categorías generales
