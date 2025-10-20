@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 interface SpecialPromotionProps {
   title: string
@@ -6,6 +7,7 @@ interface SpecialPromotionProps {
   discount: string
   endDate: string
   theme: 'halloween' | 'blackfriday' | 'summer' | 'winter'
+  linkTo?: string
 }
 
 const SpecialPromotion: React.FC<SpecialPromotionProps> = ({ 
@@ -13,8 +15,10 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
   subtitle, 
   discount, 
   endDate, 
-  theme 
+  theme,
+  linkTo
 }) => {
+  const navigate = useNavigate()
   const getThemeStyles = () => {
     switch (theme) {
       case 'halloween':
@@ -95,7 +99,10 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
           </div>
           
           <div className="promotion-action">
-            <button className="promotion-button">
+          <button 
+            className="promotion-button"
+            onClick={() => linkTo ? navigate(linkTo) : navigate('/tienda-ml')}
+          >
               ¡Aprovecha Ahora!
             </button>
           </div>

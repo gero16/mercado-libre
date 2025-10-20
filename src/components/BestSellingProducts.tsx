@@ -15,9 +15,7 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
     const fetchBestSellers = async () => {
       try {
         // 🚀 Usar endpoint con paginación para reducir datos
-        const response = await fetch(
-          `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}`
-        )
+        const response = await fetch(`/ml/productos?limit=${limit}`)
         const data = await response.json()
         
         // El endpoint con paginación devuelve {productos: [], pagination: {}}

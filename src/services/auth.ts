@@ -32,6 +32,7 @@ export const AuthService = {
     }
     const data = await res.json()
     saveToken(data.token)
+    saveUser(data.user)
     return data
   },
 
@@ -66,6 +67,12 @@ export const AuthService = {
     return localStorage.getItem('auth_token')
   },
 
+  getStoredUser(): AuthUser | null {
+    const raw = localStorage.getItem('auth_user')
+    if (!raw) return null
+    try { return JSON.parse(raw) as AuthUser } catch { return null }
+  },
+
   getAuthHeader(): Record<string, string> {
     const t = this.getToken()
     return t ? { Authorization: `Bearer ${t}` } : {}
@@ -73,11 +80,16 @@ export const AuthService = {
 
   logout() {
     localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
   }
 }
 
 function saveToken(token: string) {
   localStorage.setItem('auth_token', token)
+}
+
+function saveUser(user: AuthUser) {
+  localStorage.setItem('auth_user', JSON.stringify(user))
 }
 
 async function safeJson(res: Response) {

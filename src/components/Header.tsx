@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 import { productsCache } from '../services/productsCache'
 import { ProductoML } from '../types'

@@ -23,6 +23,7 @@ import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminClientesPage from './pages/AdminClientesPage' // 🆕 Importar página de clientes
 import AdminDescuentos from './pages/AdminDescuentos' // 🆕 Importar página de descuentos
 import AdminCupones from './pages/AdminCupones' // 🆕 Importar página de cupones
+import EventPage from './pages/EventPage'
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -72,6 +73,7 @@ function App() {
               {/* Tienda antigua desde BD - Route path="/tienda" element={<TiendaPage />} />} */ }
               <Route path="/tienda-ml" element={<TiendaPage />} />
               <Route path="/producto/:id" element={<DetalleProductoPage />} />
+              <Route path="/eventos/:slug" element={<EventPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/contacto" element={<ContactoPage />} />
               <Route path="/preguntas-frecuentes" element={<FAQPage />} />
