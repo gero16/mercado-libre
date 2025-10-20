@@ -30,6 +30,7 @@ interface EventoProducto {
   main_image?: string
   status?: string
   selected?: boolean
+  descuento?: { activo: boolean; porcentaje: number; precio_original?: number }
 }
 
 const AdminEventos: React.FC = () => {
@@ -131,7 +132,8 @@ const AdminEventos: React.FC = () => {
           images: p.images,
           main_image: p.main_image,
           status: p.status,
-          selected: false
+          selected: false,
+          descuento: p.descuento
         }))
         setProductosEvento(items)
         setSelectAll(false)
@@ -384,8 +386,16 @@ const AdminEventos: React.FC = () => {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.2 }}>{p.title}</div>
-                    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontWeight: 700 }}>{formatUSD(p.price)}</span>
+                    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      {p.descuento?.activo && p.descuento.precio_original ? (
+                        <>
+                          <span style={{ textDecoration: 'line-through', color: '#6b7280' }}>{formatUSD(p.descuento.precio_original)}</span>
+                          <span style={{ fontWeight: 700, color: '#d32f2f' }}>{formatUSD(p.price)}</span>
+                          <span style={{ fontSize: 12, background: '#fff7ed', color: '#9a3412', borderRadius: 6, padding: '2px 6px' }}>-{p.descuento.porcentaje}%</span>
+                        </>
+                      ) : (
+                        <span style={{ fontWeight: 700 }}>{formatUSD(p.price)}</span>
+                      )}
                       {p.status && <span style={{ fontSize: 12, color: p.status === 'active' ? '#16a34a' : '#ef4444' }}>{p.status}</span>}
                     </div>
                     <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>{p.ml_id}</div>
