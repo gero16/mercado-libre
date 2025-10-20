@@ -13,12 +13,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [token, setToken] = useState<string | null>(() => AuthService.getToken())
 
+  // Rehidratar usuario si hay token al montar
   useEffect(() => {
-    const t = AuthService.getToken()
-    if (t) setToken(t)
-  }, [])
+    let mounted = true
+    const hydrate = async () => {
+      if (!token) return
+      const data = await AuthService.me()
+      if (!mounted) return
+      if (data?.user) setUser(data.user)
+    }
+    hydrate()
+    return () => { mounted = false }
+  }, [token])
 
   const login = async (email: string, password: string) => {
     const { token, user } = await AuthService.login(email, password)

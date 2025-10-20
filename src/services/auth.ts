@@ -35,6 +35,18 @@ export const AuthService = {
     return data
   },
 
+  async me(): Promise<{ user: AuthUser } | null> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json', ...this.getAuthHeader() }
+    if (!headers.Authorization) return null
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, { headers })
+      if (!res.ok) return null
+      return await res.json()
+    } catch {
+      return null
+    }
+  },
+
   async registerFirstAdmin(nombre: string, email: string, password: string): Promise<LoginResponse> {
     const res = await fetch(`${API_BASE_URL}/auth/register-admin`, {
       method: 'POST',

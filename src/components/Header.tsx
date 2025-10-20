@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import ShoppingCart from './ShoppingCart'
 import { productsCache } from '../services/productsCache'
 import { ProductoML } from '../types'
@@ -9,6 +10,7 @@ import { MAPEO_CATEGORIAS, NOMBRES_CATEGORIAS, ICONOS_CATEGORIAS } from '../util
 const Header: React.FC = () => {
   const { cartItemCount, setCartOpen, cartOpen } = useCart()
   const navigate = useNavigate()
+  const { isAuthenticated, logout } = useAuth()
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -124,6 +126,21 @@ const Header: React.FC = () => {
             </li>
             
             <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
+
+            {/* Autenticación */}
+            {!isAuthenticated ? (
+              <li><NavLink to="/login" className={({ isActive }) => isActive ? 'active' : ''}>Ingresar</NavLink></li>
+            ) : (
+              <li>
+                <button
+                  onClick={() => { logout(); navigate('/'); }}
+                  className="btn-orden"
+                  style={{ padding: '6px 12px', fontSize: '14px' }}
+                >
+                  Cerrar sesión
+                </button>
+              </li>
+            )}
             
             {/* Buscador colapsable */}
             <li style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
