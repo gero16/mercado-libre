@@ -288,6 +288,32 @@ interface ItemTienda {
   isPaused: boolean;
 }
 
+// 🔧 Deduplicar publicaciones por catálogo (dejar solo canónica visible)
+function dedupeProductsByCatalog(list: ProductoML[]): ProductoML[] {
+  const groups = new Map<string, ProductoML[]>()
+  const others: ProductoML[] = []
+  for (const p of list) {
+    if (p.catalog_product_id) {
+      const arr = groups.get(p.catalog_product_id) || []
+      arr.push(p)
+      groups.set(p.catalog_product_id, arr)
+    } else {
+      others.push(p)
+    }
+  }
+  const pick = (arr: ProductoML[]) => {
+    return arr.sort((a, b) => {
+      const score = (x: any) => ((x.status === 'active' ? 1e6 : x.status === 'paused' ? 1e5 : 0) + (Number(x.sold_quantity)||0)*1e3 + (Number(x.health)||0)*10 - (Number(x.price)||0))
+      return score(b) - score(a)
+    })[0]
+  }
+  const picked: ProductoML[] = []
+  for (const [, arr] of groups) {
+    picked.push(pick(arr))
+  }
+  return [...picked, ...others]
+}
+
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -371,12 +397,14 @@ const TiendaMLPage: React.FC = () => {
       const startFetch = performance.now()
       
       const response = await fetch(
-        `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}&skip=${skip}`,
+        `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}&skip=${skip}&_ts=${Date.now()}`,
         {
           headers: {
             'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
           },
-          keepalive: true
+          keepalive: true,
+          cache: 'no-store'
         }
       )
       
@@ -419,7 +447,8 @@ const TiendaMLPage: React.FC = () => {
       console.log('🔍 Total productos recibidos:', first50Products.length)
       
       console.log('⚡ Procesando primeros 50 productos para carga rápida...')
-      const productList = first50Products
+      // 🔧 Quitar duplicados por catálogo antes de construir items
+      const productList = dedupeProductsByCatalog(first50Products)
       
       // Procesar productos para crear items únicos para la tienda
       const items: ItemTienda[] = []
@@ -579,7 +608,9 @@ const TiendaMLPage: React.FC = () => {
         
         const remainingItems: ItemTienda[] = []
         
-        allRemainingProducts.forEach(producto => {
+        // 🔧 Quitar duplicados por catálogo en el conjunto restante
+        const uniqueRemaining = dedupeProductsByCatalog(allRemainingProducts)
+        uniqueRemaining.forEach(producto => {
             const categoria = obtenerCategoria(producto.category_id)
             const isPaused = producto.status === 'paused'
             

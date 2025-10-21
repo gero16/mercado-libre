@@ -100,6 +100,7 @@ export default function AdminDuplicadosPage() {
         <div className="dup-meta" style={{ marginTop: 6 }}>
           <span className="badge" title={p?.catalog_product_id ? `Catálogo: ${p.catalog_product_id}` : ''}>{tipoCatalogo}</span>
           <span className="badge type">{listingLabel}</span>
+          <span className="badge" title="MLU / ID de publicación">{p?.ml_id || id}</span>
         </div>
         <div className="dup-meta">
           <span>Status: {p?.status || '-'}</span>
