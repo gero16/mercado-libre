@@ -4,6 +4,7 @@ import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
 import { EventService } from '../services/event'
 import { AuthService } from '../services/auth'
+import { productsCache } from '../services/productsCache'
 
 // Interfaz para items de administración
 interface AdminItem {
@@ -51,15 +52,14 @@ const AdminPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
 
-  // Fetch productos de Mercado Libre desde el backend
+  // Obtener productos reutilizando el caché global para evitar dobles llamadas/errores
   const fetchProducts = async (): Promise<ProductoML[]> => {
     try {
-      const response = await fetch('/ml/productos')
-      const data = await response.json()
-      console.log('Productos para admin:', data)
-      return data || []
+      const data = await productsCache.getProducts()
+      console.log('Productos para admin (desde caché):', data?.length || 0)
+      return Array.isArray(data) ? data : []
     } catch (error) {
-      console.error('Error fetching ML products for admin:', error)
+      console.error('Error obteniendo productos para admin:', error)
       return []
     }
   }
