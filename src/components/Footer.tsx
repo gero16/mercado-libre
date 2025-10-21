@@ -20,7 +20,9 @@ const Footer: React.FC = () => {
           <p>© Copyright 2025 / Poppy Shop Uruguay </p>
        
           <div className="preguntas">
-            <p>Terminos y Condiciones</p>
+            <Link to="/terminos-y-condiciones" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <p>Términos y Condiciones</p>
+            </Link>
             <Link to="/preguntas-frecuentes" style={{ textDecoration: 'none', color: 'inherit' }}>
               <p>Preguntas Frecuentes</p>
             </Link>

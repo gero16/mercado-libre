@@ -29,6 +29,13 @@
     <priority>0.6</priority>
   </url>
   
+  <!-- Página de términos y condiciones -->
+  <url>
+    <loc>https://mercado-libre-roan.vercel.app/terminos-y-condiciones</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  
   <!-- 
     NOTA: Las URLs de productos individuales se generan dinámicamente 
     desde el backend en: https://poppy-shop-production.up.railway.app/api/sitemap.xml

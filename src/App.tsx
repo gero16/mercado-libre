@@ -14,6 +14,7 @@ import DetalleProductoPage from './pages/DetalleProductoPage'
 import CheckoutPage from './pages/CheckoutPage'
 import ContactoPage from './pages/ContactoPage'
 import FAQPage from './pages/FAQPage'
+import TerminosYCondicionesPage from './pages/TerminosYCondicionesPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailurePage from './pages/PaymentFailurePage'
 import PaymentPendingPage from './pages/PaymentPendingPage'
@@ -78,6 +79,7 @@ function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/contacto" element={<ContactoPage />} />
               <Route path="/preguntas-frecuentes" element={<FAQPage />} />
+              <Route path="/terminos-y-condiciones" element={<TerminosYCondicionesPage />} />
 
               <Route path="/login" element={<LoginPage />} />
               

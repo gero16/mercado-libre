@@ -75,6 +75,25 @@
   margin-bottom: 40px;
 }
 
+/* ======== Terminos & Condiciones ======== */
+.terms-content {
+  padding: 30px;
+}
+
+.terms-content h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 24px 0 10px;
+  color: #333;
+}
+
+.terms-content p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.8;
+  margin: 0 0 10px;
+}
+
 .faq-item {
   border-bottom: 1px solid #e0e0e0;
   transition: all 0.3s ease;
