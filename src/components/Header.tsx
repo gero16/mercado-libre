@@ -29,7 +29,7 @@ const Header: React.FC = () => {
     let mounted = true
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/ml/categories/distinct?onlyActive=true&_ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } })
+        const res = await fetch(`${API_BASE_URL}/ml/categories/distinct?onlyActive=true&requireImage=true&onlyInStock=true&_ts=${Date.now()}` , { cache: 'no-store', headers: { Accept: 'application/json' } })
         const json = await res.json()
         if (!mounted) return
         let cats = (json?.categories || []).map((c: any) => {
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
 
         // Fallback: si no hay categorías activas, incluir también pausadas
         if (!cats.length) {
-          const resAll = await fetch(`${API_BASE_URL}/ml/categories/distinct?onlyActive=false&_ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } })
+          const resAll = await fetch(`${API_BASE_URL}/ml/categories/distinct?onlyActive=false&requireImage=true&onlyInStock=false&_ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } })
           const jsonAll = await resAll.json()
           cats = (jsonAll?.categories || []).map((c: any) => {
             const slug = (MAPEO_CATEGORIAS[c.category_id] || 'otros') as string
