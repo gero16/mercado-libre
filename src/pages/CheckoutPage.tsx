@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
-import { MercadoPagoService } from '../services/mercadopago'
-import { FEATURE_FLAGS } from '../config/featureFlags'
+import { Payment } from '@mercadopago/sdk-react'
+import { useMercadoPago } from '../hooks/useMercadoPago'
 
 interface CustomerData {
   name: string
@@ -14,16 +14,7 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { 
-    cartItems, 
-    cartTotal, 
-    setCartOpen,
-    cuponAplicado,
-    aplicarCupon,
-    quitarCupon,
-    cartTotalConDescuento,
-    descuentoCupon
-  } = useCart()
+  const { cartItems, cartTotal, setCartOpen } = useCart()
   const navigate = useNavigate()
   
   const [customerData, setCustomerData] = useState<CustomerData>({
@@ -35,16 +26,65 @@ const CheckoutPage: React.FC = () => {
     state: '',
   })
 
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [showPaymentBrick, setShowPaymentBrick] = useState(false)
+  const [isCreatingPreference, setIsCreatingPreference] = useState(false)
   
-  // 🆕 Estados para cupón
-  const [codigoCupon, setCodigoCupon] = useState('')
-  const [aplicandoCupon, setAplicandoCupon] = useState(false)
-  const [mensajeCupon, setMensajeCupon] = useState<{ tipo: 'success' | 'error', texto: string} | null>(null)
+  const {
+    createPreference,
+    getInitialization,
+    getCustomization,
+    onSubmit: originalOnSubmit,
+    onError,
+    onReady,
+    preferenceId,
+    isLoading: _mpLoading,
+    error: _mpError
+  } = useMercadoPago()
+
+  // Efecto para controlar el scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (showPaymentBrick) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    // Cleanup al desmontar el componente
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showPaymentBrick])
+
+  // Efecto para cerrar el modal con la tecla Escape
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showPaymentBrick) {
+        setShowPaymentBrick(false)
+      }
+    }
+
+    if (showPaymentBrick) {
+      document.addEventListener('keydown', handleEscapeKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }, [showPaymentBrick])
 
   useEffect(() => {
     setCartOpen(false)
   }, [])
+
+  // 🆕 Crear un wrapper para onSubmit que pase los datos del carrito y cliente
+  const handlePaymentSubmit = useCallback(async ({ formData, selectedPaymentMethod }: any) => {
+    console.log('💳 Datos del pago recibidos:', formData)
+    console.log('🛒 Items del carrito:', cartItems)
+    console.log('👤 Datos del cliente:', customerData)
+    
+    // Llamar al onSubmit original pasando los datos adicionales
+    return originalOnSubmit({ formData, selectedPaymentMethod }, cartItems, customerData)
+  }, [originalOnSubmit, cartItems, customerData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -52,47 +92,6 @@ const CheckoutPage: React.FC = () => {
       ...prev,
       [name]: value
     }))
-  }
-
-  // 🆕 Función para aplicar cupón
-  const handleAplicarCupon = async () => {
-    if (!codigoCupon.trim()) {
-      setMensajeCupon({ tipo: 'error', texto: 'Ingresa un código de cupón' })
-      return
-    }
-
-    setAplicandoCupon(true)
-    setMensajeCupon(null)
-
-    try {
-      const resultado = await aplicarCupon(codigoCupon, customerData.email)
-      
-      if (resultado.valido) {
-        setMensajeCupon({ 
-          tipo: 'success', 
-          texto: `¡Cupón aplicado! Ahorras $${resultado.descuento?.toFixed(2)}` 
-        })
-      } else {
-        setMensajeCupon({ 
-          tipo: 'error', 
-          texto: resultado.error || 'Cupón inválido' 
-        })
-      }
-    } catch (error) {
-      setMensajeCupon({ 
-        tipo: 'error', 
-        texto: 'Error al validar el cupón' 
-      })
-    } finally {
-      setAplicandoCupon(false)
-    }
-  }
-
-  // 🆕 Función para quitar cupón
-  const handleQuitarCupon = () => {
-    quitarCupon()
-    setCodigoCupon('')
-    setMensajeCupon(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,46 +112,24 @@ const CheckoutPage: React.FC = () => {
     }
 
     try {
-      setIsProcessing(true)
+      setIsCreatingPreference(true)
       
-      console.log('🛒 Creando preferencia de Checkout Pro...')
-      console.log('Items:', cartItems)
-      console.log('Customer:', customerData)
-      console.log('Cupón:', cuponAplicado?.cupon?.codigo)
+      // Crear preferencia en MercadoPago
+      await createPreference(cartItems, customerData)
       
-      // Crear preferencia de Checkout Pro
-      const { init_point } = await MercadoPagoService.createCheckoutProPreference(
-        cartItems,
-        customerData,
-        cuponAplicado?.cupon?.codigo
-      )
+      // Mostrar el Payment Brick
+      setShowPaymentBrick(true)
       
-      console.log('✅ Preferencia creada, redirigiendo a:', init_point)
-      
-      // Redirigir a MercadoPago para completar el pago
-      window.location.href = init_point
-      
-    } catch (error: any) {
-      console.error('Error creating preference:', error)
-      alert(error.message || 'Error creando la preferencia de pago. Por favor intenta nuevamente.')
-      setIsProcessing(false)
+    } catch (error) {
+      console.error('Error creando preferencia:', error)
+      alert('Error creando la preferencia de pago. Por favor intenta nuevamente.')
+    } finally {
+      setIsCreatingPreference(false)
     }
   }
 
   const handleGoBack = () => {
     navigate('/tienda')
-  }
-
-  if (FEATURE_FLAGS.DISABLE_CHECKOUT) {
-    return (
-      <main className="container" style={{ padding: '40px 20px', maxWidth: 720 }}>
-        <h1>Checkout temporalmente deshabilitado</h1>
-        <p>
-          Por mantenimiento, el proceso de compra está deshabilitado momentáneamente. Por favor, vuelve a intentarlo más tarde.
-        </p>
-        <button className="btn btn-primary" onClick={() => navigate('/tienda-ml')}>Volver a la tienda</button>
-      </main>
-    )
   }
 
   if (cartItems.length === 0) {
@@ -266,25 +243,51 @@ const CheckoutPage: React.FC = () => {
             <div className="form-actions">
                 <button 
                   type="submit" 
-                  className="btn-orden"
-                  disabled={isProcessing}
-                  style={{
-                    backgroundColor: isProcessing ? '#ccc' : '',
-                    cursor: isProcessing ? 'not-allowed' : 'pointer'
-                  }}
+                className="btn-orden"
+                  disabled={isCreatingPreference}
                 >
-                  {isProcessing ? '🔄 Procesando...' : '💳 Pagar con MercadoPago (USD)'}
+                {isCreatingPreference ? 'Creando preferencia...' : 'Proceder al Pago'}
                 </button>
-                <p style={{
-                  marginTop: '10px',
-                  fontSize: '0.9rem',
-                  color: '#666',
-                  textAlign: 'center'
-                }}>
-                  Serás redirigido a MercadoPago para completar tu pago en USD
-                </p>
             </div>
           </form>
+          
+          {/* Modal de Payment Brick de MercadoPago */}
+          {showPaymentBrick && preferenceId && (
+            <div className="payment-modal-overlay" onClick={() => setShowPaymentBrick(false)}>
+              <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="payment-modal-header">
+                  <h2>Selecciona tu método de pago</h2>
+                  <button 
+                    className="payment-modal-close"
+                    onClick={() => setShowPaymentBrick(false)}
+                    title="Cerrar"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div id="paymentBrick_container">
+                  <Payment
+                    initialization={getInitialization(cartTotal, preferenceId)}
+                    customization={getCustomization()}
+                    onSubmit={handlePaymentSubmit}
+                    onReady={onReady}
+                    onError={onError}
+                  />
+                </div>
+                
+                <div className="payment-modal-actions">
+                  <button 
+                    type="button" 
+                    className="btn-orden volver"
+                    onClick={() => setShowPaymentBrick(false)}
+                  >
+                    Volver a datos del cliente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Resumen del pedido */}
@@ -318,138 +321,10 @@ const CheckoutPage: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            {/* 🆕 Sección de cupón */}
-            <div className="cupon-section" style={{
-              padding: '20px',
-              background: '#f8f9fa',
-              borderRadius: '12px',
-              margin: '20px 0'
-            }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#333' }}>
-                🎟️ ¿Tienes un cupón de descuento?
-              </h3>
-              
-              {!cuponAplicado ? (
-                <div>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                    <input
-                      type="text"
-                      placeholder="VERANO2026"
-                      value={codigoCupon}
-                      onChange={(e) => setCodigoCupon(e.target.value.toUpperCase())}
-                      style={{
-                        flex: 1,
-                        padding: '12px',
-                        borderRadius: '8px',
-                        border: '2px solid #ddd',
-                        fontSize: '1rem',
-                        textTransform: 'uppercase'
-                      }}
-                      onKeyPress={(e) => e.key === 'Enter' && handleAplicarCupon()}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAplicarCupon}
-                      disabled={aplicandoCupon}
-                      style={{
-                        padding: '12px 24px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontWeight: '600',
-                        cursor: aplicandoCupon ? 'not-allowed' : 'pointer',
-                        opacity: aplicandoCupon ? 0.7 : 1
-                      }}
-                    >
-                      {aplicandoCupon ? 'Validando...' : 'Aplicar'}
-                    </button>
-                  </div>
-                  
-                  {mensajeCupon && (
-                    <div style={{
-                      padding: '12px',
-                      borderRadius: '8px',
-                      background: mensajeCupon.tipo === 'success' ? '#d4edda' : '#f8d7da',
-                      color: mensajeCupon.tipo === 'success' ? '#155724' : '#721c24',
-                      border: `2px solid ${mensajeCupon.tipo === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
-                      fontSize: '0.95rem',
-                      fontWeight: '600'
-                    }}>
-                      {mensajeCupon.texto}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{
-                  padding: '15px',
-                  background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
-                  borderRadius: '10px',
-                  border: '2px solid #28a745'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <p style={{ margin: '0 0 5px 0', fontWeight: '700', color: '#155724', fontSize: '1.1rem' }}>
-                        ✅ {cuponAplicado.cupon?.codigo}
-                      </p>
-                      <p style={{ margin: 0, color: '#155724', fontSize: '0.9rem' }}>
-                        {cuponAplicado.cupon?.descripcion}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleQuitarCupon}
-                      style={{
-                        padding: '8px 16px',
-                        background: 'white',
-                        color: '#dc3545',
-                        border: '2px solid #dc3545',
-                        borderRadius: '8px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        fontSize: '0.9rem'
-                      }}
-                    >
-                      Quitar
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <div className="total-pedido">
               <div className="total-box">
-                <span>Subtotal</span>
-                <strong>$ {cartTotal.toFixed(2)}</strong>
-              </div>
-              
-              {descuentoCupon > 0 && (
-                <div className="total-box" style={{
-                  background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  margin: '10px 0'
-                }}>
-                  <span style={{ color: '#155724', fontWeight: '600' }}>
-                    🎟️ Descuento ({cuponAplicado?.cupon?.valor_descuento}
-                    {cuponAplicado?.cupon?.tipo_descuento === 'porcentaje' ? '%' : ' UYU'})
-                  </span>
-                  <strong style={{ color: '#155724' }}>
-                    - $ {descuentoCupon.toFixed(2)}
-                  </strong>
-                </div>
-              )}
-              
-              <div className="total-box" style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                padding: '16px',
-                borderRadius: '10px',
-                fontSize: '1.2rem'
-              }}>
-                <span>Total a Pagar</span>
-                <strong>$ {cartTotalConDescuento.toFixed(2)}</strong>
+                <span>Total</span>
+                <strong>$ {cartTotal}</strong>
               </div>
             </div>
           </div>
