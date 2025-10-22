@@ -8,7 +8,6 @@ import InstagramSection from '../components/InstagramSection'
 import LazySection from '../components/LazySection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
-import SpecialEventProducts from '../components/SpecialEventProducts'
 import { EventService } from '../services/event'
 
 // 🚀 Lazy loading solo para componentes que están más abajo en la página

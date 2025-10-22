@@ -69,9 +69,38 @@ class ProductsCacheService {
     qp.set('offset', String(params.offset))
     if (params.fields) qp.set('fields', params.fields)
     if (params.status && params.status !== 'all') qp.set('status', params.status)
+    qp.set('_ts', String(Date.now()))
     const response = await fetch(`${API_BASE_URL}/ml/productos?${qp.toString()}`)
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
-    return response.json()
+    const data = await response.json()
+
+    // Soportar backends antiguos que devuelven array directo o {registros: [...]}
+    if (Array.isArray(data)) {
+      const total = data.length
+      const start = Math.max(0, params.offset)
+      const end = Math.min(total, start + params.limit)
+      const items = data.slice(start, end)
+      return { total, items }
+    }
+    if (data && Array.isArray(data.registros)) {
+      // respuesta de /api/productos del backend viejo
+      const registros = data.registros
+      const total = registros.length
+      const start = Math.max(0, params.offset)
+      const end = Math.min(total, start + params.limit)
+      const items = registros.slice(start, end)
+      return { total, items }
+    }
+
+    // Nueva versión paginada { total, items }
+    if (typeof data === 'object' && data && Array.isArray(data.items) && typeof data.total === 'number') {
+      return { total: data.total, items: data.items }
+    }
+
+    // Fallback seguro
+    const items = Array.isArray(data?.items) ? data.items : []
+    const total = typeof data?.total === 'number' ? data.total : items.length
+    return { total, items }
   }
 }
 

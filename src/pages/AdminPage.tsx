@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useDeferredValue } from 'react'
+import React, { useState, useEffect, useMemo, useDeferredValue, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -70,9 +70,10 @@ const AdminPage: React.FC = () => {
 
   // Config paginación servidor
   const [serverTotal, setServerTotal] = useState(0)
-  const [serverLimit, setServerLimit] = useState(250)
+  const [serverLimit, setServerLimit] = useState(100)
   const [serverOffset, setServerOffset] = useState(0)
   const [serverLoading, setServerLoading] = useState(false)
+  const didFallback = useRef(false)
 
   const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,variantes'
 
@@ -80,8 +81,10 @@ const AdminPage: React.FC = () => {
     const buildItemsFromProduct = (producto: ProductoML): AdminItem[] => {
       const isPaused = producto.status === 'paused'
       let totalVariantsStock = 0
-      if (producto.variantes && producto.variantes.length > 0) {
-        totalVariantsStock = producto.variantes.reduce((sum, variante) => sum + variante.stock, 0)
+      if (Array.isArray(producto.variantes) && producto.variantes.length > 0) {
+        totalVariantsStock = (producto.variantes as any[])
+          .map(v => (typeof v?.stock === 'number' ? v.stock : 0))
+          .reduce((sum, n) => sum + n, 0)
       }
       const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
       const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
@@ -99,16 +102,16 @@ const AdminPage: React.FC = () => {
 
       const result: AdminItem[] = []
       result.push({
-        id: producto._id,
+        id: (producto as any)._id || (producto as any).id || producto.ml_id,
         title: producto.title,
         price: producto.price,
-        image: producto.images[0]?.url || producto.main_image,
+        image: (producto.images && producto.images[0]?.url) || (producto as any).main_image,
         stock: effectiveStock,
         esVariante: false,
         productoPadre: producto,
-        categoria: producto.category_id,
+        categoria: (producto as any).category_id || (producto as any).category || '',
         productId: producto.ml_id,
-        status: producto.status,
+        status: (producto as any).status || 'active',
         isPaused: isPaused,
         tieneVariantes: producto.variantes && producto.variantes.length > 0,
         stockTotalVariantes: totalVariantsStock,
@@ -122,8 +125,8 @@ const AdminPage: React.FC = () => {
         destacado: producto.destacado || false
       })
 
-      if (producto.variantes && producto.variantes.length > 0) {
-        producto.variantes.forEach(variante => {
+      if (Array.isArray(producto.variantes) && producto.variantes.length > 0 && typeof (producto.variantes[0] as any) === 'object' && (producto.variantes[0] as any).stock !== undefined) {
+        (producto.variantes as any[]).forEach((variante: any) => {
           const imagenVariante = variante.images && variante.images.length > 0
             ? variante.images[0].url
             : producto.images[0]?.url || producto.main_image
@@ -136,17 +139,17 @@ const AdminPage: React.FC = () => {
           const variantEsStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
 
           result.push({
-            id: `${producto._id}_${variante._id}`,
+            id: `${producto._id}_${variante._id || variante.id || Math.random()}`,
             title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
-            price: variante.price || producto.price,
+            price: (variante.price ?? producto.price) || 0,
             image: imagenVariante,
-            stock: variante.stock,
+            stock: variante.stock ?? 0,
             esVariante: true,
             variante: variante,
             productoPadre: producto,
             categoria: producto.category_id,
             productId: producto.ml_id,
-            variantId: variante._id,
+            variantId: (variante._id || variante.id || '').toString(),
             status: producto.status,
             isPaused: isPaused,
             dias_preparacion: variantDiasPreparacion,
@@ -167,6 +170,7 @@ const AdminPage: React.FC = () => {
     const fetchPage = async (reset: boolean) => {
       try {
         setServerLoading(true)
+        console.log('[Admin] Fetching page', { limit: serverLimit, offset: serverOffset, status: filterStatus, fields: SERVER_FIELDS })
         const { total, items } = await productsCache.getProductsPage({
           limit: serverLimit,
           offset: serverOffset,
@@ -174,14 +178,34 @@ const AdminPage: React.FC = () => {
           status: filterStatus
         })
         setServerTotal(total)
-        const mapped: AdminItem[] = []
-        items.forEach(p => mapped.push(...buildItemsFromProduct(p as any)))
+        console.log('[Admin] Response', { total, itemsType: Array.isArray(items) ? 'array' : typeof items, itemsLength: Array.isArray(items) ? items.length : undefined })
+        let mapped: AdminItem[] = []
+        if (Array.isArray(items) && items.length > 0) {
+          items.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
+        }
+        // Fallback a modo antiguo si el backend activo no soporta paginado y devolvió vacío
+        if (reset && mapped.length === 0 && !didFallback.current) {
+          console.log('[Admin] Fallback: cargando todos los productos (modo antiguo)')
+          try {
+            const all = await productsCache.getProducts()
+            setServerTotal(Array.isArray(all) ? all.length : 0)
+            const slice = Array.isArray(all) ? all.slice(0, serverLimit) : []
+            mapped = []
+            slice.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
+            didFallback.current = true
+            console.log('[Admin] Fallback mapped count', { mappedCount: mapped.length })
+          } catch (fe) {
+            console.error('[Admin] Fallback error', fe)
+          }
+        }
+        console.log('[Admin] Mapped items count', { mappedCount: mapped.length, reset })
         setAdminItems(prev => reset ? mapped : [...prev, ...mapped])
       } catch (e) {
-        console.error('Error obteniendo página de productos:', e)
+        console.error('[Admin] Error obteniendo página de productos:', e)
       } finally {
         setLoading(false)
         setServerLoading(false)
+        console.log('[Admin] Page load finished', { loading: false, serverLoading: false })
       }
     }
 
@@ -189,6 +213,13 @@ const AdminPage: React.FC = () => {
     fetchPage(serverOffset === 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverLimit, serverOffset, filterStatus])
+
+  // Log cambios en la lista resultante
+  useEffect(() => {
+    if (!loading) {
+      console.log('[Admin] adminItems updated', { count: adminItems.length })
+    }
+  }, [adminItems, loading])
 
   // 🆕 Cargar métricas de censo y duplicados de forma diferida (post-render)
   useEffect(() => {
