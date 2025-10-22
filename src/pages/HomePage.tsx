@@ -84,8 +84,8 @@ const HomePage: React.FC = () => {
       {/* Evento activo dinámico */}
       {activeEvent && (
         <>
-          <SpecialEventProducts slug={activeEvent.slug} title={`Selección ${activeEvent.titulo}`} />
-          <SpecialPromotion 
+          {/* <SpecialEventProducts slug={activeEvent.slug} title={`Selección ${activeEvent.titulo}`} /> */}
+            <SpecialPromotion 
             title={`${(activeEvent.theme || '').toLowerCase() === 'halloween' ? '🎃 ' : ''}${activeEvent.titulo}`}
             subtitle={activeEvent.subtitle || ((activeEvent.theme || '').toLowerCase() === 'halloween' ? '¡No te pierdas las mejores ofertas de Halloween!' : 'Ofertas por tiempo limitado')}
             discount={activeEvent.discount_text || 'Hasta 50% OFF'}
