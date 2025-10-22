@@ -4,8 +4,6 @@ import { ProductoML } from '../types'
 import '../css/product-categories.css'
 
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
-const isBrowser = typeof window !== 'undefined'
-const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
 interface Category {
@@ -20,7 +18,7 @@ const ProductCategories: React.FC = () => {
   const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [productosPorCategoria, setProductosPorCategoria] = useState<Record<string, ProductoML[]>>({})
+  const [productosPorCategoria] = useState<Record<string, ProductoML[]>>({})
   const [imageIndexes, setImageIndexes] = useState<Record<string, number>>({})
   
   // Función para obtener URL de imagen grande

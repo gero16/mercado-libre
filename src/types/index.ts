@@ -62,6 +62,7 @@ export interface ProductoML {
   status: string;
   title: string;
   permalink?: string; // URL de la publicación en MercadoLibre
+  catalog_product_id?: string | null; // para deduplicación por catálogo
   variantes: Variante[];
   cantidad?: number;
   description?: string;

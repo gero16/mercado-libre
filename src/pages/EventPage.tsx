@@ -14,8 +14,8 @@ const EventPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const [productos, setProductos] = useState<ProductoML[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'paused'>('all')
+  const [search] = useState('')
+  const [statusFilter] = useState<'all' | 'active' | 'paused'>('all')
   const { addToCart } = useCart()
 
   useEffect(() => {

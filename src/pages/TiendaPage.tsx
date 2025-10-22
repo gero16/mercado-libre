@@ -465,15 +465,15 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       const startTime = performance.now()
-      console.log('⏱️ Iniciando carga RÁPIDA (primeros 50 productos desde servidor)...')
+      console.log('⏱️ Iniciando carga RÁPIDA (primeros 120 productos desde servidor)...')
       
-      // 🚀 FASE 1: Cargar SOLO los primeros 50 productos desde el servidor (SÚPER RÁPIDO)
-      const first50Products = await fetchProductsPaginated(50, 0)
+      // 🚀 FASE 1: Cargar SOLO los primeros 120 productos desde el servidor (rápido)
+      const first50Products = await fetchProductsPaginated(120, 0)
       const fetchTime = performance.now()
-      console.log(`📡 Primeros 50 productos cargados en: ${(fetchTime - startTime).toFixed(0)}ms`)
+      console.log(`📡 Primeros 120 productos cargados en: ${(fetchTime - startTime).toFixed(0)}ms`)
       console.log('🔍 Total productos recibidos:', first50Products.length)
       
-      console.log('⚡ Procesando primeros 50 productos para carga rápida...')
+      console.log('⚡ Procesando primeros 120 productos para carga rápida...')
       // 🔧 Quitar duplicados por catálogo antes de construir items
       const productList = dedupeProductsByCatalog(first50Products)
       
@@ -597,7 +597,7 @@ const TiendaMLPage: React.FC = () => {
       
       const endTime = performance.now()
       const totalTime = endTime - startTime
-      console.log(`✅ Carga INICIAL (50 productos) completada en: ${totalTime.toFixed(0)}ms`)
+      console.log(`✅ Carga INICIAL (120 productos) completada en: ${totalTime.toFixed(0)}ms`)
       console.log(`   - Fetch API: ${(fetchTime - startTime).toFixed(0)}ms`)
       console.log(`   - Procesamiento: ${(endTime - fetchTime).toFixed(0)}ms`)
       
@@ -611,7 +611,7 @@ const TiendaMLPage: React.FC = () => {
         
         // Cargar todos los productos restantes en lotes de 100
         let allRemainingProducts: ProductoML[] = []
-        let currentSkip = 50
+        let currentSkip = 120
         const batchSize = 100
         let hasMore = true
         

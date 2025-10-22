@@ -5,8 +5,6 @@ import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 import { MAPEO_CATEGORIAS, NOMBRES_CATEGORIAS, ICONOS_CATEGORIAS } from '../utils/categories'
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
-const isBrowser = typeof window !== 'undefined'
-const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
 const Header: React.FC = () => {
