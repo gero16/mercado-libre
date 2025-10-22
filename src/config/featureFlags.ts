@@ -1,3 +1,3 @@
 export const FEATURE_FLAGS = {
-  DISABLE_CHECKOUT: true, // poner en false para habilitar nuevamente
+  DISABLE_CHECKOUT: false, // poner en false para habilitar nuevamente
 }

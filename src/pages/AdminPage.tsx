@@ -5,6 +5,7 @@ import ProductSkeleton from '../components/ProductSkeleton'
 import { EventService } from '../services/event'
 import { AuthService } from '../services/auth'
 import { productsCache } from '../services/productsCache'
+import { fetchCensus, fetchDuplicates, type CensusResponse } from '../services/diagnostics'
 
 // Interfaz para items de administración
 interface AdminItem {
@@ -51,6 +52,9 @@ const AdminPage: React.FC = () => {
   // 🆕 Estados para paginación
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
+  // 🆕 Métricas de censo/duplicados
+  const [census, setCensus] = useState<CensusResponse | null>(null)
+  const [dupExcess, setDupExcess] = useState<number | null>(null)
 
   // Obtener productos reutilizando el caché global para evitar dobles llamadas/errores
   const fetchProducts = async (): Promise<ProductoML[]> => {
@@ -183,6 +187,23 @@ const AdminPage: React.FC = () => {
       setLoading(false)
     }
     loadProducts()
+  }, [])
+
+  // 🆕 Cargar métricas de censo y duplicados (exceso por catálogo)
+  useEffect(() => {
+    const loadCensusAndDuplicates = async () => {
+      try {
+        const [c, d] = await Promise.all([
+          fetchCensus(),
+          fetchDuplicates({ type: 'catalog', limit: 1000, summary: true })
+        ])
+        setCensus(c)
+        setDupExcess((d as any)?.summary?.excess_catalog ?? null)
+      } catch (e) {
+        console.error('Error cargando métricas de duplicados/censo:', e)
+      }
+    }
+    loadCensusAndDuplicates()
   }, [])
 
   // Filtrar y ordenar items
@@ -544,6 +565,27 @@ const AdminPage: React.FC = () => {
           <div className="stat-card">
             <h3>Total Items</h3>
             <span className="stat-number">{adminItems.length}</span>
+          </div>
+          {/* 🆕 Total real y duplicados */}
+          <div 
+            className="stat-card"
+            title="Total de publicaciones en la base de datos (incluye duplicados)"
+            onClick={() => navigate('/admin/duplicados')}
+            style={{ cursor: 'pointer' }}
+          >
+            <h3>Total real (DB)</h3>
+            <span className="stat-number">{typeof census?.db_total === 'number' ? census?.db_total : '-'}</span>
+            <div className="stat-subtitle">Incluye duplicados</div>
+          </div>
+          <div 
+            className="stat-card"
+            title="Exceso por catálogo: suma de (count - 1) por grupo"
+            onClick={() => navigate('/admin/duplicados')}
+            style={{ cursor: 'pointer' }}
+          >
+            <h3>Duplicados</h3>
+            <span className="stat-number">{typeof dupExcess === 'number' ? dupExcess : '-'}</span>
+            <div className="stat-subtitle">Click para ver detalles</div>
           </div>
           <div className="stat-card">
             <h3>Productos</h3>
