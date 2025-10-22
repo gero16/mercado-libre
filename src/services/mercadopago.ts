@@ -52,10 +52,14 @@ export class MercadoPagoService {
 
       const result = await response.json()
       console.log('✅ Preferencia de Checkout Pro creada:', result)
-      
+
+      const initPoint = (FEATURE_FLAGS.USE_CHECKOUT_PRO_SANDBOX && result.sandbox_init_point)
+        ? result.sandbox_init_point
+        : result.init_point
+
       return {
         preferenceId: result.preferenceId,
-        init_point: result.init_point
+        init_point: initPoint
       }
     } catch (error) {
       console.error('Error creating Checkout Pro preference:', error)
