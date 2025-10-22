@@ -3,9 +3,11 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
-import { productsCache } from '../services/productsCache'
-import { ProductoML } from '../types'
 import { MAPEO_CATEGORIAS, NOMBRES_CATEGORIAS, ICONOS_CATEGORIAS } from '../utils/categories'
+const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
+const isBrowser = typeof window !== 'undefined'
+const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
 const Header: React.FC = () => {
   const { cartItemCount, setCartOpen, cartOpen } = useCart()
@@ -16,7 +18,7 @@ const Header: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false)
   const location = useLocation()
 
-  const [productos, setProductos] = useState<ProductoML[]>([])
+  const [categoryCounts, setCategoryCounts] = useState<{ id: string, count: number }[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
 
   useEffect(() => {
@@ -27,9 +29,46 @@ const Header: React.FC = () => {
     let mounted = true
     const load = async () => {
       try {
-        const data = await productsCache.getProducts()
+        const res = await fetch(`${API_BASE_URL}/ml/categories/distinct?onlyActive=true&_ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } })
+        const json = await res.json()
         if (!mounted) return
-        setProductos(data)
+        let cats = (json?.categories || []).map((c: any) => {
+          const slug = (MAPEO_CATEGORIAS[c.category_id] || 'otros') as string
+          return { id: slug, count: c.count as number }
+        })
+
+        // Fallback: si no hay categorías activas, incluir también pausadas
+        if (!cats.length) {
+          const resAll = await fetch(`${API_BASE_URL}/ml/categories/distinct?onlyActive=false&_ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } })
+          const jsonAll = await resAll.json()
+          cats = (jsonAll?.categories || []).map((c: any) => {
+            const slug = (MAPEO_CATEGORIAS[c.category_id] || 'otros') as string
+            return { id: slug, count: c.count as number }
+          })
+        }
+
+        // Fallback 2: si aún no hay categorías, construir desde categorias-simples
+        if (!cats.length) {
+          try {
+            const resSimple = await fetch(`${API_BASE_URL}/ml/categorias-simples?_ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } })
+            const jsonSimple = await resSimple.json()
+            const arr = (jsonSimple?.categories || []) as Array<{ id?: string, category_id?: string, count?: number }>
+            cats = arr.map((c: any) => {
+              const raw = c.id || c.category_id
+              const slug = (MAPEO_CATEGORIAS[raw] || 'otros') as string
+              return { id: slug, count: Number(c.count || 0) }
+            })
+          } catch (e) {
+            // ignorar
+          }
+        }
+        // Consolidar por slug
+        const map = new Map<string, number>()
+        for (const c of cats) map.set(c.id, (map.get(c.id) || 0) + c.count)
+        const consolidated = Array.from(map.entries()).map(([id, count]) => ({ id, count }))
+        setCategoryCounts(consolidated)
+      } catch (e) {
+        setCategoryCounts([])
       } finally {
         if (mounted) setLoadingCategories(false)
       }
@@ -40,32 +79,22 @@ const Header: React.FC = () => {
 
   // Construir categorías dinámicas con conteo > 0
   const dynamicCategories = useMemo(() => {
-    if (!productos || productos.length === 0) return [] as { id: string, name: string, icon: string, count: number }[]
-
-    const counts = new Map<string, number>()
-    for (const p of productos) {
-      const slug = MAPEO_CATEGORIAS[p.category_id || ''] || 'otros'
-      counts.set(slug, (counts.get(slug) || 0) + 1)
-    }
-
-    const entries = Array.from(counts.entries())
-      .filter(([slug, count]) => slug !== 'otros' && count > 0)
-      .map(([slug, count]) => ({
-        id: slug,
-        name: `${ICONOS_CATEGORIAS[slug] || ''} ${NOMBRES_CATEGORIAS[slug] || slug}`.trim(),
-        icon: ICONOS_CATEGORIAS[slug] || '',
-        count,
+    const entries = (categoryCounts || [])
+      .filter(c => c.id && c.count > 0)
+      .map(c => ({
+        id: c.id,
+        name: `${ICONOS_CATEGORIAS[c.id] || ''} ${NOMBRES_CATEGORIAS[c.id] || c.id}`.trim(),
+        icon: ICONOS_CATEGORIAS[c.id] || '',
+        count: c.count,
       }))
 
-    // Ordenar por cantidad desc y luego alfabético
     entries.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
 
-    // Insertar opción "mostrar todo" al inicio
     return [
-      { id: 'mostrar-todo', name: '📋 Todos los Productos', icon: '📋', count: productos.length },
+      { id: 'mostrar-todo', name: '📋 Todos los Productos', icon: '📋', count: entries.reduce((s, e) => s + e.count, 0) },
       ...entries,
     ]
-  }, [productos])
+  }, [categoryCounts])
 
   const handleCategoryClick = (categoryId: string) => {
     navigate('/tienda-ml', { state: { categoryFilter: categoryId } })

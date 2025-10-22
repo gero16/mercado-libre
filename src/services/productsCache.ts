@@ -3,7 +3,7 @@ import { ProductoML } from '../types'
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const isBrowser = typeof window !== 'undefined'
 const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost ? 'http://localhost:3000' : PROD_BACKEND)
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
 // 🚀 Servicio de caché para productos ML
 // Permite que múltiples componentes compartan una única llamada HTTP
@@ -36,7 +36,7 @@ class ProductsCacheService {
     this.loading = true
 
     try {
-      const response = await fetch(`${API_BASE_URL}/ml/productos`)
+      const response = await fetch(`${API_BASE_URL}/ml/productos?_ts=${Date.now()}`)
       const data: ProductoML[] = await response.json()
       
       this.cache = data

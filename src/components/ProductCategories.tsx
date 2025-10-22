@@ -6,7 +6,7 @@ import '../css/product-categories.css'
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const isBrowser = typeof window !== 'undefined'
 const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost ? 'http://localhost:3000' : PROD_BACKEND)
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
 interface Category {
   id: string
@@ -64,64 +64,74 @@ const ProductCategories: React.FC = () => {
 
   useEffect(() => {
     const fetchCategoryImages = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/ml/productos`)
-        const productos: ProductoML[] = await response.json()
-        
-        // Mapeo de categorías ML a categorías generales
-        const mapeoCategorias: Record<string, string> = {
-          'MLU163646': 'electronica', 'MLU163764': 'electronica', 'MLU163765': 'electronica',
-          'MLU163771': 'electronica', 'MLU168248': 'electronica', 'MLU3697': 'electronica',
-          'MLU6344': 'gaming', 'MLU443628': 'gaming', 'MLU448172': 'gaming',
-          'MLU443741': 'gaming', 'MLU10858': 'gaming',
-          'MLU12201': 'hogar', 'MLU7969': 'hogar', 'MLU40398': 'hogar',
-          'MLU205198': 'hogar', 'MLU43687': 'hogar',
-          'MLU165701': 'deportes', 'MLU165785': 'deportes', 'MLU413593': 'deportes'
-        }
-        
-        // Agrupar productos por categoría
-        const productosPorCat: Record<string, ProductoML[]> = {}
-        mainCategories.forEach(cat => {
-          productosPorCat[cat.id] = productos.filter(p => {
-            const categoriaGeneral = mapeoCategorias[p.category_id || '']
-            return categoriaGeneral === cat.id && p.images && p.images.length > 0
-          })
-        })
-        
-        setProductosPorCategoria(productosPorCat)
-        
-        // Inicializar índices de imágenes
-        const initialIndexes: Record<string, number> = {}
-        mainCategories.forEach(cat => {
-          initialIndexes[cat.id] = 0
-        })
-        setImageIndexes(initialIndexes)
-        
-        // Obtener imagen inicial de cada categoría
-        const categoriasConImagenes = mainCategories.map(cat => {
-          const productosDeCategoria = productosPorCat[cat.id]
-          const productoInicial = productosDeCategoria && productosDeCategoria.length > 0 
-            ? productosDeCategoria[0] 
-            : null
-          
-          const imageUrl = productoInicial?.images[0]?.url || productoInicial?.main_image || '/img/portada4.jpg'
-          
-          return {
-            ...cat,
-            image: getLargeImageUrl(imageUrl)
-          }
-        })
-        
-        setCategories(categoriasConImagenes)
-        setLoading(false)
-      } catch (error) {
-        console.error('Error cargando imágenes de categorías:', error)
-        // Fallback con imágenes locales
+      let isMounted = true
+      let resolved = false
+
+      const url = `${API_BASE_URL}/ml/home/categories?kind=main&_ts=${Date.now()}`
+
+      // Timeout no bloqueante: si supera 2s, mostramos fallback; el fetch sigue en segundo plano
+      const fallbackTimer = setTimeout(() => {
+        if (!isMounted || resolved) return
         setCategories(mainCategories.map(cat => ({
           ...cat,
           image: '/img/portada4.jpg'
         })))
         setLoading(false)
+      }, 2000)
+
+      const doFetch = async () => {
+        try {
+          const response = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          const data = await response.json()
+          const categoriesResp = (data && data.categories) || []
+          if (!isMounted) return
+
+          // Inicializar índices de imágenes
+          const initialIndexes: Record<string, number> = {}
+          mainCategories.forEach(cat => {
+            initialIndexes[cat.id] = 0
+          })
+          setImageIndexes(initialIndexes)
+
+          // Obtener imagen inicial de cada categoría desde backend
+          const categoriasConImagenes = mainCategories.map(cat => {
+            const found = categoriesResp.find((c: any) => c.id === cat.id)
+            const imageUrl = found?.image || '/img/portada4.jpg'
+
+            return {
+              ...cat,
+              image: getLargeImageUrl(imageUrl)
+            }
+          })
+
+          setCategories(categoriasConImagenes)
+          setLoading(false)
+          resolved = true
+          clearTimeout(fallbackTimer)
+        } catch (error: any) {
+          if (!isMounted) return
+          // No loggear Timeout/Abort como error ruidoso
+          if (error?.name !== 'AbortError') {
+            console.error('Error cargando imágenes de categorías:', error)
+          }
+          if (!resolved) {
+            setCategories(mainCategories.map(cat => ({
+              ...cat,
+              image: '/img/portada4.jpg'
+            })))
+            setLoading(false)
+            resolved = true
+          }
+          clearTimeout(fallbackTimer)
+        }
+      }
+
+      doFetch()
+
+      return () => {
+        isMounted = false
+        clearTimeout(fallbackTimer)
       }
     }
     

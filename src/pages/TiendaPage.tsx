@@ -314,6 +314,34 @@ function dedupeProductsByCatalog(list: ProductoML[]): ProductoML[] {
   return [...picked, ...others]
 }
 
+// 🔧 Deduplicar items de tienda por catálogo (usa productoPadre.catalog_product_id)
+function dedupeItemsByCatalog(items: ItemTienda[]): ItemTienda[] {
+  const groups = new Map<string, ItemTienda[]>()
+  const others: ItemTienda[] = []
+  for (const it of items) {
+    const cat = it.productoPadre?.catalog_product_id
+    if (cat) {
+      const arr = groups.get(cat) || []
+      arr.push(it)
+      groups.set(cat, arr)
+    } else {
+      others.push(it)
+    }
+  }
+  const score = (x: ItemTienda) => {
+    const p: any = x.productoPadre
+    return ((p?.status === 'active' ? 1e6 : p?.status === 'paused' ? 1e5 : 0)
+      + (Number(p?.sold_quantity)||0)*1e3
+      + (Number(p?.health)||0)*10
+      - (Number(x.price)||0))
+  }
+  const picked: ItemTienda[] = []
+  for (const [, arr] of groups) {
+    picked.push(arr.sort((a,b)=>score(b)-score(a))[0])
+  }
+  return [...picked, ...others]
+}
+
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -400,8 +428,7 @@ const TiendaMLPage: React.FC = () => {
         `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}&skip=${skip}&_ts=${Date.now()}`,
         {
           headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache'
+            'Accept': 'application/json'
           },
           keepalive: true,
           cache: 'no-store'
@@ -541,8 +568,9 @@ const TiendaMLPage: React.FC = () => {
         status: item.productoPadre?.status
       })))
       
-      setItemsTienda(items)
-      setFilteredItems(items)
+      const itemsUnicos = dedupeItemsByCatalog(items)
+      setItemsTienda(itemsUnicos)
+      setFilteredItems(itemsUnicos)
       
       // Extraer categorías únicas de los items con contadores
       const categoriasMap = new Map<string, number>()
@@ -678,6 +706,11 @@ const TiendaMLPage: React.FC = () => {
             }
           })
           
+          // Deduplicar mezclando con los ya presentes
+          const merged = dedupeItemsByCatalog([...(itemsTienda || []), ...remainingItems])
+          setItemsTienda(merged)
+          setFilteredItems(merged)
+
           const backgroundEnd = performance.now()
           console.log(`✅ Productos restantes cargados en: ${(backgroundEnd - backgroundStart).toFixed(0)}ms`)
           
