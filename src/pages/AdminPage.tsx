@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -37,6 +37,18 @@ interface AdminItem {
   destacado?: boolean;  // 🆕 Campo para productos destacados
 }
 
+// Optimiza URLs de imágenes de ML a la variante V (más liviana)
+const getOptimizedImageUrl = (url?: string) => {
+  if (!url) return url as any
+  if (url.match(/-[IOSV]\.(jpg|jpeg|png|webp)$/i)) {
+    return url.replace(/-[IOSV]\.(jpg|jpeg|png|webp)$/i, '-V.jpg')
+  }
+  if (url.match(/\.(jpg|jpeg|png|webp)$/i)) {
+    return url.replace(/\.(jpg|jpeg|png|webp)$/i, '-V.jpg')
+  }
+  return url
+}
+
 const AdminPage: React.FC = () => {
   const navigate = useNavigate()
   const [adminItems, setAdminItems] = useState<AdminItem[]>([])
@@ -56,141 +68,131 @@ const AdminPage: React.FC = () => {
   const [census, setCensus] = useState<CensusResponse | null>(null)
   const [dupExcess, setDupExcess] = useState<number | null>(null)
 
-  // Obtener productos reutilizando el caché global para evitar dobles llamadas/errores
-  const fetchProducts = async (): Promise<ProductoML[]> => {
-    try {
-      const data = await productsCache.getProducts()
-      console.log('Productos para admin (desde caché):', data?.length || 0)
-      return Array.isArray(data) ? data : []
-    } catch (error) {
-      console.error('Error obteniendo productos para admin:', error)
-      return []
-    }
-  }
+  // Config paginación servidor
+  const [serverTotal, setServerTotal] = useState(0)
+  const [serverLimit, setServerLimit] = useState(250)
+  const [serverOffset, setServerOffset] = useState(0)
+  const [serverLoading, setServerLoading] = useState(false)
+
+  const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,variantes'
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const productList = await fetchProducts()
-      
-      // Procesar productos para crear items de administración
-      const items: AdminItem[] = []
-      
-      productList.forEach(producto => {
-        const isPaused = producto.status === 'paused'
-        
-        // Calcular stock total de variantes si existen
-        let totalVariantsStock = 0
-        if (producto.variantes && producto.variantes.length > 0) {
-          totalVariantsStock = producto.variantes.reduce((sum, variante) => {
-            return sum + variante.stock
-          }, 0)
-        }
-        
-        const effectiveStock = (producto.variantes && producto.variantes.length > 0)
-          ? totalVariantsStock
-          : producto.available_quantity
-        
-        // Calcular tiempo de entrega
-        const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
-        const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
-        const tiempoTotalEntrega = diasPreparacion + diasEnvio
-        const esEntregaLarga = tiempoTotalEntrega > 14
-        
-        // 🚀 DETERMINAR SI ES STOCK FÍSICO/RÁPIDO
-        // Basado en análisis: xd_drop_off con dias_preparacion: 0 es lo más "local"
-        const esFlex = producto.shipping?.logistic_type === 'fulfillment'
-        const esXdDropOff = producto.shipping?.logistic_type === 'xd_drop_off'
-        const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
-        const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
-        
-        // Es "stock rápido" si:
-        // 1. Flex (fulfillment) - ideal
-        // 2. Cross Docking SIN días de preparación (solo envío) = ~7 días
-        // 3. Cualquier producto con entrega ≤ 10 días total
-        const esStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
-        
-        // Agregar el producto principal
-        items.push({
-          id: producto._id,
-          title: producto.title,
-          price: producto.price,
-          image: producto.images[0]?.url || producto.main_image,
-          stock: effectiveStock,
-          esVariante: false,
-          productoPadre: producto,
-          categoria: producto.category_id,
-          productId: producto.ml_id,
-          status: producto.status,
-          isPaused: isPaused,
-          tieneVariantes: producto.variantes && producto.variantes.length > 0,
-          stockTotalVariantes: totalVariantsStock,
-          // Propiedades de tiempo de entrega
-          dias_preparacion: diasPreparacion,
-          dias_envio_estimado: diasEnvio,
-          tiempo_total_entrega: tiempoTotalEntrega,
-          es_entrega_larga: esEntregaLarga,
-          es_stock_fisico: esStockFisico,
-          proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
-          pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
-          destacado: producto.destacado || false  // 🆕 Campo destacado
-        })
-        
-        // Agregar cada variante como un item separado
-        if (producto.variantes && producto.variantes.length > 0) {
-          producto.variantes.forEach(variante => {
-            const imagenVariante = variante.images && variante.images.length > 0 
-              ? variante.images[0].url 
-              : producto.images[0]?.url || producto.main_image;
-            
-            const variantStock = variante.stock
-            
-            // Calcular tiempo de entrega para variantes (priorizar configuración de variante)
-            const variantDiasPreparacion = variante.dropshipping?.dias_preparacion || diasPreparacion
-            const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
-            const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
-            const variantEsEntregaLarga = variantTiempoTotal > 14
-            
-            // 🚀 DETERMINAR SI LA VARIANTE ES STOCK RÁPIDO
-            const variantSinPreparacion = (variante.dropshipping?.dias_preparacion || producto.dropshipping?.dias_preparacion || 0) === 0
-            const variantEntregaTotal = variantTiempoTotal || (variante.dropshipping?.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 7)
-            const variantEsStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
-            
-            items.push({
-              id: `${producto._id}_${variante._id}`,
-              title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
-              price: variante.price || producto.price,
-              image: imagenVariante,
-              stock: variantStock,
-              esVariante: true,
-              variante: variante,
-              productoPadre: producto,
-              categoria: producto.category_id,
-              productId: producto.ml_id,
-              variantId: variante._id,
-              status: producto.status,
-              isPaused: isPaused,
-              // Propiedades de tiempo de entrega para variantes
-              dias_preparacion: variantDiasPreparacion,
-              dias_envio_estimado: variantDiasEnvio,
-              tiempo_total_entrega: variantTiempoTotal,
-              es_entrega_larga: variantEsEntregaLarga,
-              es_stock_fisico: variantEsStockFisico,
-              proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
-              pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
-              destacado: producto.destacado || false  // 🆕 Campo destacado (hereda del producto padre)
-            })
-          })
-        }
+    const buildItemsFromProduct = (producto: ProductoML): AdminItem[] => {
+      const isPaused = producto.status === 'paused'
+      let totalVariantsStock = 0
+      if (producto.variantes && producto.variantes.length > 0) {
+        totalVariantsStock = producto.variantes.reduce((sum, variante) => sum + variante.stock, 0)
+      }
+      const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
+      const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
+      const tiempoTotalEntrega = diasPreparacion + diasEnvio
+      const esEntregaLarga = tiempoTotalEntrega > 14
+      const esFlex = producto.shipping?.logistic_type === 'fulfillment'
+      const esXdDropOff = producto.shipping?.logistic_type === 'xd_drop_off'
+      const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
+      const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
+      const esStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
+
+      const effectiveStock = (producto.variantes && producto.variantes.length > 0)
+        ? totalVariantsStock
+        : producto.available_quantity
+
+      const result: AdminItem[] = []
+      result.push({
+        id: producto._id,
+        title: producto.title,
+        price: producto.price,
+        image: producto.images[0]?.url || producto.main_image,
+        stock: effectiveStock,
+        esVariante: false,
+        productoPadre: producto,
+        categoria: producto.category_id,
+        productId: producto.ml_id,
+        status: producto.status,
+        isPaused: isPaused,
+        tieneVariantes: producto.variantes && producto.variantes.length > 0,
+        stockTotalVariantes: totalVariantsStock,
+        dias_preparacion: diasPreparacion,
+        dias_envio_estimado: diasEnvio,
+        tiempo_total_entrega: tiempoTotalEntrega,
+        es_entrega_larga: esEntregaLarga,
+        es_stock_fisico: esStockFisico,
+        proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
+        pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
+        destacado: producto.destacado || false
       })
-      
-      setAdminItems(items)
-      setLoading(false)
-    }
-    loadProducts()
-  }, [])
 
-  // 🆕 Cargar métricas de censo y duplicados (exceso por catálogo)
+      if (producto.variantes && producto.variantes.length > 0) {
+        producto.variantes.forEach(variante => {
+          const imagenVariante = variante.images && variante.images.length > 0
+            ? variante.images[0].url
+            : producto.images[0]?.url || producto.main_image
+          const variantDiasPreparacion = variante.dropshipping?.dias_preparacion || diasPreparacion
+          const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
+          const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
+          const variantEsEntregaLarga = variantTiempoTotal > 14
+          const variantSinPreparacion = (variante.dropshipping?.dias_preparacion || producto.dropshipping?.dias_preparacion || 0) === 0
+          const variantEntregaTotal = variantTiempoTotal || (variante.dropshipping?.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 7)
+          const variantEsStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
+
+          result.push({
+            id: `${producto._id}_${variante._id}`,
+            title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
+            price: variante.price || producto.price,
+            image: imagenVariante,
+            stock: variante.stock,
+            esVariante: true,
+            variante: variante,
+            productoPadre: producto,
+            categoria: producto.category_id,
+            productId: producto.ml_id,
+            variantId: variante._id,
+            status: producto.status,
+            isPaused: isPaused,
+            dias_preparacion: variantDiasPreparacion,
+            dias_envio_estimado: variantDiasEnvio,
+            tiempo_total_entrega: variantTiempoTotal,
+            es_entrega_larga: variantEsEntregaLarga,
+            es_stock_fisico: variantEsStockFisico,
+            proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
+            pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
+            destacado: producto.destacado || false
+          })
+        })
+      }
+
+      return result
+    }
+
+    const fetchPage = async (reset: boolean) => {
+      try {
+        setServerLoading(true)
+        const { total, items } = await productsCache.getProductsPage({
+          limit: serverLimit,
+          offset: serverOffset,
+          fields: SERVER_FIELDS,
+          status: filterStatus
+        })
+        setServerTotal(total)
+        const mapped: AdminItem[] = []
+        items.forEach(p => mapped.push(...buildItemsFromProduct(p as any)))
+        setAdminItems(prev => reset ? mapped : [...prev, ...mapped])
+      } catch (e) {
+        console.error('Error obteniendo página de productos:', e)
+      } finally {
+        setLoading(false)
+        setServerLoading(false)
+      }
+    }
+
+    // Cuando cambia offset/limit o filtro de status, recargar desde servidor
+    fetchPage(serverOffset === 0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverLimit, serverOffset, filterStatus])
+
+  // 🆕 Cargar métricas de censo y duplicados de forma diferida (post-render)
   useEffect(() => {
+    if (loading) return
     const loadCensusAndDuplicates = async () => {
       try {
         const [c, d] = await Promise.all([
@@ -203,14 +205,20 @@ const AdminPage: React.FC = () => {
         console.error('Error cargando métricas de duplicados/censo:', e)
       }
     }
-    loadCensusAndDuplicates()
-  }, [])
+    const anyWindow = window as any
+    if (anyWindow && typeof anyWindow.requestIdleCallback === 'function') {
+      anyWindow.requestIdleCallback(loadCensusAndDuplicates, { timeout: 3000 })
+    } else {
+      setTimeout(loadCensusAndDuplicates, 1500)
+    }
+  }, [loading])
 
-  // Filtrar y ordenar items
-  const filteredAndSortedItems = adminItems
+  // Filtrar y ordenar items (memo + búsqueda diferida)
+  const deferredSearchTerm = useDeferredValue(searchTerm)
+  const filteredAndSortedItems = useMemo(() => adminItems
     .filter(item => {
       // Filtro por búsqueda
-      if (searchTerm && !item.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (deferredSearchTerm && !item.title.toLowerCase().includes(deferredSearchTerm.toLowerCase())) {
         return false
       }
       
@@ -251,13 +259,20 @@ const AdminPage: React.FC = () => {
       }
       
       return sortOrder === 'asc' ? comparison : -comparison
-    })
+    }), [adminItems, deferredSearchTerm, filterType, filterStatus, filterDelivery, filterDestacado, sortBy, sortOrder])
 
-  // 🆕 Paginación
-  const totalPages = Math.ceil(filteredAndSortedItems.length / itemsPerPage)
-  const indexOfLastItem = currentPage * itemsPerPage
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = filteredAndSortedItems.slice(indexOfFirstItem, indexOfLastItem)
+  // 🆕 Paginación (memo)
+  const { totalPages, indexOfFirstItem, indexOfLastItem, currentItems } = useMemo(() => {
+    const total = Math.ceil(filteredAndSortedItems.length / itemsPerPage)
+    const last = currentPage * itemsPerPage
+    const first = last - itemsPerPage
+    return {
+      totalPages: total,
+      indexOfFirstItem: first,
+      indexOfLastItem: last,
+      currentItems: filteredAndSortedItems.slice(first, last)
+    }
+  }, [filteredAndSortedItems, currentPage, itemsPerPage])
 
   // 🆕 Funciones de paginación
   const handlePageChange = (pageNumber: number) => {
@@ -509,7 +524,7 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 🆕 Información de paginación y control */}
+        {/* 🆕 Información de paginación y control (cliente) */}
         <div style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           padding: '20px',
@@ -557,6 +572,53 @@ const AdminPage: React.FC = () => {
                 <option value={100}>100</option>
               </select>
             </div>
+          </div>
+        </div>
+
+        {/* 🆕 Paginación de servidor */}
+        <div style={{
+          background: '#0d1117',
+          border: '1px solid #30363d',
+          borderRadius: '10px',
+          padding: '16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          flexWrap: 'wrap',
+          color: '#c9d1d9'
+        }}>
+          <div>
+            <strong>Servidor</strong>: {serverOffset + 1} - {Math.min(serverOffset + serverLimit, serverTotal)} de {serverTotal}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <label>Items por request:</label>
+            <select
+              value={serverLimit}
+              onChange={e => { setServerLimit(Number(e.target.value)); setServerOffset(0); }}
+              className="admin-select"
+              style={{ minWidth: 90 }}
+            >
+              <option value={100}>100</option>
+              <option value={250}>250</option>
+              <option value={500}>500</option>
+            </select>
+
+            <button
+              className="admin-sort-btn"
+              disabled={serverOffset === 0 || serverLoading}
+              onClick={() => setServerOffset(Math.max(0, serverOffset - serverLimit))}
+            >
+              ← Anterior lote
+            </button>
+            <button
+              className="admin-sort-btn"
+              disabled={serverOffset + serverLimit >= serverTotal || serverLoading}
+              onClick={() => setServerOffset(serverOffset + serverLimit)}
+            >
+              Siguiente lote →
+            </button>
           </div>
         </div>
 
@@ -657,8 +719,10 @@ const AdminPage: React.FC = () => {
               <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
                 <div className="product-image">
                   <img 
-                    src={item.image} 
+                    src={getOptimizedImageUrl(item.image)} 
                     alt={item.title}
+                    loading="lazy"
+                    decoding="async"
                     className={
                       item.isPaused 
                         ? 'paused-image' 

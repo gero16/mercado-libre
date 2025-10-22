@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { initMercadoPago } from '@mercadopago/sdk-react'
 import { CartProvider } from './context/CartContext'
@@ -18,14 +18,14 @@ import TerminosYCondicionesPage from './pages/TerminosYCondicionesPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailurePage from './pages/PaymentFailurePage'
 import PaymentPendingPage from './pages/PaymentPendingPage'
-import AdminPage from './pages/AdminPage'
-import AdminDropshippingPage from './pages/AdminDropshippingPage'
-import AdminOrdersPage from './pages/AdminOrdersPage'
-import AdminClientesPage from './pages/AdminClientesPage' // 🆕 Importar página de clientes
-import AdminDescuentos from './pages/AdminDescuentos' // 🆕 Importar página de descuentos
-import AdminCupones from './pages/AdminCupones' // 🆕 Importar página de cupones
-import AdminEventos from './pages/AdminEventos'
-import AdminDuplicadosPage from './pages/AdminDuplicadosPage'
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const AdminDropshippingPage = lazy(() => import('./pages/AdminDropshippingPage'))
+const AdminOrdersPage = lazy(() => import('./pages/AdminOrdersPage'))
+const AdminClientesPage = lazy(() => import('./pages/AdminClientesPage')) // 🆕 Importar página de clientes
+const AdminDescuentos = lazy(() => import('./pages/AdminDescuentos')) // 🆕 Importar página de descuentos
+const AdminCupones = lazy(() => import('./pages/AdminCupones')) // 🆕 Importar página de cupones
+const AdminEventos = lazy(() => import('./pages/AdminEventos'))
+const AdminDuplicadosPage = lazy(() => import('./pages/AdminDuplicadosPage'))
 import EventPage from './pages/EventPage'
 import './css/style.css'
 import './css/index.css'
@@ -85,14 +85,14 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               
               {/* Rutas de administración protegidas */}
-              <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-              <Route path="/admin/dropshipping" element={<ProtectedRoute><AdminDropshippingPage /></ProtectedRoute>} />
-              <Route path="/admin/orders" element={<ProtectedRoute><AdminOrdersPage /></ProtectedRoute>} />
-              <Route path="/admin/clientes" element={<ProtectedRoute><AdminClientesPage /></ProtectedRoute>} /> {/* 🆕 Ruta de clientes */}
-              <Route path="/admin/descuentos" element={<ProtectedRoute><AdminDescuentos /></ProtectedRoute>} /> {/* 🆕 Ruta de descuentos */}
-              <Route path="/admin/cupones" element={<ProtectedRoute><AdminCupones /></ProtectedRoute>} /> {/* 🆕 Ruta de cupones */}
-              <Route path="/admin/eventos" element={<ProtectedRoute><AdminEventos /></ProtectedRoute>} /> {/* 🆕 Ruta de eventos */}
-              <Route path="/admin/duplicados" element={<ProtectedRoute><AdminDuplicadosPage /></ProtectedRoute>} /> {/* 🆕 Ruta de duplicados */}
+              <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminPage /></Suspense></ProtectedRoute>} />
+              <Route path="/admin/dropshipping" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDropshippingPage /></Suspense></ProtectedRoute>} />
+              <Route path="/admin/orders" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminOrdersPage /></Suspense></ProtectedRoute>} />
+              <Route path="/admin/clientes" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminClientesPage /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de clientes */}
+              <Route path="/admin/descuentos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDescuentos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de descuentos */}
+              <Route path="/admin/cupones" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminCupones /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de cupones */}
+              <Route path="/admin/eventos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminEventos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de eventos */}
+              <Route path="/admin/duplicados" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDuplicadosPage /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de duplicados */}
               
               {/* Rutas de resultado de pago */}
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
