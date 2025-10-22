@@ -562,9 +562,13 @@ const AdminPage: React.FC = () => {
 
         {/* Estadísticas */}
         <div className="admin-stats">
-          <div className="stat-card">
-            <h3>Total Items</h3>
+          <div 
+            className="stat-card"
+            title="Productos base + Variantes"
+          >
+            <h3>Total items</h3>
             <span className="stat-number">{adminItems.length}</span>
+            <div className="stat-subtitle">Productos + Variantes</div>
           </div>
           {/* 🆕 Total real y duplicados */}
           <div 
@@ -587,13 +591,21 @@ const AdminPage: React.FC = () => {
             <span className="stat-number">{typeof dupExcess === 'number' ? dupExcess : '-'}</span>
             <div className="stat-subtitle">Click para ver detalles</div>
           </div>
-          <div className="stat-card">
-            <h3>Productos</h3>
+          <div 
+            className="stat-card"
+            title="Solo publicaciones base (sin variantes)"
+          >
+            <h3>Total productos</h3>
             <span className="stat-number">{adminItems.filter(item => !item.esVariante).length}</span>
+            <div className="stat-subtitle">Solo productos base</div>
           </div>
-          <div className="stat-card">
-            <h3>Variantes</h3>
+          <div 
+            className="stat-card"
+            title="Cada variante individual"
+          >
+            <h3>Total variantes</h3>
             <span className="stat-number">{adminItems.filter(item => item.esVariante).length}</span>
+            <div className="stat-subtitle">Solo variantes</div>
           </div>
           <div className="stat-card">
             <h3>Sin Stock</h3>
