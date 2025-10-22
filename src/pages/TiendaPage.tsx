@@ -8,6 +8,9 @@ import '../styles/categoryFilter.css'
 import '../styles/pagination.css'
 import '../styles/tienda-improved.css'
 
+const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
+const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
+
 // Mapeo de categorías de ML a categorías GENERALES
 const mapeoCategorias: Record<string, string> = {
   // 📚 E-READERS Y KINDLE
@@ -372,6 +375,62 @@ const TiendaMLPage: React.FC = () => {
   const [isChangingPage, setIsChangingPage] = useState(false)
   
   const { addToCart } = useCart()
+
+  // 🔍 Efecto para actualizar searchQuery cuando cambie el parámetro de la URL
+  useEffect(() => {
+    // Cargar categorías desde backend para alinear con el header
+    const loadCategoriesFromBackend = async () => {
+      try {
+        const urlBase = `${API_BASE_URL}/ml/categories/distinct`
+        const url1 = `${urlBase}?onlyActive=true&requireImage=true&onlyInStock=true&_ts=${Date.now()}`
+        const res1 = await fetch(url1, { cache: 'no-store', headers: { Accept: 'application/json' } })
+        const json1 = await res1.json()
+        let cats: Array<{ category_id: string, count: number }> = Array.isArray(json1?.categories) ? json1.categories : []
+        if (!cats.length) {
+          const url2 = `${urlBase}?onlyActive=false&requireImage=true&onlyInStock=false&_ts=${Date.now()}`
+          const res2 = await fetch(url2, { cache: 'no-store', headers: { Accept: 'application/json' } })
+          const json2 = await res2.json()
+          cats = Array.isArray(json2?.categories) ? json2.categories : []
+        }
+        const mapCount = new Map<string, number>()
+        for (const c of cats) {
+          const slug = (mapeoCategorias as any)[c.category_id] || 'otros'
+          mapCount.set(slug, (mapCount.get(slug) || 0) + Number(c.count || 0))
+        }
+        const entries = Array.from(mapCount.entries()).map(([id, count]) => ({ id, count, name: obtenerNombreCategoria(id) }))
+        entries.sort((a, b) => (b.count || 0) - (a.count || 0) || a.name.localeCompare(b.name))
+        setCategorias([{ id: 'mostrar-todo', name: 'Mostrar Todo', count: entries.reduce((s, e) => s + (e.count || 0), 0) }, ...entries])
+      } catch {
+        // ignorar errores; la UI seguirá usando categorías derivadas de items
+      }
+    }
+    loadCategoriesFromBackend()
+  }, [])
+
+  // Mantener contadores sincronizados con los items cargados (sin perder categorías del backend)
+  useEffect(() => {
+    const counts = new Map<string, number>()
+    for (const item of itemsTienda) {
+      const id = item.categoria || 'otros'
+      counts.set(id, (counts.get(id) || 0) + 1)
+    }
+    const total = Array.from(counts.values()).reduce((a, b) => a + b, 0)
+    const existing = new Map(categorias.map(c => [c.id, c]))
+    // Actualizar counts en existentes
+    const updated: {id: string, name: string, count?: number}[] = []
+    for (const c of categorias) {
+      if (c.id === 'mostrar-todo') continue
+      updated.push({ id: c.id, name: c.name, count: counts.get(c.id) || 0 })
+    }
+    // Agregar categorías nuevas detectadas en items y que no estaban
+    for (const [id, count] of counts.entries()) {
+      if (!existing.has(id)) {
+        updated.push({ id, name: obtenerNombreCategoria(id), count })
+      }
+    }
+    updated.sort((a, b) => (b.count || 0) - (a.count || 0) || a.name.localeCompare(b.name))
+    setCategorias([{ id: 'mostrar-todo', name: 'Mostrar Todo', count: total }, ...updated])
+  }, [itemsTienda])
 
   // 🔍 Efecto para actualizar searchQuery cuando cambie el parámetro de la URL
   useEffect(() => {
