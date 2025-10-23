@@ -63,7 +63,10 @@ class ProductsCacheService {
   }
 
   // 🆕 Paginado desde servidor
-  async getProductsPage(params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused'; q?: string; categoryIds?: string | string[] }): Promise<{ total: number; items: ProductoML[] }> {
+  async getProductsPage(
+    params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused'; q?: string; categoryIds?: string | string[] },
+    preferNoFields?: boolean
+  ): Promise<{ total: number; items: ProductoML[] }> {
     const buildQS = (omitFields = false) => {
       const qs = new URLSearchParams()
       qs.set('limit', String(params.limit))
@@ -79,12 +82,11 @@ class ProductsCacheService {
       return qs
     }
 
-    // Primer intento: con fields (más eficiente)
-    let response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(false).toString()}`)
+    // Estrategia: si preferNoFields, intentamos primero sin fields; si no, con fields primero
+    let response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(!!preferNoFields).toString()}`)
     if (!response.ok) {
-      // Fallback: reintentar sin fields por posibles problemas de proyección en el backend
       try {
-        response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(true).toString()}`)
+        response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(!preferNoFields).toString()}`)
       } catch {}
     }
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
@@ -125,7 +127,10 @@ class ProductsCacheService {
   }
 
   // 🆕 Productos por categorías ML (usa nuevo endpoint backend)
-  async getProductsByCategories(params: { categoryIds: string | string[]; limit?: number; offset?: number; fields?: string; status?: 'all' | 'active' | 'paused' }): Promise<{ total: number; items: ProductoML[] }> {
+  async getProductsByCategories(
+    params: { categoryIds: string | string[]; limit?: number; offset?: number; fields?: string; status?: 'all' | 'active' | 'paused' },
+    preferNoFields?: boolean
+  ): Promise<{ total: number; items: ProductoML[] }> {
     const qp = new URLSearchParams()
     const csv = Array.isArray(params.categoryIds) ? params.categoryIds.join(',') : params.categoryIds
     qp.set('categoryIds', csv)
@@ -134,7 +139,19 @@ class ProductsCacheService {
     if (params.fields) qp.set('fields', params.fields)
     if (params.status && params.status !== 'all') qp.set('status', params.status)
     qp.set('_ts', String(Date.now()))
-    const response = await fetch(`${API_BASE_URL}/ml/categories/productos?${qp.toString()}`)
+    const url = `${API_BASE_URL}/ml/categories/productos?${qp.toString()}`
+    // Intento respetando preferNoFields: si está activo, quitamos fields del query
+    const urlWithoutFields = (() => {
+      const q2 = new URLSearchParams(qp)
+      q2.delete('fields')
+      return `${API_BASE_URL}/ml/categories/productos?${q2.toString()}`
+    })()
+    let response = await fetch(preferNoFields ? urlWithoutFields : url)
+    if (!response.ok) {
+      try {
+        response = await fetch(preferNoFields ? url : urlWithoutFields)
+      } catch {}
+    }
     if (!response.ok) throw new Error('Error obteniendo productos por categoría')
     const data = await response.json()
     if (typeof data?.total === 'number' && Array.isArray(data?.items)) {

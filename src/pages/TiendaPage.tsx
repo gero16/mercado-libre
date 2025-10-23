@@ -379,6 +379,7 @@ const TiendaMLPage: React.FC = () => {
   // 🔎 Modo búsqueda en servidor (trae resultados de toda la BD)
   const [isServerSearch, setIsServerSearch] = useState(false)
   const [serverTotalItems, setServerTotalItems] = useState(0)
+  const [isFetchingResults, setIsFetchingResults] = useState(false)
   
   const { addToCart } = useCart()
 
@@ -451,6 +452,7 @@ const TiendaMLPage: React.FC = () => {
   useEffect(() => {
     const newCategory = (location.state as any)?.categoryFilter
     if (newCategory && newCategory !== categoryFilter) {
+      setIsFetchingResults(true)
       setIsChangingPage(true)
       setCategoryFilter(newCategory)
       setCurrentPage(1)
@@ -494,7 +496,7 @@ const TiendaMLPage: React.FC = () => {
         'variantes.color','variantes.size','variantes.price','variantes.stock','variantes.images.url',
         'descuento','descuento_ml.original_price','sold_quantity','health'
       ].join(',')
-      const { items } = await productsCache.getProductsPage({ limit, offset, fields: FIELDS, status: 'all' })
+      const { items } = await productsCache.getProductsPage({ limit, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
       const endFetch = performance.now()
       console.log(`✅ Servidor respondió en: ${(endFetch - startFetch).toFixed(0)}ms`)
       return Array.isArray(items) ? items : []
@@ -521,11 +523,11 @@ const TiendaMLPage: React.FC = () => {
         ? Object.entries(mapeoCategorias).filter(([mlCat, slug]) => slug === categorySlug).map(([mlCat]) => mlCat)
         : []
       if (ids.length > 0) {
-        const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' })
+        const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
         productos = res.items
         total = res.total
       } else {
-        const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query })
+        const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query }, /*preferNoFields*/ true)
         productos = res.items
         total = res.total
       }
@@ -929,7 +931,10 @@ const TiendaMLPage: React.FC = () => {
       return
     }
     setIsServerSearch(true)
+    let cancelled = false
     const handle = setTimeout(async () => {
+      setIsFetchingResults(true)
+      console.log('⏳ Cargando resultados (server search)...')
       const { items, total } = await fetchServerSearch(1, itemsPerPage, q, categoryFilter)
       // Aplicar filtros adicionales sobre resultados del servidor si están activos
       let filtered = items
@@ -937,13 +942,16 @@ const TiendaMLPage: React.FC = () => {
       filtered = filtered.filter(i => i.price >= priceFilter)
       if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
       if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
-      setPaginatedItems(filtered)
-      const totalCalc = Math.max(total, filtered.length)
-      setServerTotalItems(totalCalc)
-      setTotalPages(Math.max(1, Math.ceil(totalCalc / itemsPerPage)))
-      setCurrentPage(1)
+      if (!cancelled) {
+        setPaginatedItems(filtered)
+        const totalCalc = Math.max(total, filtered.length)
+        setServerTotalItems(totalCalc)
+        setTotalPages(Math.max(1, Math.ceil(totalCalc / itemsPerPage)))
+        setCurrentPage(1)
+        setIsFetchingResults(false)
+      }
     }, 300)
-    return () => clearTimeout(handle)
+    return () => { cancelled = true; clearTimeout(handle); setIsFetchingResults(false) }
   }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter])
 
   const handleProductClick = (item: ItemTienda) => {
@@ -995,6 +1003,7 @@ const TiendaMLPage: React.FC = () => {
   }
 
   const handleCategoryFilter = (categoryId: string) => {
+    setIsFetchingResults(true)
     setIsChangingPage(true)
     setCategoryFilter(categoryId)
     setCurrentPage(1)
@@ -1007,6 +1016,7 @@ const TiendaMLPage: React.FC = () => {
   }
 
   const handleSearchChange = (query: string) => {
+    setIsFetchingResults(true)
     setSearchQuery(query)
     setCurrentPage(1) // Reset a la primera página cuando se busca
   }
@@ -1029,6 +1039,8 @@ const TiendaMLPage: React.FC = () => {
     }, 300)
     // Si estamos en modo servidor, cargar la página solicitada
     if (isServerSearch) {
+      setIsFetchingResults(true)
+      console.log('⏳ Paginando (server)...')
       fetchServerSearch(page, itemsPerPage, searchQuery.trim(), categoryFilter).then(({ items }) => {
         let filtered = items
         if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
@@ -1036,7 +1048,7 @@ const TiendaMLPage: React.FC = () => {
         if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
         if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
         setPaginatedItems(filtered)
-      })
+      }).finally(() => setIsFetchingResults(false))
     }
   }
 
@@ -1044,6 +1056,8 @@ const TiendaMLPage: React.FC = () => {
     setItemsPerPage(items)
     setCurrentPage(1) // Reset a la primera página
     if (isServerSearch) {
+      setIsFetchingResults(true)
+      console.log('⏳ Cambiando items por página (server)...')
       fetchServerSearch(1, items, searchQuery.trim(), categoryFilter).then(({ items: list, total }) => {
         let filtered = list
         if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
@@ -1053,7 +1067,7 @@ const TiendaMLPage: React.FC = () => {
         setPaginatedItems(filtered)
         const totalCalc = Math.max(total, filtered.length)
         setTotalPages(Math.max(1, Math.ceil(totalCalc / items)))
-      })
+      }).finally(() => setIsFetchingResults(false))
     }
   }
 
@@ -1426,7 +1440,33 @@ const TiendaMLPage: React.FC = () => {
         </div>
 
         {/* Items de la tienda */}
-        <div className="productos" style={{ position: 'relative' }}>
+        <div className="productos" style={{ position: 'relative', minHeight: (isFetchingResults || isChangingPage) ? 300 : undefined }}>
+          {(isFetchingResults || isChangingPage) && (
+            <div 
+              className="loading-overlay"
+              style={{ 
+                position: 'absolute',
+                top: "30%",
+                left: "50%",
+                right: 0,
+                bottom: 0,
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(2px)',
+                zIndex: 2
+              }}
+            >
+              <div className="loading-spinner" style={{ width: 24, height: 24, border: '3px solid #f3f3f3', borderTop: '3px solid #3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              <span className="loading-text" style={{ color: '#374151', fontSize: 14, fontWeight: 600 }}>Cargando resultados...</span>
+            </div>
+          )}
+          {(isFetchingResults || isChangingPage) && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd)', opacity: 0.9, zIndex: 1001 }} />
+          )}
           {/* Indicador de carga cuando se cambia de página */}
           {isChangingPage && (
             <div style={{
