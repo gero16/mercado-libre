@@ -63,16 +63,30 @@ class ProductsCacheService {
   }
 
   // 🆕 Paginado desde servidor
-  async getProductsPage(params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused'; q?: string }): Promise<{ total: number; items: ProductoML[] }> {
-    const qp = new URLSearchParams()
-    qp.set('limit', String(params.limit))
-    // El backend espera "offset" (además de "skip" opcional)
-    qp.set('offset', String(params.offset))
-    if (params.fields) qp.set('fields', params.fields)
-    if (params.status && params.status !== 'all') qp.set('status', params.status)
-    if (params.q && params.q.trim().length > 0) qp.set('q', params.q.trim())
-    qp.set('_ts', String(Date.now()))
-    const response = await fetch(`${API_BASE_URL}/ml/productos?${qp.toString()}`)
+  async getProductsPage(params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused'; q?: string; categoryIds?: string | string[] }): Promise<{ total: number; items: ProductoML[] }> {
+    const buildQS = (omitFields = false) => {
+      const qs = new URLSearchParams()
+      qs.set('limit', String(params.limit))
+      qs.set('offset', String(params.offset))
+      if (!omitFields && params.fields) qs.set('fields', params.fields)
+      if (params.status && params.status !== 'all') qs.set('status', params.status)
+      if (params.q && params.q.trim().length > 0) qs.set('q', params.q.trim())
+      if (params.categoryIds) {
+        const csv = Array.isArray(params.categoryIds) ? params.categoryIds.join(',') : params.categoryIds
+        if (csv.trim().length > 0) qs.set('categoryIds', csv)
+      }
+      qs.set('_ts', String(Date.now()))
+      return qs
+    }
+
+    // Primer intento: con fields (más eficiente)
+    let response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(false).toString()}`)
+    if (!response.ok) {
+      // Fallback: reintentar sin fields por posibles problemas de proyección en el backend
+      try {
+        response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(true).toString()}`)
+      } catch {}
+    }
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
     const data = await response.json()
 
@@ -106,6 +120,27 @@ class ProductsCacheService {
 
     // Fallback seguro
     const items = Array.isArray(data?.items) ? data.items : []
+    const total = typeof data?.total === 'number' ? data.total : items.length
+    return { total, items }
+  }
+
+  // 🆕 Productos por categorías ML (usa nuevo endpoint backend)
+  async getProductsByCategories(params: { categoryIds: string | string[]; limit?: number; offset?: number; fields?: string; status?: 'all' | 'active' | 'paused' }): Promise<{ total: number; items: ProductoML[] }> {
+    const qp = new URLSearchParams()
+    const csv = Array.isArray(params.categoryIds) ? params.categoryIds.join(',') : params.categoryIds
+    qp.set('categoryIds', csv)
+    if (typeof params.limit === 'number') qp.set('limit', String(params.limit))
+    if (typeof params.offset === 'number') qp.set('offset', String(params.offset))
+    if (params.fields) qp.set('fields', params.fields)
+    if (params.status && params.status !== 'all') qp.set('status', params.status)
+    qp.set('_ts', String(Date.now()))
+    const response = await fetch(`${API_BASE_URL}/ml/categories/productos?${qp.toString()}`)
+    if (!response.ok) throw new Error('Error obteniendo productos por categoría')
+    const data = await response.json()
+    if (typeof data?.total === 'number' && Array.isArray(data?.items)) {
+      return { total: data.total, items: data.items }
+    }
+    const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
     const total = typeof data?.total === 'number' ? data.total : items.length
     return { total, items }
   }

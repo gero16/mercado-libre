@@ -374,6 +374,11 @@ const TiendaMLPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
   const [isChangingPage, setIsChangingPage] = useState(false)
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false)
+
+  // 🔎 Modo búsqueda en servidor (trae resultados de toda la BD)
+  const [isServerSearch, setIsServerSearch] = useState(false)
+  const [serverTotalItems, setServerTotalItems] = useState(0)
   
   const { addToCart } = useCart()
 
@@ -496,6 +501,96 @@ const TiendaMLPage: React.FC = () => {
     } catch (error) {
       console.error('❌ Error cargando productos paginados:', error)
       return []
+    }
+  }
+
+  // 🚀 Búsqueda completa en servidor (toma toda la DB usando q)
+  const fetchServerSearch = async (page: number, perPage: number, query: string, categorySlug?: string): Promise<{ items: ItemTienda[], total: number }> => {
+    const FIELDS = [
+      'ml_id','_id','title','price','images.url','main_image','available_quantity',
+      'status','category_id','catalog_product_id','tipo_venta',
+      'variantes.color','variantes.size','variantes.price','variantes.stock','variantes.images.url',
+      'descuento','descuento_ml.original_price','sold_quantity','health'
+    ].join(',')
+    const offset = (page - 1) * perPage
+    try {
+      // Si viene categoría general, traducir a categoryIds de ML y utilizar endpoint específico
+      let productos: ProductoML[] = []
+      let total = 0
+      const ids = categorySlug && categorySlug !== 'mostrar-todo'
+        ? Object.entries(mapeoCategorias).filter(([mlCat, slug]) => slug === categorySlug).map(([mlCat]) => mlCat)
+        : []
+      if (ids.length > 0) {
+        const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' })
+        productos = res.items
+        total = res.total
+      } else {
+        const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query })
+        productos = res.items
+        total = res.total
+      }
+      // Reusar lógica de construcción de items (versión compacta del bloque existente)
+      const items: ItemTienda[] = []
+      const list = dedupeProductsByCatalog(productos)
+      list.forEach(producto => {
+        const categoria = obtenerCategoria(producto.category_id)
+        const isPaused = producto.status === 'paused'
+        if (producto.variantes && producto.variantes.length > 0) {
+          const variantesUnicas = producto.variantes.reduce((unique: Variante[], variante) => {
+            if (!unique.some(v => v.color === variante.color)) unique.push(variante)
+            return unique
+          }, [])
+          variantesUnicas.forEach(variante => {
+            const imagenVariante = (variante.images && variante.images[0]?.url) || producto.images[0]?.url || producto.main_image
+            const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0)
+            const precioBase = variante.price || producto.price
+            const tieneDescuento = producto.descuento?.activo || false
+            const porcentaje = producto.descuento?.porcentaje || 0
+            const precioConDescuento = tieneDescuento ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 : precioBase
+            if (imagenVariante) {
+              items.push({
+                id: `${producto.ml_id || producto._id}_${variante.color}`,
+                ml_id: producto.ml_id,
+                title: `${producto.title} - ${variante.color || ''}`.trim(),
+                price: precioConDescuento,
+                image: getOptimizedImageUrl(imagenVariante),
+                stock: effectiveStock,
+                esVariante: true,
+                variante,
+                productoPadre: producto,
+                categoria,
+                isPaused
+              })
+            }
+          })
+        } else {
+          const effectiveStock = isPaused ? 0 : producto.available_quantity
+          const imagenPrincipal = producto.images[0]?.url || producto.main_image
+          const precioBase = producto.price
+          const tieneDescuento = producto.descuento?.activo || false
+          const porcentaje = producto.descuento?.porcentaje || 0
+          const precioConDescuento = tieneDescuento ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 : precioBase
+          if (imagenPrincipal) {
+            items.push({
+              id: producto.ml_id || producto._id,
+              ml_id: producto.ml_id,
+              title: producto.title,
+              price: precioConDescuento,
+              image: getOptimizedImageUrl(imagenPrincipal),
+              stock: effectiveStock,
+              esVariante: false,
+              productoPadre: producto,
+              categoria,
+              isPaused
+            })
+          }
+        }
+      })
+      const itemsUnicos = dedupeItemsByCatalog(items)
+      return { items: itemsUnicos, total }
+    } catch (e) {
+      console.error('❌ Error en búsqueda servidor:', e)
+      return { items: [], total: 0 }
     }
   }
 
@@ -644,6 +739,7 @@ const TiendaMLPage: React.FC = () => {
       
       // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI) DESDE EL SERVIDOR
       console.log(`🔄 Cargando productos restantes en segundo plano...`)
+      setIsBackgroundLoading(true)
       
       setTimeout(async () => {
         if (!mounted) return
@@ -758,14 +854,16 @@ const TiendaMLPage: React.FC = () => {
           console.log(`✅ Productos restantes cargados en: ${(backgroundEnd - backgroundStart).toFixed(0)}ms`)
           
           console.log(`🎉 TODOS los productos cargados (${allRemainingProducts.length + 50} total)`)
+          setIsBackgroundLoading(false)
         }, 100) // Pequeño delay para no bloquear UI
     }
     loadProducts()
     return () => { mounted = false }
   }, [])
 
-  // Filtrar items y aplicar paginación
+  // Filtrar items y aplicar paginación (modo local)
   useEffect(() => {
+    if (isServerSearch) return
     let filtered = itemsTienda
 
     const normalize = (s: string) => s
@@ -818,7 +916,35 @@ const TiendaMLPage: React.FC = () => {
     const itemsForCurrentPage = filtered.slice(startIndex, endIndex)
     
     setPaginatedItems(itemsForCurrentPage)
-  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, pedidoFilter, currentPage, itemsPerPage])
+  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, pedidoFilter, currentPage, itemsPerPage, isServerSearch])
+
+  // Debounce y carga de búsqueda/categoría modo servidor
+  useEffect(() => {
+    const q = searchQuery.trim()
+    const useServer = q !== '' || (categoryFilter !== 'mostrar-todo')
+    if (!useServer) {
+      setIsServerSearch(false)
+      setServerTotalItems(0)
+      setCurrentPage(1)
+      return
+    }
+    setIsServerSearch(true)
+    const handle = setTimeout(async () => {
+      const { items, total } = await fetchServerSearch(1, itemsPerPage, q, categoryFilter)
+      // Aplicar filtros adicionales sobre resultados del servidor si están activos
+      let filtered = items
+      if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
+      filtered = filtered.filter(i => i.price >= priceFilter)
+      if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
+      if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
+      setPaginatedItems(filtered)
+      const totalCalc = Math.max(total, filtered.length)
+      setServerTotalItems(totalCalc)
+      setTotalPages(Math.max(1, Math.ceil(totalCalc / itemsPerPage)))
+      setCurrentPage(1)
+    }, 300)
+    return () => clearTimeout(handle)
+  }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter])
 
   const handleProductClick = (item: ItemTienda) => {
     // Usar ml_id en lugar de _id para buscar el producto
@@ -901,11 +1027,34 @@ const TiendaMLPage: React.FC = () => {
     setTimeout(() => {
       setIsChangingPage(false)
     }, 300)
+    // Si estamos en modo servidor, cargar la página solicitada
+    if (isServerSearch) {
+      fetchServerSearch(page, itemsPerPage, searchQuery.trim(), categoryFilter).then(({ items }) => {
+        let filtered = items
+        if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
+        filtered = filtered.filter(i => i.price >= priceFilter)
+        if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
+        if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
+        setPaginatedItems(filtered)
+      })
+    }
   }
 
   const handleItemsPerPageChange = (items: number) => {
     setItemsPerPage(items)
     setCurrentPage(1) // Reset a la primera página
+    if (isServerSearch) {
+      fetchServerSearch(1, items, searchQuery.trim(), categoryFilter).then(({ items: list, total }) => {
+        let filtered = list
+        if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
+        filtered = filtered.filter(i => i.price >= priceFilter)
+        if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
+        if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
+        setPaginatedItems(filtered)
+        const totalCalc = Math.max(total, filtered.length)
+        setTotalPages(Math.max(1, Math.ceil(totalCalc / items)))
+      })
+    }
   }
 
 
