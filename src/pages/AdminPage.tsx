@@ -70,7 +70,7 @@ const AdminPage: React.FC = () => {
 
   // Config paginación servidor
   const [serverTotal, setServerTotal] = useState(0)
-  const [serverLimit, setServerLimit] = useState(100)
+  const [serverLimit, setServerLimit] = useState(60)
   const [serverOffset, setServerOffset] = useState(0)
   const [serverLoading, setServerLoading] = useState(false)
   const didFallback = useRef(false)
@@ -205,21 +205,21 @@ const AdminPage: React.FC = () => {
         if (Array.isArray(items) && items.length > 0) {
           items.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
         }
-        // Fallback a modo antiguo si el backend activo no soporta paginado y devolvió vacío
-        if (reset && mapped.length === 0 && !didFallback.current) {
-          console.log('[Admin] Fallback: cargando todos los productos (modo antiguo)')
-          try {
-            const all = await productsCache.getProducts()
-            setServerTotal(Array.isArray(all) ? all.length : 0)
-            const slice = Array.isArray(all) ? all.slice(0, serverLimit) : []
-            mapped = []
-            slice.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
-            didFallback.current = true
-            console.log('[Admin] Fallback mapped count', { mappedCount: mapped.length })
-          } catch (fe) {
-            console.error('[Admin] Fallback error', fe)
-          }
-        }
+        // Fallback desactivado para evitar demoras enormes y 404
+        // if (reset && mapped.length === 0 && !didFallback.current) {
+        //   console.log('[Admin] Fallback: cargando todos los productos (modo antiguo)')
+        //   try {
+        //     const all = await productsCache.getProducts()
+        //     setServerTotal(Array.isArray(all) ? all.length : 0)
+        //     const slice = Array.isArray(all) ? all.slice(0, serverLimit) : []
+        //     mapped = []
+        //     slice.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
+        //     didFallback.current = true
+        //     console.log('[Admin] Fallback mapped count', { mappedCount: mapped.length })
+        //   } catch (fe) {
+        //     console.error('[Admin] Fallback error', fe)
+        //   }
+        // }
         console.log('[Admin] Mapped items count', { mappedCount: mapped.length, reset })
         setAdminItems(prev => reset ? mapped : [...prev, ...mapped])
       } catch (e) {

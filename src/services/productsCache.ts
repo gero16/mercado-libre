@@ -36,6 +36,9 @@ class ProductsCacheService {
 
     try {
       const response = await fetch(`${API_BASE_URL}/ml/productos?_ts=${Date.now()}`)
+      if (!response.ok) {
+        throw new Error(`Error obteniendo productos (${response.status})`)
+      }
       const data: ProductoML[] = await response.json()
       
       this.cache = data
@@ -158,10 +161,30 @@ class ProductsCacheService {
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
     const data = await response.json()
     if (typeof data === 'object' && data && Array.isArray(data.items) && typeof data.total === 'number') {
+      // Si admin devuelve vacío, hacer fallback a público paginado
+      if ((data.total || 0) === 0 && data.items.length === 0) {
+        return this.getProductsPage({
+          limit: params.limit,
+          offset: params.offset,
+          fields: params.fields,
+          status: params.status,
+          q: params.q
+        }, preferNoFields)
+      }
       return { total: data.total, items: data.items }
     }
     const items = Array.isArray(data?.items) ? data.items : []
     const total = typeof data?.total === 'number' ? data.total : items.length
+    // Fallback a público si sigue vacío
+    if (total === 0 && items.length === 0) {
+      return this.getProductsPage({
+        limit: params.limit,
+        offset: params.offset,
+        fields: params.fields,
+        status: params.status,
+        q: params.q
+      }, preferNoFields)
+    }
     return { total, items }
   }
 
