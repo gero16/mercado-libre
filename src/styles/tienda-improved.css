@@ -293,6 +293,16 @@
   height: auto !important;
 }
 
+/* Evitar estirado vertical cuando hay pocos productos */
+.pagina-principal .productos {
+  align-items: start !important;           /* que las celdas no se estiren en alto */
+  grid-auto-rows: max-content !important;  /* cada fila tan alta como su contenido */
+}
+.pagina-principal .producto {
+  align-self: start !important;            /* cada tarjeta se alinea al inicio y no rellena */
+  height: auto !important;                 /* nunca 100% del contenedor */
+}
+
 .producto:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
