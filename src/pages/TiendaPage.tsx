@@ -1320,8 +1320,8 @@ const TiendaMLPage: React.FC = () => {
                     color: '#666',
                     fontSize: '12px'
                   }}>
-                    {filteredItems.length > 0 
-                      ? `${filteredItems.length} resultado${filteredItems.length !== 1 ? 's' : ''}`
+                    {(isServerSearch ? serverTotalItems : filteredItems.length) > 0 
+                      ? `${(isServerSearch ? serverTotalItems : filteredItems.length)} resultado${(isServerSearch ? serverTotalItems : filteredItems.length) !== 1 ? 's' : ''}`
                       : 'Sin resultados'
                     }
                   </div>
