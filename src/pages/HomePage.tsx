@@ -151,14 +151,10 @@ const HomePage: React.FC = () => {
       {/* Si no hay evento activo, se omitirá la promo dinámica */}
       
       {/* Sección de productos destacados - Carga solo cuando esté cerca del viewport */}
-      <LazySection 
-        fallback={<ProductsSkeleton title="⭐ Productos Destacados" />}
-        minHeight="500px"
-      >
-        <Suspense fallback={<ProductsSkeleton title="⭐ Productos Destacados" />}>
-          <FeaturedProducts limit={8} />
-        </Suspense>
-      </LazySection>
+      {/* Cargar destacados sin lazy para que aparezcan más rápido */}
+      <Suspense fallback={<ProductsSkeleton title="⭐ Productos Destacados" />}>
+        <FeaturedProducts limit={12} />
+      </Suspense>
       
       {/* Sección de productos con descuento - Carga solo cuando esté cerca del viewport */}
       <LazySection 

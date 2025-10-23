@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { ProductoML } from '../types'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/api'
 
 interface BestSellingProductsProps {
   limit?: number
@@ -14,22 +15,14 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        // 🚀 Usar endpoint absoluto (evita 500 por proxy local) y aceptar JSON
-        const response = await fetch(`https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}`, {
-          headers: { Accept: 'application/json' },
-          cache: 'no-store'
-        })
+        // 🚀 Usar endpoint dedicado de más vendidos desde backend
+        const response = await fetch(`${API_BASE_URL}/ml/productos/bestsellers?limit=${limit}`, { headers: { Accept: 'application/json' }, cache: 'no-store' })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const data = await response.json()
         
-        // El endpoint con paginación devuelve {productos: [], pagination: {}}
-        const productos = data.productos || data
-        
-        // Filtrar y ordenar solo lo necesario
-        const productosMasVendidos = productos
-          .filter((p: ProductoML) => p.status !== 'paused' && (p.sold_quantity || 0) > 0)
-          .sort((a: ProductoML, b: ProductoML) => (b.sold_quantity || 0) - (a.sold_quantity || 0))
-          .slice(0, limit)
+        const productos = Array.isArray(data) ? data : (data.productos || data.items || [])
+        // Validación mínima
+        const productosMasVendidos = productos.filter((p: ProductoML) => p && p.status !== 'paused' && (p.sold_quantity || 0) > 0).slice(0, limit)
         
         console.log('🏆 Productos más vendidos:', productosMasVendidos.length, 'productos')
         

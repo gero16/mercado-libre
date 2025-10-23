@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { ProductoML } from '../types'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../config/api'
 
 interface FeaturedProductsProps {
   limit?: number
@@ -14,25 +15,21 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        // 🚀 Usar filtro de destacados en backend
-        const response = await fetch(
-          `https://poppy-shop-production.up.railway.app/ml/productos?destacado=true&status=active&limit=${limit}`
-        )
+        // 🚀 Usar endpoint dedicado de destacados (mezcla manuales y automáticos)
+        const response = await fetch(`${API_BASE_URL}/ml/productos/featured?limit=${limit}`, { headers: { Accept: 'application/json' }, cache: 'no-store' })
         
         if (!response.ok) {
           throw new Error(`Error HTTP: ${response.status}`)
         }
         
         const data = await response.json()
-        const productos = data.productos || data
+        const productos = Array.isArray(data) ? data : (data.productos || data.items || [])
         
         console.log('📦 Estructura de respuesta:', Array.isArray(productos) ? 'Array directo' : 'Objeto anidado')
         console.log('⭐ Total productos obtenidos:', productos.length)
         
-        // 🎯 Backend ya devuelve solo destacados; aplicar validación de stock/pausado
-        const productosDestacadosManuales = productos.filter((p: ProductoML) => 
-          p.status !== 'paused' && p.available_quantity > 0
-        )
+        // 🎯 Validación: ocultar pausados o sin stock
+        const productosDestacadosManuales = productos.filter((p: ProductoML) => p && p.status !== 'paused' && (p.available_quantity || 0) > 0)
         
         console.log('🎯 Productos destacados manualmente:', productosDestacadosManuales.length)
         console.log('📝 Títulos de destacados:', productosDestacadosManuales.map((p: ProductoML) => p.title))
