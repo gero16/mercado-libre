@@ -1,4 +1,5 @@
 import { ProductoML } from '../types'
+import { AuthService } from './auth'
 
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
@@ -121,6 +122,44 @@ class ProductsCacheService {
     }
 
     // Fallback seguro
+    const items = Array.isArray(data?.items) ? data.items : []
+    const total = typeof data?.total === 'number' ? data.total : items.length
+    return { total, items }
+  }
+
+  // 🆕 Paginado para Admin (endpoint protegido)
+  async getAdminProductsPage(
+    params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused'; q?: string },
+    preferNoFields?: boolean
+  ): Promise<{ total: number; items: ProductoML[] }> {
+    const qs = new URLSearchParams()
+    qs.set('limit', String(params.limit))
+    qs.set('offset', String(params.offset))
+    if (params.fields) qs.set('fields', params.fields)
+    if (params.status && params.status !== 'all') qs.set('status', params.status)
+    if (params.q && params.q.trim().length > 0) qs.set('q', params.q.trim())
+    qs.set('_ts', String(Date.now()))
+
+    const headers: Record<string, string> = {
+      ...(AuthService.getAuthHeader()),
+    }
+    // Intentar con/sin fields según preferNoFields
+    const makeUrl = (omitFields: boolean) => {
+      const q = new URLSearchParams(qs)
+      if (omitFields) q.delete('fields')
+      return `${API_BASE_URL}/ml/admin/productos?${q.toString()}`
+    }
+    let response = await fetch(makeUrl(!!preferNoFields), { headers })
+    if (!response.ok) {
+      try {
+        response = await fetch(makeUrl(!preferNoFields), { headers })
+      } catch {}
+    }
+    if (!response.ok) throw new Error('Error obteniendo productos paginados')
+    const data = await response.json()
+    if (typeof data === 'object' && data && Array.isArray(data.items) && typeof data.total === 'number') {
+      return { total: data.total, items: data.items }
+    }
     const items = Array.isArray(data?.items) ? data.items : []
     const total = typeof data?.total === 'number' ? data.total : items.length
     return { total, items }

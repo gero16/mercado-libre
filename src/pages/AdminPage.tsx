@@ -192,7 +192,7 @@ const AdminPage: React.FC = () => {
       try {
         setServerLoading(true)
         console.log('[Admin] Fetching page', { limit: serverLimit, offset: serverOffset, status: filterStatus, q: searchTerm, fields: SERVER_FIELDS })
-        const { total, items } = await productsCache.getProductsPage({
+        const { total, items } = await productsCache.getAdminProductsPage({
           limit: serverLimit,
           offset: serverOffset,
           fields: SERVER_FIELDS,
@@ -266,7 +266,7 @@ const AdminPage: React.FC = () => {
       let allMapped: AdminItem[] = []
       let total = 0
       for (;;) {
-        const { total: t, items } = await productsCache.getProductsPage({
+        const { total: t, items } = await productsCache.getAdminProductsPage({
           limit,
           offset,
           fields: SERVER_FIELDS,
@@ -414,12 +414,14 @@ const AdminPage: React.FC = () => {
       const nuevoEstado = !item.destacado
       
       // Llamar al endpoint para actualizar en el backend
+      const token = AuthService.getToken() || ''
       const response = await fetch(
         `/ml/productos/${item.productId}/destacado`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
           },
           body: JSON.stringify({ destacado: nuevoEstado })
         }
@@ -442,6 +444,55 @@ const AdminPage: React.FC = () => {
     } catch (error) {
       console.error('Error:', error)
       alert('Error al actualizar el producto. Por favor, intenta de nuevo.')
+    }
+  }
+
+  // 🆕 Selección múltiple de productos para destacados
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set())
+
+  const toggleSelectProduct = (item: AdminItem) => {
+    if (item.esVariante) return // solo productos base
+    setSelectedProductIds(prev => {
+      const next = new Set(prev)
+      if (next.has(item.productId)) next.delete(item.productId)
+      else next.add(item.productId)
+      return next
+    })
+  }
+
+  const selectAllCurrentPage = () => {
+    const ids = currentItems.filter(i => !i.esVariante).map(i => i.productId)
+    setSelectedProductIds(new Set(ids))
+  }
+
+  const clearSelection = () => setSelectedProductIds(new Set())
+
+  // 🆕 Batch actualizar destacados
+  const batchSetDestacados = async (destacado: boolean) => {
+    try {
+      const ml_ids = Array.from(selectedProductIds)
+      if (ml_ids.length === 0) {
+        alert('Seleccioná al menos un producto (no variantes).')
+        return
+      }
+      const token = AuthService.getToken() || ''
+      const res = await fetch('/ml/productos/destacado/batch', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ ml_ids, destacado })
+      })
+      if (!res.ok) throw new Error('Error actualizando destacados')
+      // Actualizar estado local
+      setAdminItems(prev => prev.map(i => (
+        selectedProductIds.has(i.productId) && !i.esVariante ? { ...i, destacado } : i
+      )))
+      alert(`Productos ${destacado ? 'marcados' : 'desmarcados'} como destacados`)
+      clearSelection()
+    } catch (e: any) {
+      alert(e?.message || 'Error en actualización masiva de destacados')
     }
   }
 
@@ -639,6 +690,23 @@ const AdminPage: React.FC = () => {
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
             </button>
+          </div>
+
+          {/* 🆕 Acciones para destacados (selección múltiple) */}
+          <div className="featured-batch-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button className="btn-orden" onClick={selectAllCurrentPage} title="Seleccionar productos de esta página">
+              Seleccionar página
+            </button>
+            <button className="btn-orden" onClick={clearSelection} title="Limpiar selección">
+              Limpiar selección
+            </button>
+            <button className="btn-orden" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: 'white' }} onClick={() => batchSetDestacados(true)}>
+              Marcar Destacados
+            </button>
+            <button className="btn-orden" onClick={() => batchSetDestacados(false)}>
+              Quitar Destacados
+            </button>
+            <span style={{ fontSize: 12, color: '#6b7280' }}>Seleccionados: {selectedProductIds.size}</span>
           </div>
         </div>
 
@@ -865,6 +933,17 @@ const AdminPage: React.FC = () => {
                 </div>
                 
                 <div className="product-info">
+                  {/* Checkbox de selección múltiple */}
+                  {!item.esVariante && (
+                    <div style={{ marginBottom: 6 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedProductIds.has(item.productId)}
+                        onChange={() => toggleSelectProduct(item)}
+                      />
+                      <span style={{ marginLeft: 6, fontSize: 12, color: '#6b7280' }}>Seleccionar</span>
+                    </div>
+                  )}
                   <div className="product-main-info">
                     <h3 className={`product-title ${!item.esVariante && item.tieneVariantes ? 'product-base-title' : ''}`}>
                       {item.title} 

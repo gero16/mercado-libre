@@ -14,10 +14,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        // 🆕 Obtener TODOS los productos y filtrar los destacados en el frontend
-        // (Solución temporal mientras el backend se actualiza en Railway)
+        // 🚀 Usar filtro de destacados en backend
         const response = await fetch(
-          `https://poppy-shop-production.up.railway.app/ml/productos`
+          `https://poppy-shop-production.up.railway.app/ml/productos?destacado=true&status=active&limit=${limit}`
         )
         
         if (!response.ok) {
@@ -30,11 +29,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
         console.log('📦 Estructura de respuesta:', Array.isArray(productos) ? 'Array directo' : 'Objeto anidado')
         console.log('⭐ Total productos obtenidos:', productos.length)
         
-        // 🎯 Filtrar SOLO productos marcados manualmente como destacados
+        // 🎯 Backend ya devuelve solo destacados; aplicar validación de stock/pausado
         const productosDestacadosManuales = productos.filter((p: ProductoML) => 
-          p.destacado === true && 
-          p.status !== 'paused' && 
-          p.available_quantity > 0
+          p.status !== 'paused' && p.available_quantity > 0
         )
         
         console.log('🎯 Productos destacados manualmente:', productosDestacadosManuales.length)
