@@ -5,6 +5,7 @@ import ProductSkeleton from '../components/ProductSkeleton'
 import { EventService } from '../services/event'
 import { AuthService } from '../services/auth'
 import { productsCache } from '../services/productsCache'
+import { API_BASE_URL } from '../config/api'
 import { fetchCensus, fetchDuplicates, type CensusResponse } from '../services/diagnostics'
 
 // Interfaz para items de administración
@@ -415,8 +416,10 @@ const AdminPage: React.FC = () => {
       
       // Llamar al endpoint para actualizar en el backend
       const token = AuthService.getToken() || ''
+      // Sin token: usar endpoint público con _id para evitar CastError por ml_id
+      const idForPublicEndpoint = (item as any).id || item.productId
       const response = await fetch(
-        `/ml/productos/${item.productId}/destacado`,
+        `${API_BASE_URL}/ml/productos/${idForPublicEndpoint}/destacado`,
         {
           method: 'PUT',
           headers: {
@@ -443,7 +446,7 @@ const AdminPage: React.FC = () => {
       alert(`Producto ${nuevoEstado ? 'marcado como destacado' : 'desmarcado como destacado'} exitosamente`)
     } catch (error) {
       console.error('Error:', error)
-      alert('Error al actualizar el producto. Por favor, intenta de nuevo.')
+      alert((error as any)?.message || 'Error al actualizar el producto. Por favor, intenta de nuevo.')
     }
   }
 
@@ -476,15 +479,29 @@ const AdminPage: React.FC = () => {
         return
       }
       const token = AuthService.getToken() || ''
-      const res = await fetch('/ml/productos/destacado/batch', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ ml_ids, destacado })
-      })
-      if (!res.ok) throw new Error('Error actualizando destacados')
+      if (token) {
+        const res = await fetch(`${API_BASE_URL}/ml/productos/destacado/batch`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ ml_ids, destacado })
+        })
+        if (!res.ok) throw new Error('Error actualizando destacados')
+      } else {
+        // Fallback sin token: iterar endpoint público por _id
+        const idMap = new Map(adminItems.filter(i => !i.esVariante).map(i => [i.productId, (i as any).id]))
+        const idsToCall = ml_ids.map(ml => idMap.get(ml)).filter(Boolean) as string[]
+        if (idsToCall.length === 0) throw new Error('No se encontraron IDs locales para actualizar')
+        const results = await Promise.allSettled(idsToCall.map(_id => fetch(`${API_BASE_URL}/ml/productos/${_id}/destacado`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destacado })
+        })))
+        const failed = results.filter(r => r.status === 'rejected')
+        if (failed.length > 0) throw new Error(`Fallaron ${failed.length} de ${results.length} actualizaciones`)
+      }
       // Actualizar estado local
       setAdminItems(prev => prev.map(i => (
         selectedProductIds.has(i.productId) && !i.esVariante ? { ...i, destacado } : i
