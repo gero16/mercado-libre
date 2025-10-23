@@ -520,7 +520,7 @@ const TiendaMLPage: React.FC = () => {
       let productos: ProductoML[] = []
       let total = 0
       const ids = categorySlug && categorySlug !== 'mostrar-todo'
-        ? Object.entries(mapeoCategorias).filter(([mlCat, slug]) => slug === categorySlug).map(([mlCat]) => mlCat)
+        ? Object.entries(mapeoCategorias).filter(([, slug]) => slug === categorySlug).map(([mlCat]) => mlCat)
         : []
       if (ids.length > 0) {
         const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
@@ -1441,215 +1441,167 @@ const TiendaMLPage: React.FC = () => {
 
         {/* Items de la tienda */}
         <div className="productos" style={{ position: 'relative', minHeight: (isFetchingResults || isChangingPage) ? 300 : undefined }}>
-          {(isFetchingResults || isChangingPage) && (
-            <div 
-              className="loading-overlay"
-              style={{ 
-                position: 'absolute',
-                top: "30%",
-                left: "50%",
-                right: 0,
-                bottom: 0,
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                background: 'rgba(255,255,255,0.92)',
-                backdropFilter: 'blur(2px)',
-                zIndex: 2
-              }}
-            >
-              <div className="loading-spinner" style={{ width: 24, height: 24, border: '3px solid #f3f3f3', borderTop: '3px solid #3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-              <span className="loading-text" style={{ color: '#374151', fontSize: 14, fontWeight: 600 }}>Cargando resultados...</span>
-            </div>
-          )}
-          {(isFetchingResults || isChangingPage) && (
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd)', opacity: 0.9, zIndex: 1001 }} />
-          )}
-          {/* Indicador de carga cuando se cambia de página */}
-          {isChangingPage && (
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 10,
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              padding: '20px',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              <div style={{
-                width: '20px',
-                height: '20px',
-                border: '2px solid #f3f3f3',
-                borderTop: '2px solid #007bff',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              <span style={{ fontSize: '14px', fontWeight: '500' }}>Cargando productos...</span>
-            </div>
-          )}
-
-          {paginatedItems.map(item => {
-            const tieneDescuento = item.productoPadre?.descuento?.activo
-            const precioOriginal = item.productoPadre?.descuento?.precio_original
-            const porcentajeDescuento = item.productoPadre?.descuento?.porcentaje
-            // Descuento de MercadoLibre
-            const tieneDescuentoML = !!item.productoPadre?.descuento_ml?.original_price
-            const precioOriginalML = item.productoPadre?.descuento_ml?.original_price
-            const porcentajeDescuentoML = precioOriginalML 
-              ? Math.round(((precioOriginalML - item.price) / precioOriginalML) * 100)
-              : 0
-            const productoCerrado = item.productoPadre?.status === 'closed'
-            const sinStock = item.stock === 0
-            
-            return (
-              <div 
-                key={item.id}
-                className="producto centrar-texto"
-                onClick={() => handleProductClick(item)}
-                style={{ 
-                  cursor: 'pointer',
-                  opacity: isChangingPage ? 0.5 : 1,
-                  transition: 'opacity 0.3s ease',
-                  position: 'relative'
-                }}
-              >
-                {(tieneDescuento && porcentajeDescuento || tieneDescuentoML) && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: tieneDescuentoML 
-                      ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)' // Amarillo de MercadoLibre
-                      : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)', // Rojo para descuentos web
-                    color: tieneDescuentoML ? '#000' : 'white',
-                    padding: '8px 15px',
-                    borderRadius: '25px',
-                    fontWeight: '800',
-                    fontSize: '0.9rem',
-                    boxShadow: tieneDescuentoML 
-                      ? '0 4px 15px rgba(255, 230, 0, 0.4)'
-                      : '0 4px 15px rgba(211, 47, 47, 0.4)',
-                    zIndex: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}>
-                    {tieneDescuentoML && <span style={{ fontSize: '0.85rem' }}>ML</span>}
-                    -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
-                  </div>
-                )}
+          {(isFetchingResults || isChangingPage) ? (
+            <ProductSkeleton count={8} />
+          ) : (
+            <>
+              {paginatedItems.map(item => {
+                const tieneDescuento = item.productoPadre?.descuento?.activo
+                const precioOriginal = item.productoPadre?.descuento?.precio_original
+                const porcentajeDescuento = item.productoPadre?.descuento?.porcentaje
+                // Descuento de MercadoLibre
+                const tieneDescuentoML = !!item.productoPadre?.descuento_ml?.original_price
+                const precioOriginalML = item.productoPadre?.descuento_ml?.original_price
+                const porcentajeDescuentoML = precioOriginalML 
+                  ? Math.round(((precioOriginalML - item.price) / precioOriginalML) * 100)
+                  : 0
+                const productoCerrado = item.productoPadre?.status === 'closed'
+                const sinStock = item.stock === 0
                 
-                {productoCerrado && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-                    color: 'white',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontWeight: '700',
-                    fontSize: '0.75rem',
-                    boxShadow: '0 3px 10px rgba(30, 41, 59, 0.4)',
-                    zIndex: 2
-                  }}>
-                    CERRADO
-                  </div>
-                )}
-                
-                {!productoCerrado && sinStock && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-                    color: '#1a1a1a',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontWeight: '700',
-                    fontSize: '0.75rem',
-                    boxShadow: '0 3px 10px rgba(251, 191, 36, 0.4)',
-                    zIndex: 2
-                  }}>
-                    SIN STOCK
-                  </div>
-                )}
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  loading="lazy"
-                  decoding="async"
-                  style={{
-                    willChange: 'auto'
-                  }}
-                />
-                <p>{item.title}</p>
-                
-                {/* Quitar cartel gris inferior; solo mantener badges superiores */}
-                
-                
-                <div style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center',
-                  gap: '5px',
-                  margin: '10px 0'
-                }}>
-                  {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
+                return (
+                  <div 
+                    key={item.id}
+                    className="producto centrar-texto"
+                    onClick={() => handleProductClick(item)}
+                    style={{ 
+                      cursor: 'pointer',
+                      opacity: isChangingPage ? 0.5 : 1,
+                      transition: 'opacity 0.3s ease',
+                      position: 'relative'
+                    }}
+                  >
+                    {(tieneDescuento && porcentajeDescuento || tieneDescuentoML) && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: tieneDescuentoML 
+                          ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)' // Amarillo de MercadoLibre
+                          : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)', // Rojo para descuentos web
+                        color: tieneDescuentoML ? '#000' : 'white',
+                        padding: '8px 15px',
+                        borderRadius: '25px',
+                        fontWeight: '800',
+                        fontSize: '0.9rem',
+                        boxShadow: tieneDescuentoML 
+                          ? '0 4px 15px rgba(255, 230, 0, 0.4)'
+                          : '0 4px 15px rgba(211, 47, 47, 0.4)',
+                        zIndex: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}>
+                        {tieneDescuentoML && <span style={{ fontSize: '0.85rem' }}>ML</span>}
+                        -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
+                      </div>
+                    )}
+                    
+                    {productoCerrado && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        left: '10px',
+                        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                        color: 'white',
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        fontWeight: '700',
+                        fontSize: '0.75rem',
+                        boxShadow: '0 3px 10px rgba(30, 41, 59, 0.4)',
+                        zIndex: 2
+                      }}>
+                        CERRADO
+                      </div>
+                    )}
+                    
+                    {!productoCerrado && sinStock && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        left: '10px',
+                        background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                        color: '#1a1a1a',
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        fontWeight: '700',
+                        fontSize: '0.75rem',
+                        boxShadow: '0 3px 10px rgba(251, 191, 36, 0.4)',
+                        zIndex: 2
+                      }}>
+                        SIN STOCK
+                      </div>
+                    )}
+                    <img 
+                      src={item.image} 
+                      alt={item.title}
+                      loading="lazy"
+                      decoding="async"
+                      style={{
+                        willChange: 'auto'
+                      }}
+                    />
+                    <p>{item.title}</p>
+                    
+                    {/* Quitar cartel gris inferior; solo mantener badges superiores */}
+                    
+                    
                     <div style={{ 
                       display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '10px',
-                      flexWrap: 'wrap',
-                      justifyContent: 'center'
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      gap: '5px',
+                      margin: '10px 0'
                     }}>
-                      <p style={{ 
-                        textDecoration: 'line-through', 
-                        color: '#999',
-                        fontSize: '1rem',
-                        margin: '0',
-                        lineHeight: '1'
-                      }}>
-                        US$ {tieneDescuentoML ? precioOriginalML?.toFixed(2) : precioOriginal}
-                      </p>
-                      <p style={{ 
-                        color: '#d32f2f',
-                        fontWeight: '700',
-                        fontSize: '1rem',
-                        margin: '0',
-                        lineHeight: '1'
-                      }}>
-                        US$ {item.price}
-                      </p>
+                      {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
+                        <div style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '10px',
+                          flexWrap: 'wrap',
+                          justifyContent: 'center'
+                        }}>
+                          <p style={{ 
+                            textDecoration: 'line-through', 
+                            color: '#999',
+                            fontSize: '1rem',
+                            margin: '0',
+                            lineHeight: '1'
+                          }}>
+                            US$ {tieneDescuentoML ? precioOriginalML?.toFixed(2) : precioOriginal}
+                          </p>
+                          <p style={{ 
+                            color: '#d32f2f',
+                            fontWeight: '700',
+                            fontSize: '1rem',
+                            margin: '0',
+                            lineHeight: '1'
+                          }}>
+                            US$ {item.price}
+                          </p>
+                        </div>
+                      ) : (
+                        <p style={{ margin: '0' }}>US$ {item.price}</p>
+                      )}
                     </div>
-                  ) : (
-                    <p style={{ margin: '0' }}>US$ {item.price}</p>
-                  )}
+                    {/* Ocultar botón cuando no se puede comprar; mantener solo badges superiores */}
+                    {!(productoCerrado || item.stock <= 0 || item.isPaused) && (
+                      <button 
+                        className="add"
+                        onClick={(e) => handleAddToCart(e, item)}
+                      >
+                        Agregar Carrito
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+              
+              {paginatedItems.length === 0 && !isChangingPage && !isFetchingResults && (
+                <div className="centrar-texto">
+                  <p>No se encontraron productos con los filtros seleccionados.</p>
                 </div>
-                {/* Ocultar botón cuando no se puede comprar; mantener solo badges superiores */}
-                {!(productoCerrado || item.stock <= 0 || item.isPaused) && (
-                  <button 
-                    className="add"
-                    onClick={(e) => handleAddToCart(e, item)}
-                  >
-                    Agregar Carrito
-                  </button>
-                )}
-              </div>
-            )
-          })}
-          
-          {paginatedItems.length === 0 && !isChangingPage && (
-            <div className="centrar-texto">
-              <p>No se encontraron productos con los filtros seleccionados.</p>
-            </div>
+              )}
+            </>
           )}
         </div>
 

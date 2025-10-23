@@ -9,7 +9,7 @@
 
   /* Contenedor principal para todo el contenido - Compensar header y banner fijos */
   .main-content {
-    margin-top: 125px; /* 85px hasta banner + 40px banner */
+    margin-top: 90px; /* 85px hasta banner + 40px banner */
   }
   
   /* Responsive */
