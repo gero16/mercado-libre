@@ -7,6 +7,7 @@ import Pagination from '../components/Pagination'
 import '../styles/categoryFilter.css'
 import '../styles/pagination.css'
 import '../styles/tienda-improved.css'
+import { productsCache } from '../services/productsCache'
 
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
@@ -478,43 +479,20 @@ const TiendaMLPage: React.FC = () => {
   }
 
   // 🚀 Función para cargar productos con paginación del servidor
-  const fetchProductsPaginated = async (limit: number, skip: number): Promise<ProductoML[]> => {
+  const fetchProductsPaginated = async (limit: number, offset: number): Promise<ProductoML[]> => {
     try {
-      console.log(`📡 Solicitando ${limit} productos (skip: ${skip}) desde servidor...`)
+      console.log(`📡 Solicitando ${limit} productos (offset: ${offset}) desde servidor...`)
       const startFetch = performance.now()
-      
-      const response = await fetch(
-        `https://poppy-shop-production.up.railway.app/ml/productos?limit=${limit}&skip=${skip}&_ts=${Date.now()}`,
-        {
-          headers: {
-            'Accept': 'application/json'
-          },
-          keepalive: true,
-          cache: 'no-store'
-        }
-      )
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const data = await response.json()
+      const FIELDS = [
+        'ml_id','_id','title','price','images.url','main_image','available_quantity',
+        'status','category_id','catalog_product_id','tipo_venta',
+        'variantes.color','variantes.size','variantes.price','variantes.stock','variantes.images.url',
+        'descuento','descuento_ml.original_price','sold_quantity','health'
+      ].join(',')
+      const { items } = await productsCache.getProductsPage({ limit, offset, fields: FIELDS, status: 'all' })
       const endFetch = performance.now()
-      
       console.log(`✅ Servidor respondió en: ${(endFetch - startFetch).toFixed(0)}ms`)
-      
-      // La respuesta ahora viene con metadata de paginación
-      if (data.productos) {
-        console.log(`📊 Paginación - Total en DB: ${data.pagination.total}, Página actual: ${data.pagination.page}/${data.pagination.totalPages}`)
-        return data.productos
-      }
-      
-      // Fallback por si el servidor devuelve array directo (compatibilidad)
-      if (Array.isArray(data)) {
-        return data
-      }
-      
-      return []
+      return Array.isArray(items) ? items : []
     } catch (error) {
       console.error('❌ Error cargando productos paginados:', error)
       return []
@@ -522,6 +500,7 @@ const TiendaMLPage: React.FC = () => {
   }
 
   useEffect(() => {
+    let mounted = true
     const loadProducts = async () => {
       const startTime = performance.now()
       console.log('⏱️ Iniciando carga RÁPIDA (primeros 120 productos desde servidor)...')
@@ -660,22 +639,25 @@ const TiendaMLPage: React.FC = () => {
       console.log(`   - Fetch API: ${(fetchTime - startTime).toFixed(0)}ms`)
       console.log(`   - Procesamiento: ${(endTime - fetchTime).toFixed(0)}ms`)
       
+      if (!mounted) return
       setLoading(false)
       
       // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI) DESDE EL SERVIDOR
       console.log(`🔄 Cargando productos restantes en segundo plano...`)
       
       setTimeout(async () => {
+        if (!mounted) return
         const backgroundStart = performance.now()
         
         // Cargar todos los productos restantes en lotes de 100
         let allRemainingProducts: ProductoML[] = []
-        let currentSkip = 120
+        let currentOffset = 120
         const batchSize = 100
         let hasMore = true
         
         while (hasMore) {
-          const batch = await fetchProductsPaginated(batchSize, currentSkip)
+          if (!mounted) break
+          const batch = await fetchProductsPaginated(batchSize, currentOffset)
           
           if (batch.length === 0) {
             hasMore = false
@@ -683,7 +665,7 @@ const TiendaMLPage: React.FC = () => {
           }
           
           allRemainingProducts = [...allRemainingProducts, ...batch]
-          currentSkip += batchSize
+          currentOffset += batchSize
           
           console.log(`📦 Lote cargado: ${batch.length} productos (total acumulado: ${allRemainingProducts.length + 50})`)
           
@@ -767,19 +749,19 @@ const TiendaMLPage: React.FC = () => {
           
           // Deduplicar mezclando con los ya presentes
           const merged = dedupeItemsByCatalog([...(itemsTienda || []), ...remainingItems])
-          setItemsTienda(merged)
-          setFilteredItems(merged)
+          if (mounted) {
+            setItemsTienda(merged)
+            setFilteredItems(merged)
+          }
 
           const backgroundEnd = performance.now()
           console.log(`✅ Productos restantes cargados en: ${(backgroundEnd - backgroundStart).toFixed(0)}ms`)
-          
-          setItemsTienda(prev => [...prev, ...remainingItems])
-          setFilteredItems(prev => [...prev, ...remainingItems])
           
           console.log(`🎉 TODOS los productos cargados (${allRemainingProducts.length + 50} total)`)
         }, 100) // Pequeño delay para no bloquear UI
     }
     loadProducts()
+    return () => { mounted = false }
   }, [])
 
   // Filtrar items y aplicar paginación

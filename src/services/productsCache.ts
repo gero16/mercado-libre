@@ -63,16 +63,23 @@ class ProductsCacheService {
   }
 
   // 🆕 Paginado desde servidor
-  async getProductsPage(params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused' }): Promise<{ total: number; items: ProductoML[] }> {
+  async getProductsPage(params: { limit: number; offset: number; fields?: string; status?: 'all' | 'active' | 'paused'; q?: string }): Promise<{ total: number; items: ProductoML[] }> {
     const qp = new URLSearchParams()
     qp.set('limit', String(params.limit))
+    // El backend espera "offset" (además de "skip" opcional)
     qp.set('offset', String(params.offset))
     if (params.fields) qp.set('fields', params.fields)
     if (params.status && params.status !== 'all') qp.set('status', params.status)
+    if (params.q && params.q.trim().length > 0) qp.set('q', params.q.trim())
     qp.set('_ts', String(Date.now()))
     const response = await fetch(`${API_BASE_URL}/ml/productos?${qp.toString()}`)
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
     const data = await response.json()
+
+    // Nueva versión paginada del backend activo { productos, pagination }
+    if (data && Array.isArray(data.productos) && data.pagination && typeof data.pagination.total === 'number') {
+      return { total: data.pagination.total, items: data.productos }
+    }
 
     // Soportar backends antiguos que devuelven array directo o {registros: [...]}
     if (Array.isArray(data)) {

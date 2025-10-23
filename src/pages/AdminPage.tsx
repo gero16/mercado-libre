@@ -75,107 +75,129 @@ const AdminPage: React.FC = () => {
   const [serverLoading, setServerLoading] = useState(false)
   const didFallback = useRef(false)
 
-  const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,variantes'
+  const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,variantes'
 
-  useEffect(() => {
-    const buildItemsFromProduct = (producto: ProductoML): AdminItem[] => {
-      const isPaused = producto.status === 'paused'
-      let totalVariantsStock = 0
-      if (Array.isArray(producto.variantes) && producto.variantes.length > 0) {
-        totalVariantsStock = (producto.variantes as any[])
-          .map(v => (typeof v?.stock === 'number' ? v.stock : 0))
-          .reduce((sum, n) => sum + n, 0)
-      }
-      const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
-      const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
-      const tiempoTotalEntrega = diasPreparacion + diasEnvio
-      const esEntregaLarga = tiempoTotalEntrega > 14
-      const esFlex = producto.shipping?.logistic_type === 'fulfillment'
-      const esXdDropOff = producto.shipping?.logistic_type === 'xd_drop_off'
-      const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
-      const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
-      const esStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
+  // Normalización básica para búsqueda insensible a acentos/espacios
+  const normalize = (s: string) => {
+    let input = String(s || '')
+    try {
+      // Permitir que el usuario pegue cadenas con %20 u otros encodes
+      input = decodeURIComponent(input)
+    } catch {}
+    return input
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // quitar acentos
+      .replace(/[_-]+/g, ' ')            // guiones como espacio
+      .replace(/\s+/g, ' ')             // colapsar espacios
+      .trim()
+  }
 
-      const effectiveStock = (producto.variantes && producto.variantes.length > 0)
-        ? totalVariantsStock
-        : producto.available_quantity
+  // Extraer mapeo a nivel de componente para reutilizar en múltiples cargas
+  const buildItemsFromProduct = (producto: ProductoML): AdminItem[] => {
+    const isPaused = producto.status === 'paused'
+    let totalVariantsStock = 0
+    if (Array.isArray(producto.variantes) && producto.variantes.length > 0) {
+      totalVariantsStock = (producto.variantes as any[])
+        .map(v => (typeof v?.stock === 'number' ? v.stock : 0))
+        .reduce((sum, n) => sum + n, 0)
+    }
+    const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
+    const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
+    const tiempoTotalEntrega = diasPreparacion + diasEnvio
+    const esEntregaLarga = tiempoTotalEntrega > 14
+    const esFlex = producto.shipping?.logistic_type === 'fulfillment'
+    const esXdDropOff = producto.shipping?.logistic_type === 'xd_drop_off'
+    const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
+    const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
+    const esStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
 
-      const result: AdminItem[] = []
-      result.push({
-        id: (producto as any)._id || (producto as any).id || producto.ml_id,
-        title: producto.title,
-        price: producto.price,
-        image: (producto.images && producto.images[0]?.url) || (producto as any).main_image,
-        stock: effectiveStock,
-        esVariante: false,
-        productoPadre: producto,
-        categoria: (producto as any).category_id || (producto as any).category || '',
-        productId: producto.ml_id,
-        status: (producto as any).status || 'active',
-        isPaused: isPaused,
-        tieneVariantes: producto.variantes && producto.variantes.length > 0,
-        stockTotalVariantes: totalVariantsStock,
-        dias_preparacion: diasPreparacion,
-        dias_envio_estimado: diasEnvio,
-        tiempo_total_entrega: tiempoTotalEntrega,
-        es_entrega_larga: esEntregaLarga,
-        es_stock_fisico: esStockFisico,
-        proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
-        pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
-        destacado: producto.destacado || false
-      })
+    const effectiveStock = (producto.variantes && producto.variantes.length > 0)
+      ? totalVariantsStock
+      : producto.available_quantity
 
-      if (Array.isArray(producto.variantes) && producto.variantes.length > 0 && typeof (producto.variantes[0] as any) === 'object' && (producto.variantes[0] as any).stock !== undefined) {
-        (producto.variantes as any[]).forEach((variante: any) => {
-          const imagenVariante = variante.images && variante.images.length > 0
-            ? variante.images[0].url
-            : producto.images[0]?.url || producto.main_image
-          const variantDiasPreparacion = variante.dropshipping?.dias_preparacion || diasPreparacion
-          const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
-          const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
-          const variantEsEntregaLarga = variantTiempoTotal > 14
-          const variantSinPreparacion = (variante.dropshipping?.dias_preparacion || producto.dropshipping?.dias_preparacion || 0) === 0
-          const variantEntregaTotal = variantTiempoTotal || (variante.dropshipping?.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 7)
-          const variantEsStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
+    const result: AdminItem[] = []
+    result.push({
+      id: (producto as any)._id || (producto as any).id || producto.ml_id,
+      title: producto.title,
+      price: producto.price,
+      image: (producto.images && producto.images[0]?.url) || (producto as any).main_image,
+      stock: effectiveStock,
+      esVariante: false,
+      productoPadre: producto,
+      categoria: (producto as any).category_id || (producto as any).category || '',
+      productId: producto.ml_id,
+      status: (producto as any).status || 'active',
+      isPaused: isPaused,
+      tieneVariantes: producto.variantes && producto.variantes.length > 0,
+      stockTotalVariantes: totalVariantsStock,
+      dias_preparacion: diasPreparacion,
+      dias_envio_estimado: diasEnvio,
+      tiempo_total_entrega: tiempoTotalEntrega,
+      es_entrega_larga: esEntregaLarga,
+      es_stock_fisico: esStockFisico,
+      proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
+      pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
+      destacado: producto.destacado || false
+    })
 
-          result.push({
-            id: `${producto._id}_${variante._id || variante.id || Math.random()}`,
-            title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
-            price: (variante.price ?? producto.price) || 0,
-            image: imagenVariante,
-            stock: variante.stock ?? 0,
-            esVariante: true,
-            variante: variante,
-            productoPadre: producto,
-            categoria: producto.category_id,
-            productId: producto.ml_id,
-            variantId: (variante._id || variante.id || '').toString(),
-            status: producto.status,
-            isPaused: isPaused,
-            dias_preparacion: variantDiasPreparacion,
-            dias_envio_estimado: variantDiasEnvio,
-            tiempo_total_entrega: variantTiempoTotal,
-            es_entrega_larga: variantEsEntregaLarga,
-            es_stock_fisico: variantEsStockFisico,
-            proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
-            pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
-            destacado: producto.destacado || false
-          })
+    if (Array.isArray(producto.variantes) && producto.variantes.length > 0 && typeof (producto.variantes[0] as any) === 'object' && (producto.variantes[0] as any).stock !== undefined) {
+      (producto.variantes as any[]).forEach((variante: any) => {
+        const imagenVariante = variante.images && variante.images.length > 0
+          ? variante.images[0].url
+          : producto.images[0]?.url || producto.main_image
+        const variantDiasPreparacion = variante.dropshipping?.dias_preparacion || diasPreparacion
+        const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
+        const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
+        const variantEsEntregaLarga = variantTiempoTotal > 14
+        const variantSinPreparacion = (variante.dropshipping?.dias_preparacion || producto.dropshipping?.dias_preparacion || 0) === 0
+        const variantEntregaTotal = variantTiempoTotal || (variante.dropshipping?.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 7)
+        const variantEsStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
+
+        result.push({
+          id: `${producto._id}_${variante._id || variante.id || Math.random()}`,
+          title: `${producto.title} - ${variante.color || ''} ${variante.size || ''}`.trim(),
+          price: (variante.price ?? producto.price) || 0,
+          image: imagenVariante,
+          stock: variante.stock ?? 0,
+          esVariante: true,
+          variante: variante,
+          productoPadre: producto,
+          categoria: producto.category_id,
+          productId: producto.ml_id,
+          variantId: (variante._id || variante.id || '').toString(),
+          status: producto.status,
+          isPaused: isPaused,
+          dias_preparacion: variantDiasPreparacion,
+          dias_envio_estimado: variantDiasEnvio,
+          tiempo_total_entrega: variantTiempoTotal,
+          es_entrega_larga: variantEsEntregaLarga,
+          es_stock_fisico: variantEsStockFisico,
+          proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
+          pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
+          destacado: producto.destacado || false
         })
-      }
-
-      return result
+      })
     }
 
+    return result
+  }
+
+  useEffect(() => {
+    // Si hay búsqueda activa, evitamos la carga paginada parcial para no sobreescribir resultados completos
+    if (searchTerm.trim()) {
+      return
+    }
     const fetchPage = async (reset: boolean) => {
       try {
         setServerLoading(true)
-        console.log('[Admin] Fetching page', { limit: serverLimit, offset: serverOffset, status: filterStatus, fields: SERVER_FIELDS })
+        console.log('[Admin] Fetching page', { limit: serverLimit, offset: serverOffset, status: filterStatus, q: searchTerm, fields: SERVER_FIELDS })
         const { total, items } = await productsCache.getProductsPage({
           limit: serverLimit,
           offset: serverOffset,
           fields: SERVER_FIELDS,
-          status: filterStatus
+          status: filterStatus,
+          q: searchTerm
         })
         setServerTotal(total)
         console.log('[Admin] Response', { total, itemsType: Array.isArray(items) ? 'array' : typeof items, itemsLength: Array.isArray(items) ? items.length : undefined })
@@ -212,7 +234,65 @@ const AdminPage: React.FC = () => {
     // Cuando cambia offset/limit o filtro de status, recargar desde servidor
     fetchPage(serverOffset === 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverLimit, serverOffset, filterStatus])
+  }, [serverLimit, serverOffset, filterStatus, searchTerm])
+
+  // Al cambiar el término de búsqueda, reiniciar el offset del servidor
+  useEffect(() => {
+    setServerOffset(0)
+  }, [searchTerm])
+
+  // 🆕 Cuando hay búsqueda, cargar todos los lotes para resultados completos
+  useEffect(() => {
+    const q = searchTerm.trim()
+    if (!q) return
+    // Evitar carga duplicada si ya estamos cargando
+    if (serverLoading) return
+    // Cargar todo asincrónicamente sin bloquear UI inicial
+    const id = setTimeout(() => {
+      loadAllServerPages()
+    }, 300)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm])
+
+  // 🆕 Cargar todos los lotes desde el servidor
+  const loadAllServerPages = async (options?: { ignoreQuery?: boolean }) => {
+    if (serverLoading) return
+    try {
+      setServerLoading(true)
+      setLoading(true)
+      const limit = serverLimit
+      let offset = 0
+      let allMapped: AdminItem[] = []
+      let total = 0
+      for (;;) {
+        const { total: t, items } = await productsCache.getProductsPage({
+          limit,
+          offset,
+          fields: SERVER_FIELDS,
+          status: filterStatus,
+          q: options?.ignoreQuery ? '' : searchTerm
+        })
+        total = t || total
+        if (!Array.isArray(items) || items.length === 0) break
+        const mapped: AdminItem[] = []
+        items.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
+        allMapped = allMapped.concat(mapped)
+        offset += limit
+        if (offset >= total) break
+      }
+      setServerTotal(total)
+      setAdminItems(allMapped)
+      setServerOffset(0)
+      setCurrentPage(1)
+      console.log('[Admin] Carga completa de servidor', { total, items: allMapped.length, ignoreQuery: !!options?.ignoreQuery })
+    } catch (e) {
+      console.error('[Admin] Error al cargar todos los lotes', e)
+    } finally {
+      setLoading(false)
+      setServerLoading(false)
+    }
+  }
 
   // Log cambios en la lista resultante
   useEffect(() => {
@@ -249,8 +329,15 @@ const AdminPage: React.FC = () => {
   const filteredAndSortedItems = useMemo(() => adminItems
     .filter(item => {
       // Filtro por búsqueda
-      if (deferredSearchTerm && !item.title.toLowerCase().includes(deferredSearchTerm.toLowerCase())) {
+      if (deferredSearchTerm) {
+        const needle = normalize(deferredSearchTerm)
+        const hayTitle = normalize(item.title)
+        const hayIds = `${(item.productId||'')}`.toLowerCase()
+        const hayVarId = `${(item.variantId||'')}`.toLowerCase()
+        const haySku = normalize(String((item.productoPadre as any)?.seller_sku || ''))
+        if (!(hayTitle.includes(needle) || hayIds.includes(needle) || hayVarId.includes(needle) || (haySku && haySku.includes(needle)))) {
         return false
+      }
       }
       
       // Filtro por tipo
@@ -622,6 +709,9 @@ const AdminPage: React.FC = () => {
         }}>
           <div>
             <strong>Servidor</strong>: {serverOffset + 1} - {Math.min(serverOffset + serverLimit, serverTotal)} de {serverTotal}
+            <div style={{ fontSize: '12px', opacity: 0.8 }}>
+              Cargados en cliente: {adminItems.length} items
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <label>Items por request:</label>
@@ -649,6 +739,14 @@ const AdminPage: React.FC = () => {
               onClick={() => setServerOffset(serverOffset + serverLimit)}
             >
               Siguiente lote →
+            </button>
+            <button
+              className="admin-sort-btn"
+              disabled={serverLoading || serverTotal === 0}
+              onClick={() => loadAllServerPages({ ignoreQuery: true })}
+              title="Carga todos los lotes hasta completar"
+            >
+              Cargar todo
             </button>
           </div>
         </div>
