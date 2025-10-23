@@ -523,9 +523,17 @@ const TiendaMLPage: React.FC = () => {
         ? Object.entries(mapeoCategorias).filter(([, slug]) => slug === categorySlug).map(([mlCat]) => mlCat)
         : []
       if (ids.length > 0) {
-        const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
-        productos = res.items
-        total = res.total
+        // Si hay texto de búsqueda y categoría, usar endpoint general con ambos filtros (q + categoryIds)
+        if (query && query.trim().length > 0) {
+          const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query, categoryIds: ids }, /*preferNoFields*/ true)
+          productos = res.items
+          total = res.total
+        } else {
+          // Solo categoría, sin texto: usar endpoint específico por categorías
+          const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
+          productos = res.items
+          total = res.total
+        }
       } else {
         const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query }, /*preferNoFields*/ true)
         productos = res.items
@@ -935,10 +943,11 @@ const TiendaMLPage: React.FC = () => {
     const handle = setTimeout(async () => {
       setIsFetchingResults(true)
       console.log('⏳ Cargando resultados (server search)...')
-      const { items, total } = await fetchServerSearch(1, itemsPerPage, q, categoryFilter)
+      // Si hay texto de búsqueda, ignorar categoría (buscar globalmente)
+      const { items, total } = await fetchServerSearch(1, itemsPerPage, q, q ? undefined : categoryFilter)
       // Aplicar filtros adicionales sobre resultados del servidor si están activos
       let filtered = items
-      if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
+      if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
       filtered = filtered.filter(i => i.price >= priceFilter)
       if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
       if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
@@ -1041,9 +1050,10 @@ const TiendaMLPage: React.FC = () => {
     if (isServerSearch) {
       setIsFetchingResults(true)
       console.log('⏳ Paginando (server)...')
-      fetchServerSearch(page, itemsPerPage, searchQuery.trim(), categoryFilter).then(({ items }) => {
+      const q = searchQuery.trim()
+      fetchServerSearch(page, itemsPerPage, q, q ? undefined : categoryFilter).then(({ items }) => {
         let filtered = items
-        if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
+        if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
         filtered = filtered.filter(i => i.price >= priceFilter)
         if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
         if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
@@ -1058,9 +1068,10 @@ const TiendaMLPage: React.FC = () => {
     if (isServerSearch) {
       setIsFetchingResults(true)
       console.log('⏳ Cambiando items por página (server)...')
-      fetchServerSearch(1, items, searchQuery.trim(), categoryFilter).then(({ items: list, total }) => {
+      const q = searchQuery.trim()
+      fetchServerSearch(1, items, q, q ? undefined : categoryFilter).then(({ items: list, total }) => {
         let filtered = list
-        if (categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
+        if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
         filtered = filtered.filter(i => i.price >= priceFilter)
         if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
         if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
