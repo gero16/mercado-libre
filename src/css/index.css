@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap');
+
   .header {
   z-index: 999;
   position: fixed;
@@ -198,9 +200,27 @@
     }
   
   
-    .footer p {
-      font-size: small;
-    }
+  /* Footer: tipografía alineada a ML (Rubik), tamaño y peso adecuados */
+  .footer {
+    font-family: 'Rubik', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
+  .footer p,
+  .footer a,
+  .footer li,
+  .footer span {
+    font-family: 'Rubik', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-size: 0.7rem;
+    line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+  }
+  .footer h4,
+  .footer h5 {
+    font-family: 'Rubik', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0 0 6px 0;
+  }
 
     .img-mastercard {
       height: 22px;
