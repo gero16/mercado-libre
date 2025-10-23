@@ -129,7 +129,7 @@ const CheckoutPage: React.FC = () => {
   }
 
   const handleGoBack = () => {
-    navigate('/tienda')
+    navigate('/tienda-ml')
   }
 
   if (cartItems.length === 0) {
@@ -138,7 +138,7 @@ const CheckoutPage: React.FC = () => {
         <div className="principal">
           <div className="centrar-texto">
             <h2>No hay productos en el carrito</h2>
-            <button onClick={() => navigate('/tienda')} className="btn-orden">
+            <button onClick={() => navigate('/tienda-ml')} className="btn-orden">
               Ir a la Tienda
             </button>
           </div>
@@ -297,7 +297,7 @@ const CheckoutPage: React.FC = () => {
               <h2>Resumen del pedido</h2>
               <button 
                 className="editar-carrito link-like"
-                onClick={() => navigate('/tienda')}
+                onClick={() => navigate('/tienda-ml')}
               >
                 Editar Carrito
               </button>

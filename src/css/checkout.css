@@ -341,7 +341,7 @@
   background: white;
   border-radius: 8px;
   padding: 24px 24px 16px 24px;
-  max-width: 600px;
+  max-width: 520px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -409,12 +409,23 @@
   }
   
   .payment-modal-content {
-    padding: 16px;
-    max-height: 95vh;
+    padding: 12px;
+    max-height: 96vh;
+    width: 100%;
+    max-width: 480px;
   }
   
   .payment-modal-header h2 {
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  /* Hacer que el contenedor del brick se adapte al viewport móvil */
+  .payment-modal-content #paymentBrick_container {
+    margin: 10px 0;
+  }
+  #paymentBrick_container iframe,
+  #paymentBrick_container > div {
+    width: 100% !important;
   }
 }
 
