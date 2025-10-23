@@ -27,6 +27,7 @@ const AdminCupones = lazy(() => import('./pages/AdminCupones')) // 🆕 Importar
 const AdminEventos = lazy(() => import('./pages/AdminEventos'))
 const AdminDuplicadosPage = lazy(() => import('./pages/AdminDuplicadosPage'))
 import EventPage from './pages/EventPage'
+import AdminDestacados from './pages/AdminDestacados'
 import './css/style.css'
 import './css/index.css'
 import './css/tienda.css'
@@ -94,6 +95,7 @@ function App() {
               <Route path="/admin/descuentos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDescuentos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de descuentos */}
               <Route path="/admin/cupones" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminCupones /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de cupones */}
               <Route path="/admin/eventos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminEventos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de eventos */}
+              <Route path="/admin/destacados" element={<ProtectedRoute><AdminDestacados /></ProtectedRoute>} /> {/* 🆕 Ruta de destacados */}
               <Route path="/admin/duplicados" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDuplicadosPage /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de duplicados */}
               
               {/* Rutas de resultado de pago */}

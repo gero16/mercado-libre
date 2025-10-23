@@ -619,6 +619,16 @@ const AdminPage: React.FC = () => {
           >
            ↳ Gestionar Eventos 🎉
           </button>
+          <button 
+            onClick={() => navigate("/admin/destacados")}
+            className="btn-orden"
+            style={{
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              color: '#111827'
+            }}
+          >
+           ↳ Gestionar Destacados ⭐
+          </button>
         </div>
 
         {/* Controles de filtrado y búsqueda */}

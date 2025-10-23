@@ -201,10 +201,11 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
                       loading="lazy"
                       decoding="async"
                     />
-                    <div className="bestseller-badge">
-                      <span className="badge-icon">🏆</span>
-                      <span className="badge-text">Top Ventas</span>
-                    </div>
+                  <div className="bestseller-badge">
+                    <span className="badge-icon">🏆</span>
+                    <span className="flame" aria-hidden>🔥</span>
+                    <span className="badge-text">Top Ventas</span>
+                  </div>
                   </div>
                   
                   <div className="product-info">
