@@ -43,6 +43,12 @@ const LoginPage: React.FC = () => {
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
       </form>
+      <div style={{ marginTop: 16 }}>
+        <span>¿No tenés cuenta? </span>
+        <button type="button" className="btn" style={{ background: 'transparent', color: '#0f62fe' }} onClick={() => navigate('/register')}>
+          Registrate
+        </button>
+      </div>
     </main>
   )
 }

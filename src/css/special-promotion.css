@@ -57,12 +57,12 @@
 }
 
 .discount-text {
-  background: rgba(255,255,255,0.2);
-  color: white;
+  background: white;
+  color: black!important;
   padding: 10px 20px;
   border-radius: 30px;
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: 450;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
   border: 2px solid rgba(255,255,255,0.3);
   display: inline-block;

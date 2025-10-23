@@ -9,6 +9,7 @@ import LazySection from '../components/LazySection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
 import { EventService } from '../services/event'
+import { useAuth } from '../context/AuthContext'
 
 // 🚀 Lazy loading solo para componentes que están más abajo en la página
 const FeaturedProducts = lazy(() => import('../components/FeaturedProducts'))
@@ -42,6 +43,7 @@ const ProductsSkeleton = ({ title }: { title: string }) => (
 )
 
 const HomePage: React.FC = () => {
+  const { isAuthenticated } = useAuth()
   // Array de imágenes para el carrusel
   const carouselImages = [
     'https://res.cloudinary.com/geronicola/image/upload/v1760638797/poppy-shop/q2l0fkzp85v6hiiomcgc.png',
@@ -79,6 +81,50 @@ const HomePage: React.FC = () => {
         subtitle="Emprendimiento uruguayo con años de experiencia"
         description="Somos una tienda en línea comprometida en ofrecer una amplia gama de productos de cualquier parte del mundo. Nuestro propósito es hacer de tus deseos, realidad, por eso nos encargamos de todo para que puedas tener eso que tanto querés."
       />
+
+      {/* Banner de invitación a registro (oculto si autenticado) */}
+      {!isAuthenticated && (
+        <section style={{ margin: '24px 0' }}>
+          <div
+            className="container"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+              padding: '16px 18px',
+              borderRadius: 14,
+              border: '1px solid #e5e7eb',
+              background: '#ffffff',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+              flexWrap: 'wrap'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 24 }}>🎁</span>
+              <div>
+                <h3 style={{ margin: 0, fontWeight: 800, color: '#111827' }}>¿Todavía no te registraste?</h3>
+                <p style={{ margin: '4px 0 0 0', color: '#374151' }}>Registrate y disfrutá de beneficios, novedades y ofertas.</p>
+              </div>
+            </div>
+            <a
+              href="/register"
+              style={{
+                background: 'var(--color-primary, #fe9f01)',
+                color: '#ffffff',
+                fontWeight: 800,
+                padding: '10px 18px',
+                borderRadius: 999,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 6px 14px rgba(254,159,1,0.25)'
+              }}
+            >
+              Registrarme
+            </a>
+          </div>
+        </section>
+      )}
 
       {/* Evento activo dinámico */}
       {activeEvent && (

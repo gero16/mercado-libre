@@ -36,6 +36,22 @@ export const AuthService = {
     return data
   },
 
+  async register(nombre: string, email: string, password: string): Promise<LoginResponse> {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, password })
+    })
+    if (!res.ok) {
+      const err = await safeJson(res)
+      throw new Error(err?.error || 'Error registrando usuario')
+    }
+    const data = await res.json()
+    saveToken(data.token)
+    saveUser(data.user)
+    return data
+  },
+
   async me(): Promise<{ user: AuthUser } | null> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json', ...this.getAuthHeader() }
     if (!headers.Authorization) return null

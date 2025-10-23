@@ -54,6 +54,7 @@ import './css/header-dropdown.css' // 🆕 Importar estilos del dropdown del hea
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -83,6 +84,7 @@ function App() {
               <Route path="/terminos-y-condiciones" element={<TerminosYCondicionesPage />} />
 
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
               
               {/* Rutas de administración protegidas */}
               <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminPage /></Suspense></ProtectedRoute>} />

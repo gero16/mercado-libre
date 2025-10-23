@@ -374,7 +374,7 @@ const TiendaMLPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
   const [isChangingPage, setIsChangingPage] = useState(false)
-  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false)
+  const [, setIsBackgroundLoading] = useState(false)
 
   // 🔎 Modo búsqueda en servidor (trae resultados de toda la BD)
   const [isServerSearch, setIsServerSearch] = useState(false)
