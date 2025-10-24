@@ -58,8 +58,7 @@
     background: linear-gradient(100deg, #fa9212, #ffc400);
 
   }
-  .btn-orders { 
-  }
+  /* .btn-orders eliminado por estar vacío */
   .btn-clientes { 
     background: linear-gradient(135deg, #28a745, #20c997);
   }
@@ -106,7 +105,7 @@
     display: grid;
     grid-template-columns: 1.4fr 1fr;
     gap: 30px;
-    margin: 110px 0px 50px 0px;
+    margin: 50px 0px 40px 0px;
     /* min-height: 800px; */
   }
   
@@ -124,6 +123,59 @@
   .order-page h1 {
     margin-bottom: 20px;
     color: #696767;
+  }
+
+  /* ==========================
+     Checkout form container
+     ========================== */
+  .checkout-form {
+    color: black;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: calc(100vh - 100px);
+    overflow: hidden;
+  }
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 16px 0;
+    border-bottom: 1px solid #eee;
+    flex: 0 0 auto;
+  }
+  .checkout-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+    padding-bottom: 72px; /* espacio para mantener visible el botón */
+  }
+  .checkout-form-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .checkout-form-content::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+  }
+  .form-actions {
+    margin-top: 8px;
+    flex: 0 0 auto;
+    position: sticky;
+    bottom: 0;
+    background: #ffffff;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+    padding-bottom: 8px;
+    z-index: 1;
   }
   
   .order-shipping {
@@ -143,7 +195,7 @@
   }
   .form-group input {
     height: 20px;
-    padding: 8px 12px;
+    padding: 14px 12px;
     margin-top: 6px;
     width:  92%;
     border: 1px solid #ced4da;
@@ -164,8 +216,9 @@
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     position: sticky;
-    top: 110px;
-    height: 480px;
+    top: 70px;
+    height: auto;
+    max-height: calc(100vh - 100px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -246,11 +299,20 @@
     border-radius: 8px;
     border: 1px solid #eee;
   }
+  .item-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
   .item-name {
     margin: 0 0 4px 0;
     color: #333;
     font-weight: 600;
-   
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     line-height: 1.2;
   }
   .item-meta {
@@ -273,6 +335,13 @@
     font-weight: 700;
     color: #111827;
     font-size: small;
+  }
+  .contenido-pedido::-webkit-scrollbar {
+    width: 6px;
+  }
+  .contenido-pedido::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
   }
   .total-box {
     display: flex;
@@ -405,6 +474,13 @@
   .order-shipping {
     grid-template-columns: 1fr;
   }
+  .checkout-form {
+    max-height: none;
+  }
+  .checkout-form-content {
+    overflow: visible;
+    padding-right: 0;
+  }
   .payment-modal-overlay {
     padding: 10px;
   }
@@ -427,6 +503,22 @@
   #paymentBrick_container iframe,
   #paymentBrick_container > div {
     width: 100% !important;
+  }
+}
+
+/* Ajustes para laptops (ancho típico 1024-1366) */
+@media (max-width: 1366px) and (min-width: 1024px) {
+  .principal {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+  }
+  .resumen-pedido {
+    top: 60px;
+    max-height: calc(100vh - 90px);
+  }
+  .item-thumb {
+    width: 48px;
+    height: 48px;
   }
 }
 
