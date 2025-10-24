@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useDeferredValue, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -74,7 +74,7 @@ const AdminPage: React.FC = () => {
   const [serverLimit, setServerLimit] = useState(60)
   const [serverOffset, setServerOffset] = useState(0)
   const [serverLoading, setServerLoading] = useState(false)
-  const didFallback = useRef(false)
+  
 
   const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,variantes'
 

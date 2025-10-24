@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from '../config/api'
 import { AuthService } from '../services/auth'
-import type { ProductoML } from '../types'
 
 interface AdminDestacadosItem {
   _id?: string
@@ -25,7 +24,7 @@ const AdminDestacados: React.FC = () => {
   const [results, setResults] = useState<AdminDestacadosItem[]>([])
   const [working, setWorking] = useState(false)
 
-  const normalize = (s: string) => s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  
 
   useEffect(() => {
     const load = async () => {

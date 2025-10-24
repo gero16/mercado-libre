@@ -457,7 +457,25 @@ const TiendaMLPage: React.FC = () => {
       setCategoryFilter(newCategory)
       setCurrentPage(1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-      setTimeout(() => setIsChangingPage(false), 300)
+    // ⚡ Hacer búsqueda de servidor inmediata (sin debounce) para la categoría del navbar
+    ;(async () => {
+      try {
+        setIsServerSearch(true)
+        const { items, total } = await fetchServerSearch(1, itemsPerPage, '', newCategory)
+        let filtered = items
+        filtered = filtered.filter(i => i.price >= priceFilter)
+        if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
+        if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
+        setPaginatedItems(filtered)
+        setServerTotalItems(Math.max(total, filtered.length))
+        setTotalPages(Math.max(1, Math.ceil(Math.max(total, filtered.length) / itemsPerPage)))
+      } catch (e) {
+        console.error('❌ Error cargando categoría desde navbar:', e)
+      } finally {
+        setIsFetchingResults(false)
+        setTimeout(() => setIsChangingPage(false), 200)
+      }
+    })()
     }
   }, [location.state])
 
@@ -604,9 +622,14 @@ const TiendaMLPage: React.FC = () => {
     }
   }
 
-  useEffect(() => {
-    let mounted = true
-    const loadProducts = async () => {
+useEffect(() => {
+  let mounted = true
+  // ⚡ Si venimos desde el navbar con una categoría seleccionada, saltar la carga inicial pesada
+  if ((location.state as any)?.categoryFilter) {
+    setLoading(false)
+    return () => { mounted = false }
+  }
+  const loadProducts = async () => {
       const startTime = performance.now()
       console.log('⏱️ Iniciando carga RÁPIDA (primeros 120 productos desde servidor)...')
       
