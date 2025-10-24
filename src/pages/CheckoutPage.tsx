@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 import { Payment } from '@mercadopago/sdk-react'
 import { useMercadoPago } from '../hooks/useMercadoPago'
+import { FEATURE_FLAGS } from '../config/featureFlags'
 
 interface CustomerData {
   name: string
@@ -257,6 +258,9 @@ const CheckoutPage: React.FC = () => {
               <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="payment-modal-header">
                   <h2>Selecciona tu método de pago</h2>
+                  <div style={{ marginLeft: 'auto', fontWeight: 800, color: '#111827' }}>
+                    {FEATURE_FLAGS.PRICE_IN_UYU ? `Total: UYU ${cartTotal}` : `Total: US$ ${cartTotal}`}
+                  </div>
                   <button 
                     className="payment-modal-close"
                     onClick={() => setShowPaymentBrick(false)}
