@@ -40,6 +40,37 @@ interface Orden {
   date_approved?: string;
   status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   notes?: string;
+  mp_error?: any;
+}
+
+// Mapeo legible de motivos de rechazo de MP
+function mapMpStatusDetail(detail?: string) {
+  const code = (detail || '').toLowerCase();
+  switch (code) {
+    case 'cc_rejected_insufficient_amount':
+      return { titulo: 'Fondos insuficientes', mensaje: 'La tarjeta no tenía saldo suficiente.', accion: 'Pedir otro medio de pago o intentar más tarde.' };
+    case 'cc_rejected_high_risk':
+      return { titulo: 'Pago con riesgo alto', mensaje: 'Mercado Pago rechazó por política de riesgo.', accion: 'Sugerir otro medio de pago o contactar a MP.' };
+    case 'cc_rejected_call_for_authorize':
+      return { titulo: 'Autorizar con el banco', mensaje: 'El banco solicita autorización del pago.', accion: 'Pedir al cliente llamar al emisor y reintentar.' };
+    case 'cc_rejected_bad_filled_card_number':
+    case 'cc_rejected_bad_filled_date':
+    case 'cc_rejected_bad_filled_other':
+    case 'cc_rejected_bad_filled_security_code':
+      return { titulo: 'Datos de tarjeta inválidos', mensaje: 'Algún dato de la tarjeta es incorrecto.', accion: 'Revisar número, fecha y código de seguridad.' };
+    case 'cc_rejected_blacklist':
+      return { titulo: 'Tarjeta en lista de bloqueo', mensaje: 'El medio de pago está bloqueado.', accion: 'Usar otro medio de pago.' };
+    case 'cc_rejected_card_disabled':
+      return { titulo: 'Tarjeta deshabilitada', mensaje: 'La tarjeta está inactiva o bloqueada.', accion: 'Pedir al cliente habilitarla con el banco.' };
+    case 'cc_rejected_invalid_installments':
+      return { titulo: 'Cuotas inválidas', mensaje: 'El plan de cuotas no es válido.', accion: 'Elegir otro plan o pagar en 1 cuota.' };
+    case 'cc_rejected_max_attempts':
+      return { titulo: 'Demasiados intentos', mensaje: 'Se superó el máximo de intentos de pago.', accion: 'Esperar un tiempo o usar otro medio.' };
+    case 'cc_rejected_other_reason':
+      return { titulo: 'Pago rechazado', mensaje: 'El banco rechazó el pago por un motivo general.', accion: 'Probar otra tarjeta o contactar al banco.' };
+    default:
+      return { titulo: 'Error de pago', mensaje: 'No se pudo procesar el pago.', accion: 'Reintentar u optar por otro medio.' };
+  }
 }
 
 const AdminOrdersPage: React.FC = () => {
@@ -52,6 +83,8 @@ const AdminOrdersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalOrders, setTotalOrders] = useState(0)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showMpHelp, setShowMpHelp] = useState(false)
 
   const API_BASE_URL = 'https://poppy-shop-production.up.railway.app'
 
@@ -241,6 +274,21 @@ const AdminOrdersPage: React.FC = () => {
                       {order.status.toUpperCase()}
                     </span>
                   </div>
+                    <div style={{ display:'flex', gap:10, alignItems:'center', marginTop: 8 }}>
+                      {(() => { const info = mapMpStatusDetail(order.payment_status_detail); return (
+                        <span style={{ fontSize: 12, color:'#8b949e' }}>
+                          Estado MP: <strong style={{ color:'#c9d1d9' }}>{info.titulo}</strong>
+                        </span>
+                      )})()}
+                      <span style={{ fontSize: 12, color:'#8b949e' }}>Pago ID: <strong style={{ color:'#c9d1d9' }}>{order.payment_id || '—'}</strong></span>
+                      <button 
+                        className="back-button"
+                        style={{ marginLeft:'auto' }}
+                        onClick={() => setExpandedId(expandedId === order._id ? null : order._id)}
+                      >
+                        {expandedId === order._id ? 'Ocultar detalles' : 'Ver detalles'}
+                      </button>
+                    </div>
                   
                   <div style={{ 
                     background: 'rgba(22, 27, 34, 0.5)', 
@@ -259,6 +307,101 @@ const AdminOrdersPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                  {expandedId === order._id && (
+                    <div style={{ 
+                      background: 'rgba(110, 118, 129, 0.1)',
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      marginBottom: 12,
+                      color: '#c9d1d9'
+                    }}>
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e' }}>Notas</div>
+                          <div style={{ fontSize:13 }}>{order.notes || '—'}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e' }}>Referencia externa</div>
+                          <div style={{ fontSize:13 }}>{order.external_reference}</div>
+                        </div>
+                      </div>
+                      {order.payment_status_detail && (() => { const info = mapMpStatusDetail(order.payment_status_detail); return (
+                        <div style={{ marginTop:12 }}>
+                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e', marginBottom:4 }}>Explicación del rechazo</div>
+                          <div style={{ fontSize:13 }}>
+                            <div style={{ marginBottom:4 }}>{info.mensaje}</div>
+                            <div style={{ color:'#9ca3af', fontSize:12 }}>Sugerencia: {info.accion}</div>
+                          </div>
+                          <button 
+                            className="back-button"
+                            style={{ marginTop:8 }}
+                            onClick={() => setShowMpHelp(v => !v)}
+                          >
+                            {showMpHelp ? 'Ocultar ayuda' : '¿Por qué fue rechazado?'}
+                          </button>
+                          {showMpHelp && (
+                            <div style={{
+                              marginTop:8,
+                              background:'rgba(22,27,34,0.4)',
+                              border:'1px solid #30363d',
+                              borderRadius:6,
+                              padding:10,
+                              color:'#c9d1d9',
+                              fontSize:12,
+                              lineHeight:1.5
+                            }}>
+                              <div style={{ fontWeight:700, marginBottom:6 }}>Motivos frecuentes de rechazo</div>
+                              <ul style={{ margin:'0 0 6px 16px', padding:0 }}>
+                                <li><strong>Fondos insuficientes</strong>: pedir otro medio o reintentar más tarde.</li>
+                                <li><strong>Pago con riesgo alto</strong>: probar otra tarjeta o medio (débito, MP).</li>
+                                <li><strong>Autorizar con el banco</strong>: el cliente debe llamar a su emisor.</li>
+                                <li><strong>Datos mal cargados</strong>: revisar número, fecha y código de seguridad.</li>
+                                <li><strong>Tarjeta deshabilitada/bloqueada</strong>: habilitar con el banco o usar otra.</li>
+                                <li><strong>Cuotas inválidas</strong>: elegir otro plan o 1 cuota.</li>
+                                <li><strong>Demasiados intentos</strong>: esperar unos minutos y reintentar.</li>
+                                <li><strong>Otro motivo del banco</strong>: probar otro medio o contactar al banco.</li>
+                              </ul>
+                              <div style={{ color:'#9ca3af' }}>Si persiste, intenta con otro navegador/PC o paga con cuenta MP.</div>
+                            </div>
+                          )}
+                        </div>
+                      )})()}
+                      {order.mp_error && (
+                        <div style={{ marginTop:12 }}>
+                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e', marginBottom:6 }}>Detalle de error MP</div>
+                          <pre style={{ 
+                            background:'#0b1220', 
+                            color:'#e5e7eb', 
+                            padding:10, 
+                            borderRadius:6, 
+                            maxHeight:200, 
+                            overflow:'auto', 
+                            fontSize:12, 
+                            lineHeight:1.4,
+                            border:'1px solid #1f2937' 
+                          }}>{JSON.stringify(order.mp_error, null, 2)}</pre>
+                        </div>
+                      )}
+                      {/** mp_request visible si existe */}
+                      {(order as any).mp_request && (
+                        <div style={{ marginTop:12 }}>
+                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e', marginBottom:6 }}>Solicitud enviada a MP</div>
+                          <pre style={{ 
+                            background:'#0b1220', 
+                            color:'#e5e7eb', 
+                            padding:10, 
+                            borderRadius:6, 
+                            maxHeight:200, 
+                            overflow:'auto', 
+                            fontSize:12, 
+                            lineHeight:1.4,
+                            border:'1px solid #1f2937' 
+                          }}>{JSON.stringify((order as any).mp_request, null, 2)}</pre>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                 <div style={{ marginBottom: '15px' }}>
                   <div style={{ 

@@ -74,8 +74,20 @@ export const useMercadoPago = () => {
     return new Promise((resolve, reject) => {
       MercadoPagoService.processPayment(paymentData.formData, cartItems, customerData)
         .then((response) => {
-          console.log('Payment processed successfully:', response)
-          navigate(MERCADOPAGO_CONFIG.SUCCESS_URL)
+          try {
+            const status = (response && response.status) || ''
+            console.log('Payment response status:', status, response)
+            if (status === 'approved') {
+              navigate(MERCADOPAGO_CONFIG.SUCCESS_URL)
+            } else if (status === 'pending') {
+              navigate(MERCADOPAGO_CONFIG.PENDING_URL)
+            } else {
+              navigate(MERCADOPAGO_CONFIG.FAILURE_URL)
+            }
+          } catch (e) {
+            console.warn('Unexpected payment response shape, redirecting to failure')
+            navigate(MERCADOPAGO_CONFIG.FAILURE_URL)
+          }
           resolve(response)
         })
         .catch((error) => {
