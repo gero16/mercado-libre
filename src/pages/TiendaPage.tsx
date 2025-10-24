@@ -959,6 +959,87 @@ useEffect(() => {
       setIsServerSearch(false)
       setServerTotalItems(0)
       setCurrentPage(1)
+      // 🛟 Fallback: si no hay datos locales (caso venir desde navbar con categoría), cargar inicial rápido
+      if (itemsTienda.length === 0) {
+        ;(async () => {
+          try {
+            setIsFetchingResults(true)
+            const productos = await fetchProductsPaginated(120, 0)
+            const list = dedupeProductsByCatalog(productos)
+            const items: ItemTienda[] = []
+            list.forEach(producto => {
+              const categoria = obtenerCategoria(producto.category_id)
+              const isPaused = producto.status === 'paused'
+              if (producto.variantes && producto.variantes.length > 0) {
+                const variantesUnicas = producto.variantes.reduce((unique: Variante[], variante) => {
+                  if (!unique.some(v => v.color === variante.color)) unique.push(variante)
+                  return unique
+                }, [])
+                variantesUnicas.forEach(variante => {
+                  const imagenVariante = (variante.images && variante.images[0]?.url) || producto.images[0]?.url || producto.main_image
+                  const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0)
+                  const precioBase = variante.price || producto.price
+                  const tieneDescuento = producto.descuento?.activo || false
+                  const porcentaje = producto.descuento?.porcentaje || 0
+                  const precioConDescuento = tieneDescuento ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 : precioBase
+                  if (imagenVariante) {
+                    items.push({
+                      id: `${producto.ml_id || (producto as any)._id}_${variante.color}`,
+                      ml_id: producto.ml_id,
+                      title: `${producto.title} - ${variante.color || ''}`.trim(),
+                      price: precioConDescuento,
+                      image: getOptimizedImageUrl(imagenVariante),
+                      stock: effectiveStock,
+                      esVariante: true,
+                      variante,
+                      productoPadre: producto,
+                      categoria,
+                      isPaused
+                    })
+                  }
+                })
+              } else {
+                const effectiveStock = isPaused ? 0 : producto.available_quantity
+                const imagenPrincipal = producto.images[0]?.url || producto.main_image
+                const precioBase = producto.price
+                const tieneDescuento = producto.descuento?.activo || false
+                const porcentaje = producto.descuento?.porcentaje || 0
+                const precioConDescuento = tieneDescuento ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 : precioBase
+                if (imagenPrincipal) {
+                  items.push({
+                    id: producto.ml_id || (producto as any)._id,
+                    ml_id: producto.ml_id,
+                    title: producto.title,
+                    price: precioConDescuento,
+                    image: getOptimizedImageUrl(imagenPrincipal),
+                    stock: effectiveStock,
+                    esVariante: false,
+                    productoPadre: producto,
+                    categoria,
+                    isPaused
+                  })
+                }
+              }
+            })
+            const itemsUnicos = dedupeItemsByCatalog(items)
+            setItemsTienda(itemsUnicos)
+            // Aplicar filtros locales activos
+            let filtered = itemsUnicos
+            filtered = filtered.filter(i => i.price >= priceFilter)
+            if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
+            if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
+            setFilteredItems(filtered)
+            const totalItems = filtered.length
+            const totalPagesCalculated = Math.max(1, Math.ceil(totalItems / itemsPerPage))
+            setTotalPages(totalPagesCalculated)
+            setPaginatedItems(filtered.slice(0, itemsPerPage))
+          } catch (e) {
+            console.error('❌ Error fallback cargar Mostrar Todo:', e)
+          } finally {
+            setIsFetchingResults(false)
+          }
+        })()
+      }
       return
     }
     setIsServerSearch(true)
@@ -984,7 +1065,7 @@ useEffect(() => {
       }
     }, 300)
     return () => { cancelled = true; clearTimeout(handle); setIsFetchingResults(false) }
-  }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter])
+  }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter, itemsTienda])
 
   const handleProductClick = (item: ItemTienda) => {
     // Usar ml_id en lugar de _id para buscar el producto
@@ -1640,11 +1721,11 @@ useEffect(() => {
         </div>
 
         {/* 🚀 Controles de paginación */}
-        {filteredItems.length > 0 && (
+        {(isServerSearch ? serverTotalItems : filteredItems.length) > 0 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={filteredItems.length}
+            totalItems={isServerSearch ? serverTotalItems : filteredItems.length}
             itemsPerPage={itemsPerPage}
             onPageChange={handlePageChange}
             onItemsPerPageChange={handleItemsPerPageChange}
