@@ -614,7 +614,7 @@ const DetalleProductoPage: React.FC = () => {
                   className="btn-mercadolibre"
                   title="Ver publicación en MercadoLibre"
                 >
-                  Ver en MercadoLibre
+                 Mercado Libre
                 </button>
               )}
               
