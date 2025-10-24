@@ -5,7 +5,6 @@ import ProductCategories from '../components/ProductCategories'
 import ProductCategories2 from '../components/ProductCategories2'
 import CustomerReviews from '../components/CustomerReviews'
 import InstagramSection from '../components/InstagramSection'
-import LazySection from '../components/LazySection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
 import { EventService } from '../services/event'
@@ -13,7 +12,7 @@ import { useAuth } from '../context/AuthContext'
 
 // 🚀 Lazy loading solo para componentes que están más abajo en la página
 const FeaturedProducts = lazy(() => import('../components/FeaturedProducts'))
-const DiscountedProducts = lazy(() => import('../components/DiscountedProducts'))
+// const DiscountedProducts = lazy(() => import('../components/DiscountedProducts'))
 
 // 🎯 Skeleton Loader mejorado
 const ProductsSkeleton = ({ title }: { title: string }) => (
