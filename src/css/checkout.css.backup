@@ -66,10 +66,10 @@
   .btn-clientes:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 22px rgba(40, 167, 69, 0.35);
-  }
     background: linear-gradient(135deg, #7c1ef7, #00aeff);
-
   }
+
+  
   
   .confirmar {
     background: linear-gradient(135deg, #007bff 0%, #0062cc 100%);
