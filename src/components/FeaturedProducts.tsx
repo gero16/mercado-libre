@@ -97,10 +97,11 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
     navigate(`/producto/${product.ml_id}`)
   }
 
-  const renderStars = (rating?: number) => {
-    if (!rating || rating === 0) return null
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 !== 0
+  const renderStars = (rating?: number | string) => {
+    const numericRating = Number(rating)
+    if (!Number.isFinite(numericRating) || numericRating <= 0) return null
+    const fullStars = Math.floor(numericRating)
+    const hasHalfStar = numericRating % 1 !== 0
     
     return (
       <div className="product-rating">
@@ -108,10 +109,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
           <span key={i} className="star full">★</span>
         ))}
         {hasHalfStar && <span className="star half">★</span>}
-        {[...Array(5 - Math.ceil(rating))].map((_, i) => (
+        {[...Array(5 - Math.ceil(numericRating))].map((_, i) => (
           <span key={i} className="star empty">★</span>
         ))}
-        <span className="rating-number">({rating})</span>
+        <span className="rating-number">({numericRating})</span>
       </div>
     )
   }
@@ -123,6 +124,20 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
           <div className="section-header">
             <h2 className="section-title">⭐ Productos Destacados</h2>
             <p className="section-subtitle">Cargando productos...</p>
+          </div>
+          <div className="products-grid">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="product-card skeleton">
+                <div className="product-image-container">
+                  <div className="skeleton skeleton-image" />
+                </div>
+                <div className="product-info">
+                  <div className="skeleton skeleton-line w-80" />
+                  <div className="skeleton skeleton-line w-60" />
+                  <div className="skeleton skeleton-price" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -156,15 +171,22 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                 ? product.images[0].url 
                 : product.main_image
               const imagenPrincipal = getOptimizedImageUrl(imagenOriginal)
-              const tieneDescuento = product.descuento?.activo
-              const precioOriginal = product.descuento?.precio_original
-              const porcentajeDescuento = product.descuento?.porcentaje
+              // Descuento propio (tienda)
+              const showDescuentoTienda = !!(
+                product.descuento?.activo &&
+                typeof product.descuento?.porcentaje === 'number' && product.descuento.porcentaje > 0 &&
+                typeof product.descuento?.precio_original === 'number' && product.descuento.precio_original > product.price
+              )
+              const precioOriginal = showDescuentoTienda ? product.descuento!.precio_original : undefined
+              const porcentajeDescuento = showDescuentoTienda ? product.descuento!.porcentaje : undefined
               // Descuento de MercadoLibre
-              const tieneDescuentoML = !!product.descuento_ml?.original_price
               const precioOriginalML = product.descuento_ml?.original_price
-              const porcentajeDescuentoML = precioOriginalML 
+              const baseShowDescuentoML = typeof precioOriginalML === 'number' && precioOriginalML > product.price
+              const porcentajeDescuentoMLCalc = baseShowDescuentoML
                 ? Math.round(((precioOriginalML - product.price) / precioOriginalML) * 100)
-                : 0
+                : undefined
+              const showDescuentoML = baseShowDescuentoML && typeof porcentajeDescuentoMLCalc === 'number' && porcentajeDescuentoMLCalc >= 1
+              const porcentajeDescuentoML = showDescuentoML ? porcentajeDescuentoMLCalc : undefined
               
               return (
                 <div 
@@ -181,21 +203,21 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                       loading="lazy"
                       decoding="async"
                     />
-                    {(tieneDescuento && porcentajeDescuento) || tieneDescuentoML ? (
+                    {(showDescuentoTienda || showDescuentoML) ? (
                       <div className="product-badge" style={{
-                        background: tieneDescuentoML
+                        background: showDescuentoML
                           ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)'
                           : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
-                        color: tieneDescuentoML ? '#000' : 'white',
-                        boxShadow: tieneDescuentoML
+                        color: showDescuentoML ? '#000' : 'white',
+                        boxShadow: showDescuentoML
                           ? '0 4px 15px rgba(255, 230, 0, 0.4)'
                           : '0 4px 15px rgba(211, 47, 47, 0.4)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px'
                       }}>
-                        {tieneDescuentoML && <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>ML</span>}
-                        -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
+                        {showDescuentoML && <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>ML</span>}
+                        -{showDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
                       </div>
                     ) : (
                       <div className="product-badge">
@@ -206,10 +228,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                   
                   <div className="product-info">
                     <h3 className="product-name">{product.title}</h3>
-                    {(product.metrics?.reviews.rating_average && product.metrics.reviews.rating_average > 0) && 
-                      renderStars(product.metrics.reviews.rating_average)}
+                    {((product.metrics?.reviews?.rating_average ?? 0) > 0) && 
+                      renderStars(product.metrics?.reviews?.rating_average)}
                     <div className="product-price-container">
-                      {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
+                      {(showDescuentoTienda || showDescuentoML) ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ 
                             textDecoration: 'line-through', 
@@ -217,7 +239,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                             fontSize: '1rem',
                             lineHeight: '1'
                           }}>
-                            {formatPrice(tieneDescuentoML ? (precioOriginalML ?? 0) : (precioOriginal ?? 0))}
+                            {formatPrice(showDescuentoML ? (precioOriginalML as number) : (precioOriginal as number))}
                           </span>
                           <span className="product-price" style={{ 
                             color: '#d32f2f',

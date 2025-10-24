@@ -156,7 +156,7 @@ const HomePage: React.FC = () => {
         <FeaturedProducts limit={12} />
       </Suspense>
       
-      {/* Sección de productos con descuento - Carga solo cuando esté cerca del viewport */}
+      {/* Sección de productos con descuento - Carga solo cuando esté cerca del viewport 
       <LazySection 
         fallback={<ProductsSkeleton title="🔥 Productos en Descuento" />}
         minHeight="500px"
@@ -165,6 +165,9 @@ const HomePage: React.FC = () => {
           <DiscountedProducts limit={8} />
         </Suspense>
       </LazySection>
+
+      */
+      }
       
       {/* Segunda sección de categorías */}
       <ProductCategories2 />
