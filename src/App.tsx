@@ -56,6 +56,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import AdminNotificationsPage from './pages/AdminNotificationsPage'
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -97,6 +98,7 @@ function App() {
               <Route path="/admin/eventos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminEventos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de eventos */}
               <Route path="/admin/destacados" element={<ProtectedRoute><AdminDestacados /></ProtectedRoute>} /> {/* 🆕 Ruta de destacados */}
               <Route path="/admin/duplicados" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDuplicadosPage /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de duplicados */}
+              <Route path="/admin/notificaciones" element={<ProtectedRoute><AdminNotificationsPage /></ProtectedRoute>} />
               
               {/* Rutas de resultado de pago */}
               <Route path="/payment-success" element={<PaymentSuccessPage />} />

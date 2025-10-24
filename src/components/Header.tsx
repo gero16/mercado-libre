@@ -10,7 +10,7 @@ const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 const Header: React.FC = () => {
   const { cartItemCount, setCartOpen, cartOpen } = useCart()
   const navigate = useNavigate()
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, logout, user, token } = useAuth() as any
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -18,6 +18,41 @@ const Header: React.FC = () => {
 
   const [categoryCounts, setCategoryCounts] = useState<{ id: string, count: number }[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
+
+  // Notificaciones admin
+  const [notifyOpen, setNotifyOpen] = useState(false)
+  const [notifications, setNotifications] = useState<Array<any>>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isLoadingNotifs, setIsLoadingNotifs] = useState(false)
+
+  const fetchNotifications = async () => {
+    try {
+      setIsLoadingNotifs(true)
+      const headers: Record<string, string> = { Accept: 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const res = await fetch(`${API_BASE_URL}/api/admin/notifications?page=1&pageSize=10&_ts=${Date.now()}`, { headers, cache: 'no-store' })
+      if (!res.ok) throw new Error('Error cargando notificaciones')
+      const data = await res.json()
+      const items = Array.isArray(data?.items) ? data.items : []
+      setNotifications(items)
+      setUnreadCount(items.filter((n: any) => n.status === 'unread').length)
+    } catch (e) {
+      // silencioso
+    } finally {
+      setIsLoadingNotifs(false)
+    }
+  }
+
+  const markNotificationRead = async (id: string) => {
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const res = await fetch(`${API_BASE_URL}/api/admin/notifications/${id}/read`, { method: 'PATCH', headers })
+      if (!res.ok) return
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, status: 'read' } : n))
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    } catch {}
+  }
 
   useEffect(() => {
     if (location.pathname === '/login') {
@@ -74,6 +109,15 @@ const Header: React.FC = () => {
     load()
     return () => { mounted = false }
   }, [location.pathname])
+
+  // Cargar notificaciones periódicamente solo para admin autenticado
+  useEffect(() => {
+    if (!isAuthenticated || user?.rol !== 'admin') return
+    let mounted = true
+    fetchNotifications()
+    const id = setInterval(() => { if (mounted) fetchNotifications() }, 60000)
+    return () => { mounted = false; clearInterval(id) }
+  }, [isAuthenticated, user?.rol])
 
   // Construir categorías dinámicas con conteo > 0
   const dynamicCategories = useMemo(() => {
@@ -153,6 +197,52 @@ const Header: React.FC = () => {
             </li>
             
             <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
+
+            {/* Notificaciones admin */}
+            {isAuthenticated && user?.rol === 'admin' && (
+              <li style={{ position: 'relative' }}
+                  onMouseEnter={() => { setNotifyOpen(true); if (!notifications.length) fetchNotifications() }}
+                  onMouseLeave={() => setNotifyOpen(false)}>
+                <button
+                  className="notify-bell"
+                  onClick={() => { setNotifyOpen(o => !o); if (!notifications.length) fetchNotifications() }}
+                  title="Notificaciones"
+                  style={{ position: 'relative', background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}
+                >
+                  🔔
+                  {unreadCount > 0 && <span className="notify-badge">{unreadCount}</span>}
+                </button>
+                {notifyOpen && (
+                  <div className="notify-dropdown">
+                    <div className="notify-header">Notificaciones</div>
+                    <div className="notify-list">
+                      {isLoadingNotifs && <div className="notify-empty">Cargando…</div>}
+                      {!isLoadingNotifs && notifications.length === 0 && (
+                        <div className="notify-empty">Sin notificaciones</div>
+                      )}
+                      {notifications.map((n) => (
+                        <div key={n._id} className={`notify-item ${n.status === 'unread' ? 'unread' : ''}`}>
+                          <div className="notify-main">
+                            <div className="notify-title">{n.message || `${(n.type || 'order').toUpperCase()} ${n.order_id || ''}`}</div>
+                            <div className="notify-meta">
+                              {n.total ? <span>${n.total} {n.currency || ''}</span> : null}
+                              {n.customer_email ? <span> · {n.customer_email}</span> : null}
+                            </div>
+                          </div>
+                          {n.status === 'unread' && (
+                            <button className="notify-read" onClick={() => markNotificationRead(n._id)}>Marcar leída</button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="notify-footer" style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+                      <button className="notify-refresh" onClick={fetchNotifications}>Actualizar</button>
+                      <button className="notify-refresh" onClick={() => navigate('/admin/notificaciones')}>Ver todas</button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            )}
 
             {/* Autenticación */}
             {!isAuthenticated ? (
