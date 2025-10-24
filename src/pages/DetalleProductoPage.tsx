@@ -271,6 +271,10 @@ const DetalleProductoPage: React.FC = () => {
   const precioConDescuento = tieneDescuento 
     ? Math.round(precioBase * (1 - porcentajeDescuento / 100) * 100) / 100 
     : precioBase
+  const useUYU = true
+  const conv = 1
+  const displayPrice = useUYU ? Math.round(precioBase * conv * 100) / 100 : precioBase
+  const displayDiscountPrice = useUYU ? Math.round(precioConDescuento * conv * 100) / 100 : precioConDescuento
 
   // Función helper para obtener el stock de una variante específica
   const getStockVariante = (): number => {
@@ -480,13 +484,13 @@ const DetalleProductoPage: React.FC = () => {
                   <div className="precio-con-descuento">
                     <div className="precio-descuento-header">
                       <span className="badge-descuento">-{porcentajeDescuento}%</span>
-                      <p className="precio-original-tachado">US$ {precioBase.toFixed(2)}</p>
+                      <p className="precio-original-tachado">{useUYU ? `UYU ${displayPrice.toFixed(2)}` : `US$ ${precioBase.toFixed(2)}`}</p>
                     </div>
-                    <h2 className='h2-precio precio-rebajado'>US$ {precioConDescuento.toFixed(2)}</h2>
-                    <p className="ahorro-texto">¡Ahorras US$ {(precioBase - precioConDescuento).toFixed(2)}!</p>
+                    <h2 className='h2-precio precio-rebajado'>{useUYU ? `UYU ${displayDiscountPrice.toFixed(2)}` : `US$ ${precioConDescuento.toFixed(2)}`}</h2>
+                    <p className="ahorro-texto">{useUYU ? `¡Ahorras UYU ${(displayPrice - displayDiscountPrice).toFixed(2)}!` : `¡Ahorras US$ ${(precioBase - precioConDescuento).toFixed(2)}!`}</p>
                   </div>
                 ) : (
-                  <h2 className='h2-precio'>US$ {precioBase.toFixed(2)}</h2>
+                  <h2 className='h2-precio'>{useUYU ? `UYU ${displayPrice.toFixed(2)}` : `US$ ${precioBase.toFixed(2)}`}</h2>
                 )}
                 {/* Solo mostrar disponibilidad si hay stock */}
                 {getStockVariante() > 0 && (

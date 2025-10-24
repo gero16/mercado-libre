@@ -157,12 +157,14 @@ export class MercadoPagoService {
    * Convierte los items del carrito al formato de MercadoPago
    */
   static formatCartItemsForMP(cartItems: any[]): PreferenceItem[] {
+    const useUYU = FEATURE_FLAGS.PRICE_IN_UYU
+    const rate = Number(FEATURE_FLAGS.PRICE_CONVERSION_RATE || 1)
     return cartItems.map((item, index) => ({
       id: item.ml_id?.toString() || item.id?.toString() || index.toString(),
       title: item.name || item.title,
       quantity: item.cantidad || item.quantity || 1,
-      currency_id: 'USD', // 💵 Dólares estadounidenses
-      unit_price: item.price
+      currency_id: useUYU ? 'UYU' : 'USD',
+      unit_price: useUYU ? Math.round((item.price * rate) * 100) / 100 : item.price
     }))
   }
 
