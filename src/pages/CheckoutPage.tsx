@@ -3,6 +3,8 @@ import { useCart } from '../context/CartContext'
 import { useNavigate } from 'react-router-dom'
 import { Payment } from '@mercadopago/sdk-react'
 import { useMercadoPago } from '../hooks/useMercadoPago'
+import { FEATURE_FLAGS } from '../config/featureFlags'
+import { MercadoPagoService } from '../services/mercadopago'
 
 interface CustomerData {
   name: string
@@ -113,13 +115,21 @@ const CheckoutPage: React.FC = () => {
 
     try {
       setIsCreatingPreference(true)
-      
-      // Crear preferencia en MercadoPago
-      await createPreference(cartItems, customerData)
-      
-      // Mostrar el Payment Brick
-      setShowPaymentBrick(true)
-      
+
+      if (FEATURE_FLAGS.USE_CHECKOUT_PRO) {
+        // Crear preferencia vía backend y redirigir a Checkout Pro
+        const pref = await MercadoPagoService.createCheckoutProPreference(cartItems as any[], customerData as any)
+        if (pref?.init_point) {
+          window.location.href = pref.init_point
+          return
+        }
+        throw new Error('No se obtuvo init_point de Checkout Pro')
+      } else {
+        // Flujo Bricks (existente)
+        await createPreference(cartItems, customerData)
+        setShowPaymentBrick(true)
+      }
+
     } catch (error) {
       console.error('Error creando preferencia:', error)
       alert('Error creando la preferencia de pago. Por favor intenta nuevamente.')
@@ -252,7 +262,7 @@ const CheckoutPage: React.FC = () => {
           </form>
           
           {/* Modal de Payment Brick de MercadoPago */}
-          {showPaymentBrick && preferenceId && (
+          {!FEATURE_FLAGS.USE_CHECKOUT_PRO && showPaymentBrick && preferenceId && (
             <div className="payment-modal-overlay" onClick={() => setShowPaymentBrick(false)}>
               <div className="payment-modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="payment-modal-header">
