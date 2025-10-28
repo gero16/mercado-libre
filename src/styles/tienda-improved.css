@@ -367,6 +367,8 @@
   transition: all 0.2s ease;
   width: 100%;
   margin-top: auto;
+  visibility: visible !important; /* Mostrar siempre (sobrescribe CSS original) */
+  opacity: 1 !important;
 }
 
 .producto .add:hover:not(:disabled) {
@@ -378,6 +380,14 @@
   background-color: #9ca3af;
   cursor: not-allowed;
   transform: none;
+}
+
+/* En dispositivos sin hover (móviles), asegurar visibilidad del botón */
+@media (hover: none) {
+  .pagina-principal .producto .add {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 
