@@ -1,8 +1,6 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
 
 const PromotionalBanner: React.FC = () => {
-  const navigate = useNavigate()
   return (
     <div className="promotional-banner">
       <div className="promotional-content">
