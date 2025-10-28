@@ -381,6 +381,8 @@ const TiendaMLPage: React.FC = () => {
   const [isServerSearch, setIsServerSearch] = useState(false)
   const [serverTotalItems, setServerTotalItems] = useState(0)
   const [isFetchingResults, setIsFetchingResults] = useState(false)
+  // 🆕 Total global reportado por backend (independiente de la deduplicación local)
+  const [allServerTotal, setAllServerTotal] = useState(0)
   
   const { addToCart } = useCart()
 
@@ -400,7 +402,7 @@ const TiendaMLPage: React.FC = () => {
               const ls = entry as any
               if (!ls.hadRecentInput) {
                 clsValue += ls.value || 0
-                console.log('📏 CLS fragment:', ls.value)
+               
               }
             }
           }
@@ -458,6 +460,16 @@ const TiendaMLPage: React.FC = () => {
       }
     }
     loadCategoriesFromBackend()
+  }, [])
+
+  // 🆕 Obtener total global de items desde backend para mostrar conteo real
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await productsCache.getProductsPage({ limit: 1, offset: 0, status: 'all' }, /*preferNoFields*/ true)
+        if (typeof res?.total === 'number') setAllServerTotal(res.total)
+      } catch {}
+    })()
   }, [])
 
   // Mantener contadores sincronizados con los items cargados (sin perder categorías del backend)
@@ -986,8 +998,9 @@ useEffect(() => {
     setFilteredItems(filtered)
     
     // 🚀 Calcular paginación
-    const totalItems = filtered.length
-    const totalPagesCalculated = Math.ceil(totalItems / itemsPerPage)
+    const localTotal = filtered.length
+    const effectiveTotal = allServerTotal > 0 ? allServerTotal : localTotal
+    const totalPagesCalculated = Math.ceil(effectiveTotal / itemsPerPage)
     setTotalPages(totalPagesCalculated)
     
     // 🚀 Ajustar página actual si es necesario
@@ -1001,7 +1014,7 @@ useEffect(() => {
     const itemsForCurrentPage = filtered.slice(startIndex, endIndex)
     
     setPaginatedItems(itemsForCurrentPage)
-  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, pedidoFilter, currentPage, itemsPerPage, isServerSearch])
+  }, [itemsTienda, searchQuery, categoryFilter, priceFilter, stockFilter, pedidoFilter, currentPage, itemsPerPage, isServerSearch, allServerTotal])
 
   // Debounce y carga de búsqueda/categoría modo servidor
   useEffect(() => {
@@ -1202,18 +1215,22 @@ useEffect(() => {
     setTimeout(() => {
       setIsChangingPage(false)
     }, 300)
-    // Si estamos en modo servidor, cargar la página solicitada
-    if (isServerSearch) {
+    // Si estamos en modo servidor (o forzamos para mostrar todo), cargar la página solicitada
+    if (isServerSearch || (searchQuery.trim() === '' && categoryFilter === 'mostrar-todo')) {
+      if (!isServerSearch) setIsServerSearch(true)
       setIsFetchingResults(true)
       console.log('⏳ Paginando (server)...')
       const q = searchQuery.trim()
-      fetchServerSearch(page, itemsPerPage, q, q ? undefined : categoryFilter).then(({ items }) => {
+      fetchServerSearch(page, itemsPerPage, q, q ? undefined : categoryFilter).then(({ items, total }) => {
         let filtered = items
         if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
         filtered = filtered.filter(i => i.price >= priceFilter)
         if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
         if (pedidoFilter) filtered = filtered.filter(i => i.productoPadre?.tipo_venta === 'dropshipping')
         setPaginatedItems(filtered)
+        const totalCalc = Math.max(total || 0, filtered.length)
+        setServerTotalItems(totalCalc)
+        setTotalPages(Math.max(1, Math.ceil(totalCalc / itemsPerPage)))
       }).finally(() => setIsFetchingResults(false))
     }
   }
@@ -1221,7 +1238,11 @@ useEffect(() => {
   const handleItemsPerPageChange = (items: number) => {
     setItemsPerPage(items)
     setCurrentPage(1) // Reset a la primera página
-    if (isServerSearch) {
+    // Forzar modo servidor al cambiar a páginas grandes aun en "Mostrar Todo"
+    if (!isServerSearch && categoryFilter === 'mostrar-todo' && searchQuery.trim() === '') {
+      setIsServerSearch(true)
+    }
+    if (isServerSearch || (searchQuery.trim() === '' && categoryFilter === 'mostrar-todo')) {
       setIsFetchingResults(true)
       console.log('⏳ Cambiando items por página (server)...')
       const q = searchQuery.trim()
@@ -1773,11 +1794,11 @@ useEffect(() => {
         </div>
 
         {/* 🚀 Controles de paginación */}
-        {(isServerSearch ? serverTotalItems : filteredItems.length) > 0 && (
+        {(isServerSearch ? serverTotalItems : (allServerTotal || filteredItems.length)) > 0 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            totalItems={isServerSearch ? serverTotalItems : filteredItems.length}
+            totalItems={isServerSearch ? serverTotalItems : (allServerTotal || filteredItems.length)}
             itemsPerPage={itemsPerPage}
             onPageChange={handlePageChange}
             onItemsPerPageChange={handleItemsPerPageChange}
