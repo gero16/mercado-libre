@@ -103,6 +103,11 @@ const AdminPage: React.FC = () => {
         .map(v => (typeof v?.stock === 'number' ? v.stock : 0))
         .reduce((sum, n) => sum + n, 0)
     }
+    // Calcular stock efectivo primero (usado más abajo)
+    const effectiveStock = (producto.variantes && producto.variantes.length > 0)
+      ? totalVariantsStock
+      : producto.available_quantity
+
     const diasPreparacion = producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0
     const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
     const tiempoTotalEntrega = diasPreparacion + diasEnvio
@@ -117,9 +122,7 @@ const AdminPage: React.FC = () => {
     const fallbackStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
     const esStockFisico = (tipoVentaProd === 'stock_fisico') || (tipoVentaProd === 'mixto' && effectiveStock > 0) || (!tipoVentaProd && fallbackStockFisico)
 
-    const effectiveStock = (producto.variantes && producto.variantes.length > 0)
-      ? totalVariantsStock
-      : producto.available_quantity
+    // effectiveStock ya calculado arriba
 
     const result: AdminItem[] = []
     result.push({
