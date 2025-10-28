@@ -120,7 +120,8 @@ const AdminPage: React.FC = () => {
     const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
     const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
     const fallbackStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
-    const esStockFisico = (tipoVentaProd === 'stock_fisico') || (tipoVentaProd === 'mixto' && effectiveStock > 0) || (!tipoVentaProd && fallbackStockFisico)
+    const hasAnyStock = ((producto.variantes && producto.variantes.length > 0) ? totalVariantsStock : (producto.available_quantity || 0)) > 0
+    const esStockFisico = (tipoVentaProd === 'stock_fisico') || (tipoVentaProd === 'mixto' && hasAnyStock) || (!tipoVentaProd && fallbackStockFisico)
 
     // effectiveStock ya calculado arriba
 
