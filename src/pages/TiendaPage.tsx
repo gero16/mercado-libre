@@ -1724,7 +1724,14 @@ useEffect(() => {
                       alt={item.title}
                       loading="lazy"
                       decoding="async"
+                      width={250}
+                      height={250}
                       style={{
+                        width: '100%',
+                        height: 'auto',
+                        aspectRatio: '1 / 1',
+                        objectFit: 'cover',
+                        display: 'block',
                         willChange: 'auto'
                       }}
                     />
