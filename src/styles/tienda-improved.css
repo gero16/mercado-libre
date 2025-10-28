@@ -50,6 +50,14 @@
   margin-top: 16px;
 }
 
+/* Mobile: 2 categorías por fila */
+@media (max-width: 619px) {
+  .categorias-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
 .categoria-filtro {
   display: flex;
   justify-content: space-between;
@@ -106,11 +114,11 @@
   overflow: visible !important;
 }
 
-/* Mobile: 1 producto por fila - SOBRESCRIBIR CSS ORIGINAL */
+/* Mobile: 2 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
 @media (max-width: 619px) {
   .pagina-principal .productos {
-    grid-template-columns: 1fr !important;
-    gap: 15px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
 }
 
