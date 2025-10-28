@@ -45,9 +45,9 @@ const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   // Array de imágenes para el carrusel
   const carouselImages = [
-    'https://res.cloudinary.com/geronicola/image/upload/v1760638797/poppy-shop/q2l0fkzp85v6hiiomcgc.png',
-    'https://res.cloudinary.com/geronicola/image/upload/v1760638796/poppy-shop/fdshlrd4xbh9w2up72kw.png',
-    'https://res.cloudinary.com/geronicola/image/upload/v1760638797/poppy-shop/yx7dr9n6seqqhqedvkfz.png'
+    'https://res.cloudinary.com/geronicola/image/upload/v1761663362/poppy-shop/ovqszuc7akrmbmpfe4qk.webp',
+    'https://res.cloudinary.com/geronicola/image/upload/v1761663361/poppy-shop/vwokbibws6jqlcjja2q3.webp',
+    'https://res.cloudinary.com/geronicola/image/upload/v1761663362/poppy-shop/yrpuzgsq4jaohsvpqhpk.webp'
   ]
 
   // Evento activo (dinámico desde backend)
