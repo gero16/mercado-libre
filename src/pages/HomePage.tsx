@@ -54,6 +54,23 @@ const HomePage: React.FC = () => {
   const [activeEvent, setActiveEvent] = useState<{ slug: string; titulo: string; theme?: string; fecha_fin?: string; subtitle?: string; discount_text?: string } | null>(null)
 
   useEffect(() => {
+    // Preload de la imagen principal del carrusel (LCP) con alta prioridad
+    try {
+      const href = carouselImages[0]
+      if (href) {
+        const link = document.createElement('link')
+        link.rel = 'preload'
+        link.as = 'image'
+        ;(link as any).fetchPriority = 'high'
+        link.href = href
+        link.crossOrigin = 'anonymous'
+        document.head.appendChild(link)
+        return () => { try { document.head.removeChild(link) } catch {} }
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
     let mounted = true
     EventService.listActive()
       .then(res => {
