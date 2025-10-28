@@ -271,7 +271,7 @@ const DetalleProductoPage: React.FC = () => {
   const precioConDescuento = tieneDescuento 
     ? Math.round(precioBase * (1 - porcentajeDescuento / 100) * 100) / 100 
     : precioBase
-  const useUYU = true
+  const useUYU = false
   const conv = 1
   const displayPrice = useUYU ? Math.round(precioBase * conv * 100) / 100 : precioBase
   const displayDiscountPrice = useUYU ? Math.round(precioConDescuento * conv * 100) / 100 : precioConDescuento
