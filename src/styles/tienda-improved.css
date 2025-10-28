@@ -122,6 +122,25 @@
   }
 }
 
+/* Evitar overflow de categorías en mobile */
+@media (max-width: 619px) {
+  .categorias-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    align-items: stretch !important;
+  }
+  .categoria-filtro {
+    min-width: 0 !important;
+    padding: 8px 10px !important;
+  }
+  .categoria-nombre {
+    white-space: normal !important;
+    word-break: break-word !important;
+    font-size: 12px !important;
+  }
+}
+
 /* Tablet pequeña: 2 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
 @media (min-width: 620px) and (max-width: 899px) {
   .pagina-principal .productos {
