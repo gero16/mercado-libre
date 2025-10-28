@@ -486,6 +486,53 @@ footer img {
   font-family: 'Roboto Slab', serif;
 }
 
+/* ==========================
+   Footer - Responsive Mobile
+   ========================== */
+@media (max-width: 619px) {
+  footer {
+    padding: 12px;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .preguntas {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .redes-sociales {
+    margin-right: 0;
+    flex-direction: row;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .social-link span {
+    font-size: 12px;
+  }
+
+  .lista-pagos {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .img-pagos {
+    margin: 0 10px 0 0;
+    height: 16px;
+    width: auto;
+  }
+}
+
   /*** PANTALLA DE CARGA ***/
   .preloader {
     display: none;
