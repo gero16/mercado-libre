@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import ImageCarousel from '../components/ImageCarousel'
 import SpecialPromotion from '../components/SpecialPromotion'
 import ProductCategories from '../components/ProductCategories'
@@ -44,11 +44,24 @@ const ProductsSkeleton = ({ title }: { title: string }) => (
 const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   // Array de imágenes para el carrusel
-  const carouselImages = [
+  const rawCarouselImages = [
     'https://res.cloudinary.com/geronicola/image/upload/v1761663362/poppy-shop/ovqszuc7akrmbmpfe4qk.webp',
     'https://res.cloudinary.com/geronicola/image/upload/v1761663361/poppy-shop/vwokbibws6jqlcjja2q3.webp',
     'https://res.cloudinary.com/geronicola/image/upload/v1761663362/poppy-shop/yrpuzgsq4jaohsvpqhpk.webp'
   ]
+
+  const optimizeCloudinary = (url: string, width: number) => {
+    try {
+      if (!url.includes('/upload/')) return url
+      return url.replace('/upload/', `/upload/f_auto,q_auto,w_${Math.max(320, Math.min(1920, Math.round(width)))} /`).replace(/\s+/g, '')
+    } catch { return url }
+  }
+
+  const carouselImages = useMemo(() => {
+    const vw = Math.max(360, typeof window !== 'undefined' ? window.innerWidth : 1280)
+    const targetW = vw <= 480 ? 720 : vw <= 768 ? 960 : 1280
+    return rawCarouselImages.map(u => optimizeCloudinary(u, targetW))
+  }, [])
 
   // Evento activo (dinámico desde backend)
   const [activeEvent, setActiveEvent] = useState<{ slug: string; titulo: string; theme?: string; fecha_fin?: string; subtitle?: string; discount_text?: string } | null>(null)
@@ -56,7 +69,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     // Preload de la imagen principal del carrusel (LCP) con alta prioridad
     try {
-      const href = carouselImages[0]
+      const href = rawCarouselImages[0]
       if (href) {
         const link = document.createElement('link')
         link.rel = 'preload'

@@ -1,27 +1,39 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import '../css/instagram-section.css'
 
 const InstagramSection: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Lazy load del script solo cuando la sección esté cercana al viewport
   useEffect(() => {
-    // Cargar el script de Instagram para procesar los embeds
+    const el = containerRef.current
+    if (!el) return
+    const obs = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        setIsVisible(true)
+        obs.disconnect()
+      }
+    }, { root: null, rootMargin: '300px', threshold: 0 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isVisible) return
     const script = document.createElement('script')
-    script.src = '//www.instagram.com/embed.js'
+    script.src = 'https://www.instagram.com/embed.js'
     script.async = true
     document.body.appendChild(script)
-
-    // Reprocesar los embeds si el script ya estaba cargado
     if (window.instgrm) {
-      window.instgrm.Embeds.process()
+      try { window.instgrm.Embeds.process() } catch {}
     }
-
-    return () => {
-      document.body.removeChild(script)
-    }
-  }, [])
+    return () => { try { document.body.removeChild(script) } catch {} }
+  }, [isVisible])
 
   return (
     <section className="instagram-section">
-      <div className="instagram-container">
+      <div className="instagram-container" ref={containerRef}>
         <div className="instagram-header">
           <h2 className="instagram-title">
             <svg 
