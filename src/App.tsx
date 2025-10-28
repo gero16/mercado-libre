@@ -53,7 +53,7 @@ import './css/welcome-section.css' // 🆕 Importar estilos de la sección de bi
 import './css/faq.css' // 🆕 Importar estilos de preguntas frecuentes
 import './css/header-dropdown.css' // 🆕 Importar estilos del dropdown del header
 import { AuthProvider } from './context/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
+import AdminRoute from './components/AdminRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AdminNotificationsPage from './pages/AdminNotificationsPage'
@@ -88,17 +88,17 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               
-              {/* Rutas de administración protegidas */}
-              <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminPage /></Suspense></ProtectedRoute>} />
-              <Route path="/admin/dropshipping" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDropshippingPage /></Suspense></ProtectedRoute>} />
-              <Route path="/admin/orders" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminOrdersPage /></Suspense></ProtectedRoute>} />
-              <Route path="/admin/clientes" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminClientesPage /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de clientes */}
-              <Route path="/admin/descuentos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDescuentos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de descuentos */}
-              <Route path="/admin/cupones" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminCupones /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de cupones */}
-              <Route path="/admin/eventos" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminEventos /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de eventos */}
-              <Route path="/admin/destacados" element={<ProtectedRoute><AdminDestacados /></ProtectedRoute>} /> {/* 🆕 Ruta de destacados */}
-              <Route path="/admin/duplicados" element={<ProtectedRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDuplicadosPage /></Suspense></ProtectedRoute>} /> {/* 🆕 Ruta de duplicados */}
-              <Route path="/admin/notificaciones" element={<ProtectedRoute><AdminNotificationsPage /></ProtectedRoute>} />
+              {/* Rutas de administración protegidas (solo admin) */}
+              <Route path="/admin" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminPage /></Suspense></AdminRoute>} />
+              <Route path="/admin/dropshipping" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDropshippingPage /></Suspense></AdminRoute>} />
+              <Route path="/admin/orders" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminOrdersPage /></Suspense></AdminRoute>} />
+              <Route path="/admin/clientes" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminClientesPage /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de clientes */}
+              <Route path="/admin/descuentos" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDescuentos /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de descuentos */}
+              <Route path="/admin/cupones" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminCupones /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de cupones */}
+              <Route path="/admin/eventos" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminEventos /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de eventos */}
+              <Route path="/admin/destacados" element={<AdminRoute><AdminDestacados /></AdminRoute>} /> {/* 🆕 Ruta de destacados */}
+              <Route path="/admin/duplicados" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDuplicadosPage /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de duplicados */}
+              <Route path="/admin/notificaciones" element={<AdminRoute><AdminNotificationsPage /></AdminRoute>} />
               
               {/* Rutas de resultado de pago */}
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
