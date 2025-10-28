@@ -8,6 +8,7 @@ import '../styles/categoryFilter.css'
 import '../styles/pagination.css'
 import '../styles/tienda-improved.css'
 import { productsCache } from '../services/productsCache'
+import { MetricsService } from '../services/event'
 
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
@@ -383,7 +384,52 @@ const TiendaMLPage: React.FC = () => {
   
   const { addToCart } = useCart()
 
-  // 🔍 Efecto para actualizar searchQuery cuando cambie el parámetro de la URL
+  // 🧪 Métricas Web Vitals + envío a backend
+  useEffect(() => {
+    try {
+      if ('PerformanceObserver' in window) {
+        let lcpValue: number | undefined
+        let clsValue = 0
+        const po = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if ((entry as any).name === 'largest-contentful-paint') {
+              lcpValue = entry.startTime
+              console.log('📏 LCP:', Math.round(lcpValue), 'ms')
+            }
+            if (entry.entryType === 'layout-shift') {
+              const ls = entry as any
+              if (!ls.hadRecentInput) {
+                clsValue += ls.value || 0
+                console.log('📏 CLS fragment:', ls.value)
+              }
+            }
+          }
+        })
+        try { po.observe({ type: 'largest-contentful-paint', buffered: true } as any) } catch {}
+        try { po.observe({ type: 'layout-shift', buffered: true } as any) } catch {}
+
+        const send = async () => {
+          const measures: Array<{ name: string; duration: number }> = []
+          try {
+            const perf = performance.getEntriesByType('measure') as PerformanceMeasure[]
+            for (const m of perf) measures.push({ name: m.name, duration: m.duration })
+          } catch {}
+          await MetricsService.sendPerf({
+            page: 'tienda',
+            lcp: typeof lcpValue === 'number' ? lcpValue : undefined,
+            cls: clsValue,
+            measures,
+            url: typeof window !== 'undefined' ? window.location.href : undefined
+          })
+        }
+        window.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden') send()
+        })
+        window.addEventListener('pagehide', send)
+      }
+    } catch {}
+  }, [])
+
   useEffect(() => {
     // Cargar categorías desde backend para alinear con el header
     const loadCategoriesFromBackend = async () => {
@@ -514,7 +560,7 @@ const TiendaMLPage: React.FC = () => {
         'variantes.color','variantes.size','variantes.price','variantes.stock','variantes.images.url',
         'descuento','descuento_ml.original_price','sold_quantity','health'
       ].join(',')
-      const { items } = await productsCache.getProductsPage({ limit, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
+      const { items } = await productsCache.getProductsPage({ limit, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ false)
       const endFetch = performance.now()
       console.log(`✅ Servidor respondió en: ${(endFetch - startFetch).toFixed(0)}ms`)
       return Array.isArray(items) ? items : []
@@ -543,17 +589,17 @@ const TiendaMLPage: React.FC = () => {
       if (ids.length > 0) {
         // Si hay texto de búsqueda y categoría, usar endpoint general con ambos filtros (q + categoryIds)
         if (query && query.trim().length > 0) {
-          const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query, categoryIds: ids }, /*preferNoFields*/ true)
+          const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query, categoryIds: ids }, /*preferNoFields*/ false)
           productos = res.items
           total = res.total
         } else {
           // Solo categoría, sin texto: usar endpoint específico por categorías
-          const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ true)
+          const res = await productsCache.getProductsByCategories({ categoryIds: ids, limit: perPage, offset, fields: FIELDS, status: 'all' }, /*preferNoFields*/ false)
           productos = res.items
           total = res.total
         }
       } else {
-        const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query }, /*preferNoFields*/ true)
+        const res = await productsCache.getProductsPage({ limit: perPage, offset, fields: FIELDS, status: 'all', q: query }, /*preferNoFields*/ false)
         productos = res.items
         total = res.total
       }
@@ -630,11 +676,12 @@ useEffect(() => {
     return () => { mounted = false }
   }
   const loadProducts = async () => {
+      performance.mark('tienda:init:start')
       const startTime = performance.now()
-      console.log('⏱️ Iniciando carga RÁPIDA (primeros 120 productos desde servidor)...')
+      console.log('⏱️ Iniciando carga RÁPIDA (primeros 60 productos desde servidor)...')
       
-      // 🚀 FASE 1: Cargar SOLO los primeros 120 productos desde el servidor (rápido)
-      const first50Products = await fetchProductsPaginated(120, 0)
+      // 🚀 FASE 1: Cargar SOLO los primeros 60 productos desde el servidor (rápido)
+      const first50Products = await fetchProductsPaginated(60, 0)
       const fetchTime = performance.now()
       console.log(`📡 Primeros 120 productos cargados en: ${(fetchTime - startTime).toFixed(0)}ms`)
       console.log('🔍 Total productos recibidos:', first50Products.length)
@@ -763,15 +810,18 @@ useEffect(() => {
       
       const endTime = performance.now()
       const totalTime = endTime - startTime
-      console.log(`✅ Carga INICIAL (120 productos) completada en: ${totalTime.toFixed(0)}ms`)
+      console.log(`✅ Carga INICIAL (60 productos) completada en: ${totalTime.toFixed(0)}ms`)
       console.log(`   - Fetch API: ${(fetchTime - startTime).toFixed(0)}ms`)
       console.log(`   - Procesamiento: ${(endTime - fetchTime).toFixed(0)}ms`)
+      performance.mark('tienda:init:end')
+      try { performance.measure('tienda:init', 'tienda:init:start', 'tienda:init:end') } catch {}
       
       if (!mounted) return
       setLoading(false)
       
       // 🔄 FASE 2: Cargar el resto en segundo plano (sin bloquear UI) DESDE EL SERVIDOR
       console.log(`🔄 Cargando productos restantes en segundo plano...`)
+      performance.mark('tienda:bg:start')
       setIsBackgroundLoading(true)
       
       setTimeout(async () => {
@@ -780,7 +830,7 @@ useEffect(() => {
         
         // Cargar todos los productos restantes en lotes de 100
         let allRemainingProducts: ProductoML[] = []
-        let currentOffset = 120
+        let currentOffset = 60
         const batchSize = 100
         let hasMore = true
         
@@ -888,6 +938,8 @@ useEffect(() => {
           
           console.log(`🎉 TODOS los productos cargados (${allRemainingProducts.length + 50} total)`)
           setIsBackgroundLoading(false)
+          performance.mark('tienda:bg:end')
+          try { performance.measure('tienda:bg', 'tienda:bg:start', 'tienda:bg:end') } catch {}
         }, 100) // Pequeño delay para no bloquear UI
     }
     loadProducts()

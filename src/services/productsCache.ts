@@ -13,6 +13,8 @@ class ProductsCacheService {
   private cacheTime: number = 0
   private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
   private callbacks: ((products: ProductoML[]) => void)[] = []
+  // 🆕 Caché en memoria por URL para respuestas paginadas
+  private pageResponseCache: Map<string, { time: number; data: { total: number; items: ProductoML[] } }> = new Map()
 
   async getProducts(): Promise<ProductoML[]> {
     // Si ya tenemos cache válido, devolverlo inmediatamente
@@ -63,6 +65,7 @@ class ProductsCacheService {
   clearCache() {
     this.cache = null
     this.cacheTime = 0
+    this.pageResponseCache.clear()
     console.log('🗑️ Caché limpiado')
   }
 
@@ -82,15 +85,25 @@ class ProductsCacheService {
         const csv = Array.isArray(params.categoryIds) ? params.categoryIds.join(',') : params.categoryIds
         if (csv.trim().length > 0) qs.set('categoryIds', csv)
       }
-      qs.set('_ts', String(Date.now()))
       return qs
     }
 
+    // URLs sin _ts para permitir caché HTTP/CDN y memo local
+    const urlPrimary = `${API_BASE_URL}/ml/productos?${buildQS(!!preferNoFields).toString()}`
+    const urlFallback = `${API_BASE_URL}/ml/productos?${buildQS(!preferNoFields).toString()}`
+
+    // Memo en memoria breve
+    const now = Date.now()
+    const memo = this.pageResponseCache.get(urlPrimary)
+    if (memo && (now - memo.time) < this.CACHE_DURATION) {
+      return memo.data
+    }
+
     // Estrategia: si preferNoFields, intentamos primero sin fields; si no, con fields primero
-    let response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(!!preferNoFields).toString()}`)
+    let response = await fetch(urlPrimary)
     if (!response.ok) {
       try {
-        response = await fetch(`${API_BASE_URL}/ml/productos?${buildQS(!preferNoFields).toString()}`)
+        response = await fetch(urlFallback)
       } catch {}
     }
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
@@ -98,7 +111,9 @@ class ProductsCacheService {
 
     // Nueva versión paginada del backend activo { productos, pagination }
     if (data && Array.isArray(data.productos) && data.pagination && typeof data.pagination.total === 'number') {
-      return { total: data.pagination.total, items: data.productos }
+      const result = { total: data.pagination.total, items: data.productos }
+      this.pageResponseCache.set(urlPrimary, { time: now, data: result })
+      return result
     }
 
     // Soportar backends antiguos que devuelven array directo o {registros: [...]}
@@ -107,7 +122,9 @@ class ProductsCacheService {
       const start = Math.max(0, params.offset)
       const end = Math.min(total, start + params.limit)
       const items = data.slice(start, end)
-      return { total, items }
+      const result = { total, items }
+      this.pageResponseCache.set(urlPrimary, { time: now, data: result })
+      return result
     }
     if (data && Array.isArray(data.registros)) {
       // respuesta de /api/productos del backend viejo
@@ -116,18 +133,24 @@ class ProductsCacheService {
       const start = Math.max(0, params.offset)
       const end = Math.min(total, start + params.limit)
       const items = registros.slice(start, end)
-      return { total, items }
+      const result = { total, items }
+      this.pageResponseCache.set(urlPrimary, { time: now, data: result })
+      return result
     }
 
     // Nueva versión paginada { total, items }
     if (typeof data === 'object' && data && Array.isArray(data.items) && typeof data.total === 'number') {
-      return { total: data.total, items: data.items }
+      const result = { total: data.total, items: data.items }
+      this.pageResponseCache.set(urlPrimary, { time: now, data: result })
+      return result
     }
 
     // Fallback seguro
     const items = Array.isArray(data?.items) ? data.items : []
     const total = typeof data?.total === 'number' ? data.total : items.length
-    return { total, items }
+    const result = { total, items }
+    this.pageResponseCache.set(urlPrimary, { time: now, data: result })
+    return result
   }
 
   // 🆕 Paginado para Admin (endpoint protegido)
@@ -200,7 +223,6 @@ class ProductsCacheService {
     if (typeof params.offset === 'number') qp.set('offset', String(params.offset))
     if (params.fields) qp.set('fields', params.fields)
     if (params.status && params.status !== 'all') qp.set('status', params.status)
-    qp.set('_ts', String(Date.now()))
     const url = `${API_BASE_URL}/ml/categories/productos?${qp.toString()}`
     // Intento respetando preferNoFields: si está activo, quitamos fields del query
     const urlWithoutFields = (() => {
@@ -208,7 +230,15 @@ class ProductsCacheService {
       q2.delete('fields')
       return `${API_BASE_URL}/ml/categories/productos?${q2.toString()}`
     })()
-    let response = await fetch(preferNoFields ? urlWithoutFields : url)
+    // Memo por URL para categorías
+    const now = Date.now()
+    const key = preferNoFields ? urlWithoutFields : url
+    const memo = this.pageResponseCache.get(key)
+    if (memo && (now - memo.time) < this.CACHE_DURATION) {
+      return memo.data
+    }
+
+    let response = await fetch(key)
     if (!response.ok) {
       try {
         response = await fetch(preferNoFields ? url : urlWithoutFields)
@@ -217,11 +247,15 @@ class ProductsCacheService {
     if (!response.ok) throw new Error('Error obteniendo productos por categoría')
     const data = await response.json()
     if (typeof data?.total === 'number' && Array.isArray(data?.items)) {
-      return { total: data.total, items: data.items }
+      const result = { total: data.total, items: data.items }
+      this.pageResponseCache.set(key, { time: now, data: result })
+      return result
     }
     const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
     const total = typeof data?.total === 'number' ? data.total : items.length
-    return { total, items }
+    const result = { total, items }
+    this.pageResponseCache.set(key, { time: now, data: result })
+    return result
   }
 }
 

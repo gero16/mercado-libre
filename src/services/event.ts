@@ -75,3 +75,25 @@ export const EventService = {
     return res.json()
   }
 }
+
+// 🆕 Servicio de métricas de performance
+export const MetricsService = {
+  async sendPerf(payload: {
+    page: string
+    lcp?: number
+    cls?: number
+    measures?: Array<{ name: string; duration: number }>
+    url?: string
+  }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/metrics/perf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ ...payload, ts: Date.now(), userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined })
+      })
+      return res.ok
+    } catch {
+      return false
+    }
+  }
+}
