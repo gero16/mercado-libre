@@ -467,11 +467,11 @@ const DetalleProductoPage: React.FC = () => {
               </div>
             )}
 
-            {/* Mostrar información de dropshipping si aplica */}
-            {isDropshipping && diasTotales > 0 && (
+            {/* Mostrar solo días de preparación (sin sumar envío) */}
+            {isDropshipping && diasPreparacion > 0 && (
               <div className="dropshipping-info">
                 <div className="tiempo-entrega">
-                  <h4>🚚 Tiempo de envío: {diasTotales} días</h4>
+                  <h4>🚚 Tiempo de preparación: {diasPreparacion} días</h4>
                 </div>
               </div>
             )}
