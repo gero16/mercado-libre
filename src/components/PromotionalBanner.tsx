@@ -11,12 +11,7 @@ const PromotionalBanner: React.FC = () => {
           <span className="separator">•</span>
           <span className="discount-text">+ 10%OFF primera compra con cupón <strong>"POPPYWEB"</strong></span>
           <span className="separator">•</span>
-          <button
-            onClick={() => navigate('/eventos/halloween')}
-            style={{ marginLeft: 8, background: 'transparent', color: 'white', textDecoration: 'underline', border: 'none', cursor: 'pointer' }}
-          >
-            🎃 Ver especiales de Halloween
-          </button>
+       
         </div>
       </div>
     </div>

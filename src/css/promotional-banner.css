@@ -100,7 +100,7 @@
 @media (max-width: 768px) {
   .promotional-banner {
     padding: 10px 12px;
-    top: 85px !important;
+    top: 70px !important;
     min-height: 50px;
   }
   
@@ -133,7 +133,7 @@
 @media (max-width: 480px) {
   .promotional-banner {
     padding: 8px 10px;
-    top: 85px !important;
+    top: 70px !important;
     min-height: 60px;
   }
   
