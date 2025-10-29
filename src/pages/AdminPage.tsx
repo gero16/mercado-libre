@@ -565,6 +565,10 @@ const AdminPage: React.FC = () => {
     )
   }
 
+  // Control de permisos por email para opciones avanzadas del admin
+  const currentUser = AuthService.getStoredUser()
+  const canManageExtended = (currentUser?.email || '').toLowerCase() === 'geronicola1696@gmail.com'
+
   return (
     <main className="container">
       <div className="admin-container">
@@ -588,52 +592,56 @@ const AdminPage: React.FC = () => {
           >
            ↳ Ver Órdenes de Compra
           </button>
-          <button 
-            onClick={() => navigate("/admin/clientes")}
-            className="btn-orden btn-clientes"
-          >
-           ↳ Gestionar Clientes
-          </button>
-          <button 
-            onClick={() => navigate("/admin/descuentos")}
-            className="btn-orden btn-descuentos"
-            style={{
-              background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
-              color: 'white'
-            }}
-          >
-           ↳ Gestionar Descuentos 🔥
-          </button>
-          <button 
-            onClick={() => navigate("/admin/cupones")}
-            className="btn-orden btn-cupones"
-            style={{
-              background: 'linear-gradient(135deg, #00acc1 0%, #00838f 100%)',
-              color: 'white'
-            }}
-          >
-           ↳ Gestionar Cupones 🎟️
-          </button>
-          <button 
-            onClick={() => navigate("/admin/eventos")}
-            className="btn-orden"
-            style={{
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-              color: 'white'
-            }}
-          >
-           ↳ Gestionar Eventos 🎉
-          </button>
-          <button 
-            onClick={() => navigate("/admin/destacados")}
-            className="btn-orden"
-            style={{
-              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-              color: '#111827'
-            }}
-          >
-           ↳ Gestionar Destacados ⭐
-          </button>
+          {canManageExtended && (
+            <>
+              <button 
+                onClick={() => navigate("/admin/clientes")}
+                className="btn-orden btn-clientes"
+              >
+               ↳ Gestionar Clientes
+              </button>
+              <button 
+                onClick={() => navigate("/admin/descuentos")}
+                className="btn-orden btn-descuentos"
+                style={{
+                  background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
+                  color: 'white'
+                }}
+              >
+               ↳ Gestionar Descuentos 🔥
+              </button>
+              <button 
+                onClick={() => navigate("/admin/cupones")}
+                className="btn-orden btn-cupones"
+                style={{
+                  background: 'linear-gradient(135deg, #00acc1 0%, #00838f 100%)',
+                  color: 'white'
+                }}
+              >
+               ↳ Gestionar Cupones 🎟️
+              </button>
+              <button 
+                onClick={() => navigate("/admin/eventos")}
+                className="btn-orden"
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                  color: 'white'
+                }}
+              >
+               ↳ Gestionar Eventos 🎉
+              </button>
+              <button 
+                onClick={() => navigate("/admin/destacados")}
+                className="btn-orden"
+                style={{
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  color: '#111827'
+                }}
+              >
+               ↳ Gestionar Destacados ⭐
+              </button>
+            </>
+          )}
         </div>
 
         {/* Controles de filtrado y búsqueda */}
