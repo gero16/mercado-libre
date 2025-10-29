@@ -112,16 +112,13 @@ const AdminPage: React.FC = () => {
     const diasEnvio = producto.dropshipping?.dias_envio_estimado || producto.dias_envio_estimado || 0
     const tiempoTotalEntrega = diasPreparacion + diasEnvio
     const tipoVentaProd = (producto as any).tipo_venta as ('stock_fisico'|'dropshipping'|'mixto'|undefined)
-    // A pedido: si es dropshipping por tipo_venta, o preparación >=7 días, o total >=14 días
-    const esEntregaLarga = (tipoVentaProd === 'dropshipping') || (diasPreparacion >= 7) || (tiempoTotalEntrega >= 14)
-    // Stock físico: preferir tipo_venta cuando esté presente
-    const esFlex = producto.shipping?.logistic_type === 'fulfillment'
-    const esXdDropOff = producto.shipping?.logistic_type === 'xd_drop_off'
+    // Stock físico: solo Self Service/Fulfillment sin preparación y con stock
+    const isSelfService = (producto.shipping?.logistic_type === 'self_service' || producto.shipping?.logistic_type === 'fulfillment')
     const sinPreparacion = (producto.dropshipping?.dias_preparacion || producto.dias_preparacion || 0) === 0
-    const entregaTotal = tiempoTotalEntrega || (producto.dropshipping?.dias_envio_estimado || 7)
-    const fallbackStockFisico = esFlex || (esXdDropOff && sinPreparacion) || (entregaTotal > 0 && entregaTotal <= 10)
     const hasAnyStock = ((producto.variantes && producto.variantes.length > 0) ? totalVariantsStock : (producto.available_quantity || 0)) > 0
-    const esStockFisico = (tipoVentaProd === 'stock_fisico') || (tipoVentaProd === 'mixto' && hasAnyStock) || (!tipoVentaProd && fallbackStockFisico)
+    const esStockFisico = (tipoVentaProd === 'stock_fisico') || (isSelfService && sinPreparacion && hasAnyStock)
+    // A pedido: todo lo que no sea stock físico
+    const esEntregaLarga = !esStockFisico
 
     // effectiveStock ya calculado arriba
 
@@ -159,11 +156,9 @@ const AdminPage: React.FC = () => {
         const variantDiasEnvio = variante.dropshipping?.dias_envio_estimado || diasEnvio
         const variantTiempoTotal = variantDiasPreparacion + variantDiasEnvio
         const tipoVentaVar = (variante as any).tipo_venta as ('stock_fisico'|'dropshipping'|'mixto'|undefined)
-        const variantEsEntregaLarga = (tipoVentaVar === 'dropshipping') || (variantDiasPreparacion >= 7) || (variantTiempoTotal >= 14)
         const variantSinPreparacion = (variante.dropshipping?.dias_preparacion || producto.dropshipping?.dias_preparacion || 0) === 0
-        const variantEntregaTotal = variantTiempoTotal || (variante.dropshipping?.dias_envio_estimado || producto.dropshipping?.dias_envio_estimado || 7)
-        const fallbackVariantStockFisico = esFlex || (esXdDropOff && variantSinPreparacion) || (variantEntregaTotal > 0 && variantEntregaTotal <= 10)
-        const variantEsStockFisico = (tipoVentaVar === 'stock_fisico') || (tipoVentaVar === 'mixto' && (variante.stock ?? 0) > 0) || (!tipoVentaVar && fallbackVariantStockFisico)
+        const variantEsStockFisico = (tipoVentaVar === 'stock_fisico') || (isSelfService && variantSinPreparacion && ((variante.stock ?? 0) > 0))
+        const variantEsEntregaLarga = !variantEsStockFisico
 
         result.push({
           id: `${producto._id}_${variante._id || variante.id || Math.random()}`,
