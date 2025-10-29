@@ -46,7 +46,7 @@ const RegisterPage: React.FC = () => {
         <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)} />
         <input type="password" placeholder="Repetir contraseña" value={password2} onChange={e => setPassword2(e.target.value)} />
         {error && <div style={{ color: '#b91c1c', fontSize: 14 }}>{error}</div>}
-        <button type="submit" disabled={loading}>{loading ? 'Creando...' : 'Registrarse'}</button>
+        <button className='btn-register' style={{color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer'}} type="submit" disabled={loading}>{loading ? 'Creando...' : 'Registrarse'}</button>
         <button type="button" onClick={() => navigate('/login')} style={{ background: '#eee', color: '#111' }}>Ir a Iniciar sesión</button>
       </form>
     </div>
