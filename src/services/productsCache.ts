@@ -183,6 +183,11 @@ class ProductsCacheService {
     }
     if (!response.ok) throw new Error('Error obteniendo productos paginados')
     const data = await response.json()
+    // Forma A (admin v1): { productos, pagination: { total } }
+    if (data && Array.isArray(data.productos) && data.pagination && typeof data.pagination.total === 'number') {
+      return { total: data.pagination.total, items: data.productos }
+    }
+    // Forma B (admin v2): { total, items }
     if (typeof data === 'object' && data && Array.isArray(data.items) && typeof data.total === 'number') {
       // Si admin devuelve vacío, hacer fallback a público paginado
       if ((data.total || 0) === 0 && data.items.length === 0) {
