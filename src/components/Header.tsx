@@ -198,6 +198,13 @@ const Header: React.FC = () => {
             
             <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
 
+            {/* Link directo a panel Admin */}
+            {isAuthenticated && user?.rol === 'admin' && (
+              <li>
+                <NavLink to="/admin" className={({ isActive }) => isActive ? 'active' : ''}>Admin</NavLink>
+              </li>
+            )}
+
             {/* Notificaciones admin */}
             {isAuthenticated && user?.rol === 'admin' && (
               <li style={{ position: 'relative' }}
