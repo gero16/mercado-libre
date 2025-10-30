@@ -158,7 +158,7 @@ const HomePage: React.FC = () => {
       {/* Evento activo dinámico */}
       {activeEvent && (
         <>
-          {/* <SpecialEventProducts slug={activeEvent.slug} title={`Selección ${activeEvent.titulo}`} /> */}
+          {/* <SpecialEventProducts slug={activeEvent.slug} title={`Selección ${activeEvent.titulo}`} /> 
             <SpecialPromotion 
             title={`${(activeEvent.theme || '').toLowerCase() === 'halloween' ? '🎃 ' : ''}${activeEvent.titulo}`}
             subtitle={activeEvent.subtitle || ((activeEvent.theme || '').toLowerCase() === 'halloween' ? '¡No te pierdas las mejores ofertas de Halloween!' : 'Ofertas por tiempo limitado')}
@@ -168,8 +168,13 @@ const HomePage: React.FC = () => {
             linkTo={`/eventos/${activeEvent.slug}`}
             deadline={activeEvent.fecha_fin}
           />
+          
+          */}
         </>
+        
       )}
+
+      
 
       {/* Sección de productos más vendidos - Carga inmediata (above the fold) */}
       <BestSellingProducts limit={8} />
