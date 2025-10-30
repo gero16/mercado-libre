@@ -352,7 +352,7 @@
   background-color: white !important;
   border-radius: 12px !important;
   padding: 15px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;*/ /* sin sombra */
   transition: all 0.3s ease !important;
   cursor: pointer !important;
   display: flex !important;
