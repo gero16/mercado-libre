@@ -49,7 +49,7 @@ const LoginPage: React.FC = () => {
                 <div style={{ color: '#b91c1c', background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: 8, padding: '8px 10px', fontSize: 13 }}>{error}</div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
+                <button type="submit" className="btn btn-primary" disabled={loading} style={{color: 'white', padding: '10px 20px', borderRadius: '5px', border: 'none', cursor: 'pointer'}}>
                   {loading ? 'Ingresando...' : 'Ingresar'}
                 </button>
                 <button type="button" className="btn" style={{ background: 'transparent', color: '#0f62fe' }} onClick={() => navigate('/register')}>
