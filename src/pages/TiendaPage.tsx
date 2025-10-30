@@ -1743,9 +1743,9 @@ useEffect(() => {
                   ))}
                 </div>
               </section>
-
-              <div style={{ height: 12 }} />
-              <button className="filtros-overlay-close" onClick={() => setShowMobileFilters(false)} style={{ width: '100%' }}>Aplicar filtros</button>
+            </div>
+            <div className="filtros-overlay-footer">
+              <button className="filtros-overlay-apply-btn" onClick={() => setShowMobileFilters(false)}>Aplicar filtros</button>
             </div>
           </div>
         )}

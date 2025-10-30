@@ -109,14 +109,22 @@
   }
   
   .promotional-text {
-    font-size: 13px;
-    gap: 8px;
-    flex-direction: column;
-    line-height: 1.4;
+    font-size: 12px;
+    gap: 6px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
     padding: 0;
   }
   
   .separator {
+    display: none;
+  }
+  /* Mostrar solo el mensaje de descuento en móvil */
+  .promotional-text .shipping-text {
     display: none;
   }
   
@@ -138,13 +146,13 @@
   }
   
   .promotional-content {
-    min-height: 60px;
+    min-height: 44px;
   }
   
   .promotional-text {
     font-size: 12px;
     gap: 6px;
-    line-height: 1.4;
+    line-height: 1.2;
     padding: 0;
   }
   

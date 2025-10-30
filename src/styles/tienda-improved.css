@@ -466,13 +466,13 @@
 .filtros-toggle-btn { display: none; }
 @media (max-width: 768px) {
   .filtros-toggle-btn {
-    position: sticky;
-    top: 60px;
+    position: fixed; /* fijo bajo banner */
+    top: 18%;
+    left: 10px;
     z-index: 5;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin: 8px 10px 0 10px;
     padding: 10px 14px;
     border-radius: 9999px;
     border: 2px solid #ddd;
@@ -505,7 +505,7 @@
     z-index: 1;
   }
   .filtros-overlay-content {
-    padding: 12px 16px 24px 16px;
+    padding: 8px 12px 72px 12px; /* espacio para footer fijo */
     overflow-y: auto;
   }
   .filtros-overlay-close {
@@ -519,6 +519,7 @@
 
 /* Ajustes extra móvil: imágenes aún más grandes, título más pequeño, sin botón agregar */
 @media (max-width: 619px) {
+  
   .pagina-principal .producto img {
     aspect-ratio: 1 / 0.9 !important; /* más alto que 1:1 */
   }
