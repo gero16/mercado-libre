@@ -474,7 +474,7 @@
 @media (max-width: 768px) {
   .filtros-toggle-btn {
     position: fixed; /* fijo bajo banner */
-    top: 22%;
+    top: 150px;
     left: 10px;
     z-index: 5;
     display: inline-flex;
