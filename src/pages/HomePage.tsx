@@ -1,6 +1,5 @@
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import ImageCarousel from '../components/ImageCarousel'
-import SpecialPromotion from '../components/SpecialPromotion'
 import ProductCategories from '../components/ProductCategories'
 import ProductCategories2 from '../components/ProductCategories2'
 import CustomerReviews from '../components/CustomerReviews'
