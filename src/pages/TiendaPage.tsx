@@ -1705,31 +1705,17 @@ useEffect(() => {
                 </div>
               </section>
 
-              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '12px', cursor: 'pointer',
-                  transition: 'all 0.3s ease', border: stockFilter ? '2px solid var(--color-primary)' : '2px solid transparent',
-                  boxShadow: stockFilter ? '0 4px 12px rgba(254, 159, 1, 0.2)' : 'none'
-                }}
-                onClick={() => setStockFilter(!stockFilter)}>
-                  <input type="checkbox" id="stock-filter-m" checked={stockFilter} onChange={(e)=>setStockFilter(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} onClick={(e)=>e.stopPropagation()} />
-                  <label htmlFor="stock-filter-m" style={{ fontSize: '14px', fontWeight: 500, userSelect: 'none', color: stockFilter ? 'var(--color-primary)' : '#333' }}>📦 Solo productos en stock</label>
+              {/* Toggles compactos en una misma fila */}
+              <div className="mobile-toggle-row">
+                <div className={`toggle-chip ${stockFilter ? 'active' : ''}`} onClick={() => setStockFilter(!stockFilter)}>
+                  <input type="checkbox" id="stock-filter-m" checked={stockFilter} onChange={(e)=>setStockFilter(e.target.checked)} onClick={(e)=>e.stopPropagation()} />
+                  <label htmlFor="stock-filter-m">📦 En stock</label>
                 </div>
-              </section>
-
-              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '12px', cursor: 'pointer',
-                  transition: 'all 0.3s ease', border: pedidoFilter ? '2px solid var(--color-primary)' : '2px solid transparent',
-                  boxShadow: pedidoFilter ? '0 4px 12px rgba(254, 159, 1, 0.2)' : 'none'
-                }}
-                onClick={() => setPedidoFilter(!pedidoFilter)}>
-                  <input type="checkbox" id="pedido-filter-m" checked={pedidoFilter} onChange={(e)=>setPedidoFilter(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} onClick={(e)=>e.stopPropagation()} />
-                  <label htmlFor="pedido-filter-m" style={{ fontSize: '14px', fontWeight: 500, userSelect: 'none', color: pedidoFilter ? 'var(--color-primary)' : '#333' }}>🚚 Solo productos a pedido</label>
+                <div className={`toggle-chip ${pedidoFilter ? 'active' : ''}`} onClick={() => setPedidoFilter(!pedidoFilter)}>
+                  <input type="checkbox" id="pedido-filter-m" checked={pedidoFilter} onChange={(e)=>setPedidoFilter(e.target.checked)} onClick={(e)=>e.stopPropagation()} />
+                  <label htmlFor="pedido-filter-m">🚚 A pedido</label>
                 </div>
-              </section>
+              </div>
 
               <section className="filtro-categorias centrar-texto">
                 <div className="categorias-grid">
