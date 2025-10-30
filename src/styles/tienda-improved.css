@@ -144,7 +144,7 @@
     border-radius: 8px !important;
   }
   .pagina-principal .producto p {
-    font-size: 0.9rem !important; /* título más chico */
+    font-size: 0.85rem !important; /* título un poco más chico */
     line-height: 1.25 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;

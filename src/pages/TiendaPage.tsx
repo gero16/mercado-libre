@@ -1844,7 +1844,7 @@ useEffect(() => {
                         willChange: 'auto'
                       }}
                     />
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.2', margin: '6px 0 4px 0' }}>{item.title}</p>
+                    <p style={{ fontSize: '0.85rem', lineHeight: '1.2', margin: '6px 0 4px 0' }}>{item.title}</p>
                     
                     {/* Quitar cartel gris inferior; solo mantener badges superiores */}
                     
@@ -1867,7 +1867,7 @@ useEffect(() => {
                           <p style={{ 
                             textDecoration: 'line-through', 
                             color: '#999',
-                            fontSize: '0.85rem',
+                            fontSize: '0.8rem',
                             margin: '0',
                             lineHeight: '1'
                           }}>
@@ -1876,7 +1876,7 @@ useEffect(() => {
                           <p style={{ 
                             color: '#d32f2f',
                             fontWeight: '700',
-                            fontSize: '0.95rem',
+                            fontSize: '0.9rem',
                             margin: '0',
                             lineHeight: '1'
                           }}>
@@ -1884,7 +1884,7 @@ useEffect(() => {
                           </p>
                         </div>
                       ) : (
-                        <p style={{ margin: '0', fontSize: '0.95rem' }}>US$ {item.price}</p>
+                        <p style={{ margin: '0', fontSize: '0.9rem' }}>US$ {item.price}</p>
                       )}
                     </div>
                     {/* Ocultar botón cuando no se puede comprar; mantener solo badges superiores */}
