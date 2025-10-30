@@ -76,13 +76,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
   }
 
   const formatPrice = (price: number) => {
-    const useUYU = true
-    const rate = 1
-    const value = useUYU ? price * rate : price
-    return new Intl.NumberFormat('es-UY', {
-      style: 'currency',
-      currency: useUYU ? 'UYU' : 'USD'
-    }).format(value)
+    const value = (Number(price) || 0).toFixed(2)
+    return `US$ ${value}`
   }
 
   // Función para obtener URL de imagen optimizada (tamaño mediano)

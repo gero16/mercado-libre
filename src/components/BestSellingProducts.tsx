@@ -59,10 +59,8 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price)
+    const value = (Number(price) || 0).toFixed(2)
+    return `US$ ${value}`
   }
 
   // Función para obtener URL de imagen optimizada (tamaño mediano)
