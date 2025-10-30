@@ -11,19 +11,19 @@
 
   /* Contenedor principal para todo el contenido - Compensar header y banner fijos */
   .main-content {
-    margin-top: 130px; /* 85px hasta banner + 40px banner */
+    margin-top: 110px; /* reducir espacio para evitar hueco extra */
   }
   
   /* Responsive */
   @media (max-width: 768px) {
     .main-content {
-      margin-top: 135px; /* 85px hasta banner + 50px banner mobile */
+      margin-top: 110px; /* ajustar a altura real banner */
     }
   }
   
   @media (max-width: 480px) {
     .main-content {
-      margin-top: 145px; /* 85px hasta banner + 60px banner mobile pequeño */
+      margin-top: 115px; /* ajustar fino para mobile chico */
     }
   }
   button {
@@ -239,6 +239,23 @@
       .productos-index {
         display: flex;
         justify-content: center;
+      }
+    }
+
+    /* Ajustes de banner en móvil para mejor encuadre y nitidez */
+    @media (max-width: 768px) {
+      .banner {
+        height: 220px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+        image-rendering: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .banner {
+        height: 180px;
       }
     }
     

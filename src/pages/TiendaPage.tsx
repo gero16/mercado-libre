@@ -540,6 +540,8 @@ const TiendaMLPage: React.FC = () => {
       setIsChangingPage(true)
       setCategoryFilter(newCategory)
       setCurrentPage(1)
+      // Asegurar que el overlay móvil se cierre al entrar desde el nav
+      setShowMobileFilters(false)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     // ⚡ Hacer búsqueda de servidor inmediata (sin debounce) para la categoría del navbar
     ;(async () => {
@@ -1215,6 +1217,8 @@ useEffect(() => {
     setIsChangingPage(true)
     setCategoryFilter(categoryId)
     setCurrentPage(1)
+    // En móvil, cerrar el overlay de categorías al seleccionar
+    try { setShowMobileFilters(false) } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setTimeout(() => setIsChangingPage(false), 300)
   }

@@ -164,7 +164,11 @@
 /* Responsive */
 @media (max-width: 768px) {
   .image-carousel {
-    height: 440px;
+    height: 300px;
+  }
+  .carousel-slide {
+    background-size: contain;
+    background-position: center center;
   }
   
   .carousel-arrow {
@@ -213,7 +217,7 @@
 
 @media (max-width: 480px) {
   .image-carousel {
-    height: 380px;
+    height: 240px;
   }
   
   .carousel-arrow {
