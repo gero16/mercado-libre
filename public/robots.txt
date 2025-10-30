@@ -17,7 +17,7 @@ Disallow: /payment-pending
 Disallow: /checkout
 
 # Sitemap
-Sitemap: https://mercado-libre-roan.vercel.app/sitemap.xml
+Sitemap: https://www.poppyshopuy.com/sitemap.xml
 Sitemap: https://poppy-shop-production.up.railway.app/api/sitemap.xml
 
 # Rastreadores específicos

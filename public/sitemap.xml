@@ -3,35 +3,35 @@
   
   <!-- Página principal -->
   <url>
-    <loc>https://mercado-libre-roan.vercel.app/</loc>
+    <loc>https://www.poppyshopuy.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   
   <!-- Página de tienda -->
   <url>
-    <loc>https://mercado-libre-roan.vercel.app/tienda-ml</loc>
+    <loc>https://www.poppyshopuy.com/tienda-ml</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <!-- Página de contacto -->
   <url>
-    <loc>https://mercado-libre-roan.vercel.app/contacto</loc>
+    <loc>https://www.poppyshopuy.com/contacto</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <!-- Página de preguntas frecuentes -->
   <url>
-    <loc>https://mercado-libre-roan.vercel.app/preguntas-frecuentes</loc>
+    <loc>https://www.poppyshopuy.com/preguntas-frecuentes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <!-- Página de términos y condiciones -->
   <url>
-    <loc>https://mercado-libre-roan.vercel.app/terminos-y-condiciones</loc>
+    <loc>https://www.poppyshopuy.com/terminos-y-condiciones</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
