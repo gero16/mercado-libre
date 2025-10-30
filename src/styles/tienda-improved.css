@@ -114,35 +114,47 @@
   overflow: visible !important;
 }
 
-/* Mobile: 2 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
+/* Mobile: 3 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
 @media (max-width: 619px) {
   .pagina-principal .productos {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0px !important; /* gutters mínimos */
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; /* 3 por fila */
+    gap: 2px !important; /* gutters mínimos */
     padding: 0 2px !important; /* casi full-bleed */
   }
   .pagina-principal .producto {
-    padding: 6px 6px 8px 6px !important; /* compacto */
+    padding: 4px 4px 6px 4px !important; /* más compacto para 3-col */
     border-radius: 10px !important;
     gap: 0px !important; /* menor separación vertical interna */
+    justify-content: flex-start !important; /* evitar "space-between" que genera huecos variables */
   }
   .pagina-principal .producto img {
     width: 100% !important;
     height: auto !important; /* sobreescribe 180px */
-    aspect-ratio: 1 / 0.82 !important; /* aún más alta para ocupar casi media pantalla por card */
+    aspect-ratio: 1 / 1 !important; /* cuadrada para 3-col */
     object-fit: cover !important;
     background: #f8f9fa !important;
     padding: 0 !important;
     border-radius: 8px !important;
   }
   .pagina-principal .producto p {
-    font-size: 11px !important; /* más pequeño */
+    font-size: 10px !important; /* más pequeño para 3-col */
     line-height: 1.25 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     margin: 0px 0 0px 0 !important; /* reducir separación */
+    min-height: 2.5em !important; /* altura fija para 2 líneas → alinea filas */
+  }
+}
+
+/* Contenedor full-width en móvil para aprovechar el ancho */
+@media (max-width: 619px) {
+  .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
 
