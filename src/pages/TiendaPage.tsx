@@ -370,7 +370,9 @@ const TiendaMLPage: React.FC = () => {
   ])
   
   // 🚀 Estados para paginación (24 items para carga inicial más rápida)
-  const [currentPage, setCurrentPage] = useState(1)
+  // Inicializar página desde query param (?page=)
+  const initialPageParam = Math.max(1, Number(searchParams.get('page') || 1))
+  const [currentPage, setCurrentPage] = useState(initialPageParam)
   const [itemsPerPage, setItemsPerPage] = useState(24)
   const [totalPages, setTotalPages] = useState(1)
   const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
@@ -443,6 +445,20 @@ const TiendaMLPage: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    // Restaurar scroll al volver con botón atrás si coincide la página
+    try {
+      const navs: any = (performance.getEntriesByType && performance.getEntriesByType('navigation')) || []
+      const isBackForward = navs[0] && navs[0].type === 'back_forward'
+      const saved = sessionStorage.getItem('tiendaScroll')
+      if (isBackForward && saved) {
+        const { y, page } = JSON.parse(saved)
+        if (Number(page) === Number(currentPage) && typeof y === 'number') {
+          setTimeout(() => window.scrollTo({ top: y, behavior: 'auto' }), 50)
+        }
+        sessionStorage.removeItem('tiendaScroll')
+      }
+    } catch {}
+
     // Cargar categorías desde backend para alinear con el header
     const loadCategoriesFromBackend = async () => {
       try {
@@ -1143,6 +1159,10 @@ useEffect(() => {
   }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter, itemsTienda])
 
   const handleProductClick = (item: ItemTienda) => {
+    // Guardar scroll y página para restaurar al volver
+    try {
+      sessionStorage.setItem('tiendaScroll', JSON.stringify({ y: window.scrollY, page: currentPage, ts: Date.now() }))
+    } catch {}
     // Usar ml_id en lugar de _id para buscar el producto
     const productId = item.productoPadre?.ml_id || item.ml_id || item.id
     navigate(`/producto/${productId}`)
@@ -1218,6 +1238,12 @@ useEffect(() => {
   const handlePageChange = (page: number) => {
     setIsChangingPage(true)
     setCurrentPage(page)
+    // Actualizar query param ?page= para conservar estado al volver
+    try {
+      const params = new URLSearchParams(location.search)
+      params.set('page', String(page))
+      navigate(`${location.pathname}?${params.toString()}`, { replace: true })
+    } catch {}
     // Scroll hacia arriba cuando cambies de página
     window.scrollTo({ top: 0, behavior: 'smooth' })
     
