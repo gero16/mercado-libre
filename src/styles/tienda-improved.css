@@ -117,34 +117,41 @@
 /* Mobile: 3 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
 @media (max-width: 619px) {
   .pagina-principal .productos {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important; /* 3 por fila */
-    gap: 2px !important; /* gutters mínimos */
-    padding: 0 2px !important; /* casi full-bleed */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* 2 por fila en móvil */
+    gap: 8px !important;
+    padding: 0 8px !important;
   }
   .pagina-principal .producto {
-    padding: 4px 4px 6px 4px !important; /* más compacto para 3-col */
+    padding: 8px !important;
     border-radius: 10px !important;
-    gap: 0px !important; /* menor separación vertical interna */
-    justify-content: flex-start !important; /* evitar "space-between" que genera huecos variables */
+    gap: 6px !important;
+    justify-content: flex-start !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+  }
+  .pagina-principal .producto:hover {
+    transform: none !important;
+    box-shadow: none !important;
   }
   .pagina-principal .producto img {
     width: 100% !important;
-    height: auto !important; /* sobreescribe 180px */
-    aspect-ratio: 1 / 1 !important; /* cuadrada para 3-col */
-    object-fit: cover !important;
-    background: #f8f9fa !important;
-    padding: 0 !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: contain !important;
+    background: transparent !important; /* quitar gris alrededor */
+    padding: 0 !important; /* sin marco */
     border-radius: 8px !important;
   }
   .pagina-principal .producto p {
-    font-size: 10px !important; /* más pequeño para 3-col */
+    font-size: 0.9rem !important; /* título más chico */
     line-height: 1.25 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    margin: 0px 0 0px 0 !important; /* reducir separación */
-    min-height: 2.5em !important; /* altura fija para 2 líneas → alinea filas */
+    margin: 2px 0 0 0 !important;
+    min-height: 2.5em !important;
   }
 }
 

@@ -239,6 +239,28 @@
     gap: 15px;
     padding: 15px;
   }
+  /* Quitar sombras y efectos en mobile para un look más limpio */
+  .pagina-principal .producto,
+  .producto {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 12px !important;
+    background: #fff !important;
+  }
+  .producto:hover {
+    transform: none !important;
+  }
+  .pagina-principal .producto img,
+  .producto img {
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .pagina-principal .producto p,
+  .producto p {
+    font-size: 0.95rem !important;
+    line-height: 1.2 !important;
+  }
   
   .tienda-ml-titulo h1 {
     font-size: 2rem;

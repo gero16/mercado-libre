@@ -246,7 +246,7 @@
 .producto img {
   object-fit: contain !important;
   object-position: center;
-  background: #f8f9fa;
+  background: transparent;
   border-radius: 8px;
   padding: 5px;
 }
@@ -314,6 +314,15 @@
   .productos {
     display: grid;
     grid-template-columns: 1fr;
+  }
+  /* Ajustes mobile: tipografías más chicas y sin marco en la imagen */
+  .producto p {
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+  .producto img {
+    background: transparent;
+    padding: 0;
   }
 }
 @media (min-width: 620px) {
