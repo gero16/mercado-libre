@@ -117,8 +117,32 @@
 /* Mobile: 2 productos por fila - SOBRESCRIBIR CSS ORIGINAL */
 @media (max-width: 619px) {
   .pagina-principal .productos {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0px !important; /* gutters mínimos */
+    padding: 0 2px !important; /* casi full-bleed */
+  }
+  .pagina-principal .producto {
+    padding: 6px 6px 8px 6px !important; /* compacto */
+    border-radius: 10px !important;
+    gap: 0px !important; /* menor separación vertical interna */
+  }
+  .pagina-principal .producto img {
+    width: 100% !important;
+    height: auto !important; /* sobreescribe 180px */
+    aspect-ratio: 1 / 0.82 !important; /* aún más alta para ocupar casi media pantalla por card */
+    object-fit: cover !important;
+    background: #f8f9fa !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+  }
+  .pagina-principal .producto p {
+    font-size: 11px !important; /* más pequeño */
+    line-height: 1.25 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    margin: 0px 0 0px 0 !important; /* reducir separación */
   }
 }
 
@@ -352,7 +376,6 @@
   object-position: center !important;
   background: #f8f9fa !important;
   border-radius: 8px !important;
-  margin-bottom: 12px !important;
   padding: 8px !important;
 }
 
@@ -407,12 +430,13 @@
 @media (max-width: 768px) {
   .pagina-principal {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 10px;
   }
   
   .div-filtros {
-    margin: 20px 0;
+    margin: 0;
     padding: 0;
+    display: none; /* Ocultar filtros laterales en móvil */
   }
   
   .filtro {
@@ -421,8 +445,81 @@
   }
   
   .productos {
-    margin: 20px 0;
-    padding: 0 10px;
+    margin: 10px 0;
+    padding: 0;
+  }
+}
+
+/* Botón de filtros en móvil */
+.filtros-toggle-btn { display: none; }
+@media (max-width: 768px) {
+  .filtros-toggle-btn {
+    position: sticky;
+    top: 60px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 10px 0 10px;
+    padding: 10px 14px;
+    border-radius: 9999px;
+    border: 2px solid #ddd;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-weight: 600;
+  }
+}
+
+/* Overlay de filtros a pantalla completa en móvil */
+@media (max-width: 768px) {
+  .filtros-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .filtros-overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+  }
+  .filtros-overlay-content {
+    padding: 12px 16px 24px 16px;
+    overflow-y: auto;
+  }
+  .filtros-overlay-close {
+    border: 2px solid #ddd;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 600;
+  }
+}
+
+/* Ajustes extra móvil: imágenes aún más grandes, título más pequeño, sin botón agregar */
+@media (max-width: 619px) {
+  .pagina-principal .producto img {
+    aspect-ratio: 1 / 0.9 !important; /* más alto que 1:1 */
+  }
+  .pagina-principal .producto p {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .pagina-principal .producto .add {
+    display: none !important;
   }
 }
 

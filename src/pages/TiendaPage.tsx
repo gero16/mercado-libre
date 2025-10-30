@@ -375,6 +375,16 @@ const TiendaMLPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [paginatedItems, setPaginatedItems] = useState<ItemTienda[]>([])
   const [isChangingPage, setIsChangingPage] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+
+  // Bloquear scroll del body cuando el overlay de filtros está abierto
+  useEffect(() => {
+    if (showMobileFilters) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [showMobileFilters])
   const [, setIsBackgroundLoading] = useState(false)
 
   // 🔎 Modo búsqueda en servidor (trae resultados de toda la BD)
@@ -537,24 +547,24 @@ const TiendaMLPage: React.FC = () => {
     }
   }, [location.state])
 
-  // 🆕 Función para optimizar imágenes de ML (usar versiones más pequeñas)
+  // 🆕 Función para optimizar imágenes de ML (usar versiones de mayor calidad para móvil grande)
   const getOptimizedImageUrl = (url: string) => {
     if (!url) return url
     
     // Mercado Libre usa diferentes sufijos para tamaños:
     // -I.jpg = Original (muy grande, ~2-5MB)
-    // -O.jpg = 500x500px (~200KB)
-    // -V.jpg = 250x250px (~50KB) ← Perfecto para tienda
+    // -O.jpg = 500x500px (~200KB) ← Mejor para imágenes grandes en mobile 2-col
+    // -V.jpg = 250x250px (~50KB)
     // -S.jpg = 150x150px (~20KB)
     
-    // Intentar reemplazar cualquier sufijo por -V.jpg
+    // Para evitar pixelación con imágenes más grandes, usar -O.jpg
     if (url.match(/-[IOSV]\.(jpg|jpeg|png|webp)$/i)) {
-      return url.replace(/-[IOSV]\.(jpg|jpeg|png|webp)$/i, '-V.jpg')
+      return url.replace(/-[IOSV]\.(jpg|jpeg|png|webp)$/i, '-O.jpg')
     }
     
     // Si no tiene sufijo, intentar agregarlo antes de la extensión
     if (url.match(/\.(jpg|jpeg|png|webp)$/i)) {
-      return url.replace(/\.(jpg|jpeg|png|webp)$/i, '-V.jpg')
+      return url.replace(/\.(jpg|jpeg|png|webp)$/i, '-O.jpg')
     }
     
     // Si nada funciona, devolver URL original
@@ -1423,7 +1433,25 @@ useEffect(() => {
   return (
     <main className="container">
       <section className="pagina-principal">
-        {/* Filtros */}
+        {/* Botón filtros (móvil) */}
+        <div className="filtros-toggle-btn">
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            ☰ Filtros
+          </button>
+        </div>
+
+        {/* Filtros laterales (ocultos en móvil por CSS) */}
         <div className="div-filtros">
           <div className="filtro">
             <div className="lista-filtro">
@@ -1627,6 +1655,101 @@ useEffect(() => {
           </div>
         </div>
 
+        {/* Overlay de filtros en móvil */}
+        {showMobileFilters && (
+          <div className="filtros-overlay">
+            <div className="filtros-overlay-header">
+              <h3 style={{ margin: 0 }}>Filtros</h3>
+              <button className="filtros-overlay-close" onClick={() => setShowMobileFilters(false)}>Cerrar</button>
+            </div>
+            <div className="filtros-overlay-content">
+              {/* Duplicamos los mismos controles del panel lateral */}
+              <section className="precios centrar-texto">
+                <h3 className="precios-titulo">Filtrar por Precios</h3>
+                <div className="div-precios">
+                  <div className="precio-principal">
+                    <label htmlFor="precio"></label>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="1500" 
+                      value={priceFilter} 
+                      className="input-precio" 
+                      id="input-precio"
+                      onChange={(e) => handlePriceFilter(Number(e.target.value))}
+                    />
+                    <span id="mostrar-precio">${priceFilter}</span>
+                  </div>
+                </div>
+              </section>
+
+              <section className="centrar-texto" style={{ marginTop: '20px', marginBottom: '20px' }}>
+                <h3 className="precios-titulo">Buscar Productos</h3>
+                <div style={{ position: 'relative', width: '100%', marginTop: '10px' }}>
+                  <input
+                    type="text"
+                    placeholder="🔍 Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 35px 10px 12px',
+                      fontSize: '14px',
+                      border: '2px solid #ddd',
+                      borderRadius: '20px',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                </div>
+              </section>
+
+              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '12px', cursor: 'pointer',
+                  transition: 'all 0.3s ease', border: stockFilter ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  boxShadow: stockFilter ? '0 4px 12px rgba(254, 159, 1, 0.2)' : 'none'
+                }}
+                onClick={() => setStockFilter(!stockFilter)}>
+                  <input type="checkbox" id="stock-filter-m" checked={stockFilter} onChange={(e)=>setStockFilter(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} onClick={(e)=>e.stopPropagation()} />
+                  <label htmlFor="stock-filter-m" style={{ fontSize: '14px', fontWeight: 500, userSelect: 'none', color: stockFilter ? 'var(--color-primary)' : '#333' }}>📦 Solo productos en stock</label>
+                </div>
+              </section>
+
+              <section className="centrar-texto" style={{ marginTop: '15px', marginBottom: '20px' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '12px', cursor: 'pointer',
+                  transition: 'all 0.3s ease', border: pedidoFilter ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  boxShadow: pedidoFilter ? '0 4px 12px rgba(254, 159, 1, 0.2)' : 'none'
+                }}
+                onClick={() => setPedidoFilter(!pedidoFilter)}>
+                  <input type="checkbox" id="pedido-filter-m" checked={pedidoFilter} onChange={(e)=>setPedidoFilter(e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} onClick={(e)=>e.stopPropagation()} />
+                  <label htmlFor="pedido-filter-m" style={{ fontSize: '14px', fontWeight: 500, userSelect: 'none', color: pedidoFilter ? 'var(--color-primary)' : '#333' }}>🚚 Solo productos a pedido</label>
+                </div>
+              </section>
+
+              <section className="filtro-categorias centrar-texto">
+                <div className="categorias-grid">
+                  {categorias.map(category => (
+                    <div key={category.id} className={`categoria-filtro ${categoryFilter === category.id ? 'seleccionado' : ''}`} onClick={() => handleCategoryFilter(category.id)} style={{ cursor: 'pointer' }}>
+                      {category.id !== 'mostrar-todo' && (
+                        <span className="categoria-icono">{iconosCategoriasGenerales[category.id]}</span>
+                      )}
+                      <span className="categoria-nombre">{category.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <div style={{ height: 12 }} />
+              <button className="filtros-overlay-close" onClick={() => setShowMobileFilters(false)} style={{ width: '100%' }}>Aplicar filtros</button>
+            </div>
+          </div>
+        )}
+
         {/* Items de la tienda */}
         <div className="productos" style={{ position: 'relative', minHeight: (isFetchingResults || isChangingPage) ? 300 : undefined }}>
           {(isFetchingResults || isChangingPage) ? (
@@ -1729,7 +1852,7 @@ useEffect(() => {
                       style={{
                         width: '100%',
                         height: 'auto',
-                        aspectRatio: '1 / 1',
+                        aspectRatio: '1 / 0.82',
                         objectFit: 'cover',
                         display: 'block',
                         willChange: 'auto'
@@ -1745,7 +1868,7 @@ useEffect(() => {
                       flexDirection: 'column', 
                       alignItems: 'center',
                       gap: '5px',
-                      margin: '10px 0'
+                      margin: '6px 0 4px 0'
                     }}>
                       {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
                         <div style={{ 
