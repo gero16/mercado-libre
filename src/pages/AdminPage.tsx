@@ -592,14 +592,14 @@ const AdminPage: React.FC = () => {
           >
            ↳ Ver Órdenes de Compra
           </button>
+            <button 
+              onClick={() => navigate("/admin/clientes")}
+              className="btn-orden btn-clientes"
+            >
+              ↳ Gestionar Clientes
+            </button>
           {canManageExtended && (
             <>
-              <button 
-                onClick={() => navigate("/admin/clientes")}
-                className="btn-orden btn-clientes"
-              >
-               ↳ Gestionar Clientes
-              </button>
               <button 
                 onClick={() => navigate("/admin/descuentos")}
                 className="btn-orden btn-descuentos"
