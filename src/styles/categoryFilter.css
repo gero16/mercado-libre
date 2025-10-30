@@ -79,7 +79,7 @@ section.precios {
 }
 
 .categoria-icono {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   display: inline-block;
 }
 
@@ -124,7 +124,7 @@ section.precios {
   }
   
   .categoria-filtro {
-    padding: 12px 14px;
+    padding: 12px 5px;
     min-height: 62px;
     gap : 0px;
   }
