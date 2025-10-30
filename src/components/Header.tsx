@@ -176,11 +176,7 @@ const Header: React.FC = () => {
               onMouseEnter={() => setShowCategoriesDropdown(true)}
               onMouseLeave={() => setShowCategoriesDropdown(false)}
             >
-              <NavLink 
-                to="/tienda-ml" 
-                className={({ isActive }) => isActive ? 'active' : ''}
-                onClick={() => setShowCategoriesDropdown(false)}
-              >
+              <NavLink to="/tienda-ml" className={({ isActive }) => isActive ? 'active' : ''}>
                 Tienda Online ▾
               </NavLink>
               

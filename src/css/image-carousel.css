@@ -217,7 +217,7 @@
 
 @media (max-width: 480px) {
   .image-carousel {
-    height: 240px;
+    height: 160px;
   }
   
   .carousel-arrow {
