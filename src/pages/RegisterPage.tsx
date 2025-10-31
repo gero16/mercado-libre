@@ -38,7 +38,7 @@ const RegisterPage: React.FC = () => {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 420, paddingTop: '40px' }}>
+    <div className="container div-register" style={{ maxWidth: 420 }}>
       <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Crear cuenta</h2>
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
         <input type="text" placeholder="Nombre" value={nombre} onChange={e => setNombre(e.target.value)} />

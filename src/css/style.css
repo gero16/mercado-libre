@@ -486,6 +486,10 @@ footer img {
   font-family: 'Roboto Slab', serif;
 }
 
+.div-register {
+  padding-top: 35px;
+}
+
 /* ==========================
    Footer - Responsive Mobile
    ========================== */
@@ -615,6 +619,9 @@ footer img {
     grid-template-columns: 1fr 2fr;
     align-items: center;
     font-size: 22px;
+  }
+  .div-register {
+    padding-top: 60px;
   }
 }
 
