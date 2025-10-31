@@ -492,6 +492,8 @@ footer img {
 @media (max-width: 619px) {
   footer {
     padding: 12px;
+    position: absolute;
+    bottom: 0;
   }
 
   .footer {
