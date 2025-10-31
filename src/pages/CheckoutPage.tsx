@@ -112,9 +112,9 @@ const CheckoutPage: React.FC = () => {
         return
       }
 
-      // Para cupón POPYWEB, requiere usuario logueado
+      // Para cupón POPPYWEB, requiere usuario logueado
       const codigoUpper = cuponCodigo.toUpperCase().trim()
-      if (codigoUpper === 'POPYWEB' && !user) {
+      if (codigoUpper === 'POPPYWEB' && !user) {
         setCuponValidacion({
           valido: false,
           error: 'Este cupón requiere una cuenta. Regístrate o inicia sesión para usarlo'
@@ -150,10 +150,10 @@ const CheckoutPage: React.FC = () => {
     }
 
     // Debounce: esperar 500ms después de que el usuario deje de escribir
-    // Pero si es POPYWEB y no hay usuario, validar inmediatamente
+    // Pero si es POPPYWEB y no hay usuario, validar inmediatamente
     const codigoUpper = cuponCodigo.toUpperCase().trim()
-    const isPOPYWEB = codigoUpper === 'POPYWEB'
-    const delay = isPOPYWEB && !user ? 0 : 500
+    const isPOPPYWEB = codigoUpper === 'POPPYWEB'
+    const delay = isPOPPYWEB && !user ? 0 : 500
     
     const timeoutId = setTimeout(validarCupon, delay)
     return () => clearTimeout(timeoutId)
@@ -205,8 +205,8 @@ const CheckoutPage: React.FC = () => {
         // Usar el email del usuario logueado o el del formulario para validación final
         const emailFinal = user?.email || customerData.email
         
-        if (!emailFinal && cuponCodigo.toUpperCase().trim() === 'POPYWEB') {
-          alert('El cupón POPYWEB requiere una cuenta. Por favor regístrate o inicia sesión primero.')
+        if (!emailFinal && cuponCodigo.toUpperCase().trim() === 'POPPYWEB') {
+          alert('El cupón POPPYWEB requiere una cuenta. Por favor regístrate o inicia sesión primero.')
           setIsCreatingPreference(false)
           return
         }
@@ -400,14 +400,14 @@ const CheckoutPage: React.FC = () => {
                   ) : (
                     <div>
                       <div>✗ {cuponValidacion.error}</div>
-                      {cuponCodigo.toUpperCase().trim() === 'POPYWEB' && !user && (
+                      {cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && !user && (
                         <div style={{ marginTop: '4px', fontSize: '11px' }}>
                           <a 
                             href="/register" 
                             style={{ color: '#0066cc', marginRight: '8px', textDecoration: 'underline' }}
                             onClick={(e) => {
                               e.preventDefault()
-                              navigate('/register', { state: { returnTo: '/checkout', cupon: 'POPYWEB' } })
+                              navigate('/register', { state: { returnTo: '/checkout', cupon: 'POPPYWEB' } })
                             }}
                           >
                             Regístrate
@@ -418,7 +418,7 @@ const CheckoutPage: React.FC = () => {
                             style={{ color: '#0066cc', marginLeft: '8px', textDecoration: 'underline' }}
                             onClick={(e) => {
                               e.preventDefault()
-                              navigate('/login', { state: { returnTo: '/checkout', cupon: 'POPYWEB' } })
+                              navigate('/login', { state: { returnTo: '/checkout', cupon: 'POPPYWEB' } })
                             }}
                           >
                             Inicia sesión
