@@ -1,14 +1,31 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const LoginPage: React.FC = () => {
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  // Si viene desde checkout con cupón, redirigir de vuelta después de login
+  useEffect(() => {
+    if (isAuthenticated && location.state) {
+      const { returnTo, cupon } = location.state as { returnTo?: string; cupon?: string }
+      if (returnTo === '/checkout' && cupon) {
+        navigate('/checkout', { state: { cupon } })
+      } else if (returnTo) {
+        navigate(returnTo)
+      } else {
+        navigate('/')
+      }
+    } else if (isAuthenticated) {
+      navigate('/')
+    }
+  }, [isAuthenticated, location.state, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -16,7 +33,15 @@ const LoginPage: React.FC = () => {
     setLoading(true)
     try {
       await login(email, password)
-      navigate('/admin')
+      // La redirección se maneja en el useEffect
+      const state = location.state as { returnTo?: string; cupon?: string } | null
+      if (state?.returnTo === '/checkout' && state?.cupon) {
+        navigate('/checkout', { state: { cupon: state.cupon } })
+      } else if (state?.returnTo) {
+        navigate(state.returnTo)
+      } else {
+        navigate('/')
+      }
     } catch (err: any) {
       setError(err?.message || 'Error iniciando sesión')
     } finally {

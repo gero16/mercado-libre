@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useCart } from '../context/CartContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Payment } from '@mercadopago/sdk-react'
 import { useMercadoPago } from '../hooks/useMercadoPago'
 import { FEATURE_FLAGS } from '../config/featureFlags'
 import { MercadoPagoService } from '../services/mercadopago'
+import { CuponService, ValidacionCupon } from '../services/cupones'
+import { useAuth } from '../context/AuthContext'
 
 interface CustomerData {
   name: string
@@ -18,6 +20,8 @@ interface CustomerData {
 const CheckoutPage: React.FC = () => {
   const { cartItems, cartTotal, setCartOpen } = useCart()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { user } = useAuth()
   
   const [customerData, setCustomerData] = useState<CustomerData>({
     name: '',
@@ -30,6 +34,15 @@ const CheckoutPage: React.FC = () => {
 
   const [showPaymentBrick, setShowPaymentBrick] = useState(false)
   const [isCreatingPreference, setIsCreatingPreference] = useState(false)
+  
+  // Estado para cupón - restaurar desde location state si viene de login/register
+  const [cuponCodigo, setCuponCodigo] = useState(() => {
+    const state = location.state as { cupon?: string } | null
+    return state?.cupon || ''
+  })
+  const [cuponValidacion, setCuponValidacion] = useState<ValidacionCupon | null>(null)
+  const [isValidatingCupon, setIsValidatingCupon] = useState(false)
+  const [descuentoAplicado, setDescuentoAplicado] = useState(0)
   
   const {
     createPreference,
@@ -78,6 +91,77 @@ const CheckoutPage: React.FC = () => {
     setCartOpen(false)
   }, [])
 
+  // Validar cupón automáticamente cuando se restaura desde login/register
+  useEffect(() => {
+    const state = location.state as { cupon?: string } | null
+    if (state?.cupon && user) {
+      // El cupón ya está en el estado, se validará automáticamente por el otro useEffect
+      // Solo necesitamos limpiar el state para evitar que se restaure en refresco
+      if (state.cupon) {
+        navigate(location.pathname, { replace: true, state: {} })
+      }
+    }
+  }, [user, location.state, navigate, location.pathname])
+
+  // Validar cupón cuando cambia el código o el total
+  useEffect(() => {
+    const validarCupon = async () => {
+      if (!cuponCodigo.trim()) {
+        setCuponValidacion(null)
+        setDescuentoAplicado(0)
+        return
+      }
+
+      // Para cupón POPYWEB, requiere usuario logueado
+      const codigoUpper = cuponCodigo.toUpperCase().trim()
+      if (codigoUpper === 'POPYWEB' && !user) {
+        setCuponValidacion({
+          valido: false,
+          error: 'Este cupón requiere una cuenta. Regístrate o inicia sesión para usarlo'
+        })
+        setDescuentoAplicado(0)
+        return
+      }
+
+      setIsValidatingCupon(true)
+      try {
+        // Para usuarios logueados, siempre usar su email (no el del formulario)
+        // Para usuarios no logueados, usar el email del formulario solo si lo ingresaron
+        const emailParaValidar = user?.email || (customerData.email || undefined)
+        
+        const validacion = await CuponService.validar(
+          cuponCodigo,
+          cartTotal,
+          emailParaValidar
+        )
+        setCuponValidacion(validacion)
+        if (validacion.valido && validacion.descuento) {
+          setDescuentoAplicado(validacion.descuento)
+        } else {
+          setDescuentoAplicado(0)
+        }
+      } catch (error) {
+        console.error('Error validando cupón:', error)
+        setCuponValidacion({ valido: false, error: 'Error al validar el cupón' })
+        setDescuentoAplicado(0)
+      } finally {
+        setIsValidatingCupon(false)
+      }
+    }
+
+    // Debounce: esperar 500ms después de que el usuario deje de escribir
+    // Pero si es POPYWEB y no hay usuario, validar inmediatamente
+    const codigoUpper = cuponCodigo.toUpperCase().trim()
+    const isPOPYWEB = codigoUpper === 'POPYWEB'
+    const delay = isPOPYWEB && !user ? 0 : 500
+    
+    const timeoutId = setTimeout(validarCupon, delay)
+    return () => clearTimeout(timeoutId)
+  }, [cuponCodigo, cartTotal, user, customerData.email])
+
+  // Calcular total con descuento
+  const totalConDescuento = Math.max(0, cartTotal - descuentoAplicado)
+
   // 🆕 Crear un wrapper para onSubmit que pase los datos del carrito y cliente
   const handlePaymentSubmit = useCallback(async ({ formData, selectedPaymentMethod }: any) => {
     console.log('💳 Datos del pago recibidos:', formData)
@@ -116,9 +200,47 @@ const CheckoutPage: React.FC = () => {
     try {
       setIsCreatingPreference(true)
 
+      // Validar cupón ANTES de proceder al pago - validación final en backend
+      if (cuponCodigo.trim()) {
+        // Usar el email del usuario logueado o el del formulario para validación final
+        const emailFinal = user?.email || customerData.email
+        
+        if (!emailFinal && cuponCodigo.toUpperCase().trim() === 'POPYWEB') {
+          alert('El cupón POPYWEB requiere una cuenta. Por favor regístrate o inicia sesión primero.')
+          setIsCreatingPreference(false)
+          return
+        }
+
+        // Validación final antes de crear la preferencia
+        const validacionFinal = await CuponService.validar(
+          cuponCodigo,
+          cartTotal,
+          emailFinal
+        )
+
+        if (!validacionFinal.valido) {
+          alert(`Cupón inválido: ${validacionFinal.error}`)
+          setCuponValidacion(validacionFinal)
+          setDescuentoAplicado(0)
+          setIsCreatingPreference(false)
+          return
+        }
+
+        // Actualizar la validación y descuento con la respuesta del backend
+        setCuponValidacion(validacionFinal)
+        if (validacionFinal.descuento) {
+          setDescuentoAplicado(validacionFinal.descuento)
+        }
+      }
+
       if (FEATURE_FLAGS.USE_CHECKOUT_PRO) {
         // Crear preferencia vía backend y redirigir a Checkout Pro
-        const pref = await MercadoPagoService.createCheckoutProPreference(cartItems as any[], customerData as any)
+        // El backend volverá a validar el cupón (doble validación de seguridad)
+        const pref = await MercadoPagoService.createCheckoutProPreference(
+          cartItems as any[], 
+          customerData as any,
+          cuponValidacion?.valido ? cuponCodigo.trim() : undefined
+        )
         if (pref?.init_point) {
           window.location.href = pref.init_point
           return
@@ -250,6 +372,65 @@ const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Campo de cupón */}
+            <div className="form-group">
+              <label htmlFor="cupon">Cupón de descuento</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <input 
+                  type="text" 
+                  id="cupon"
+                  name="cupon"
+                  value={cuponCodigo}
+                  onChange={(e) => setCuponCodigo(e.target.value.toUpperCase())}
+                  placeholder="Ingresa tu código de cupón"
+                  style={{ flex: 1 }}
+                />
+                {isValidatingCupon && (
+                  <span style={{ paddingTop: '8px', fontSize: '14px' }}>Validando...</span>
+                )}
+              </div>
+              {cuponValidacion && (
+                <div style={{ 
+                  marginTop: '4px', 
+                  fontSize: '12px',
+                  color: cuponValidacion.valido ? '#28a745' : '#dc3545'
+                }}>
+                  {cuponValidacion.valido ? (
+                    <span>✓ Cupón válido - Descuento aplicado</span>
+                  ) : (
+                    <div>
+                      <div>✗ {cuponValidacion.error}</div>
+                      {cuponCodigo.toUpperCase().trim() === 'POPYWEB' && !user && (
+                        <div style={{ marginTop: '4px', fontSize: '11px' }}>
+                          <a 
+                            href="/register" 
+                            style={{ color: '#0066cc', marginRight: '8px', textDecoration: 'underline' }}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              navigate('/register', { state: { returnTo: '/checkout', cupon: 'POPYWEB' } })
+                            }}
+                          >
+                            Regístrate
+                          </a>
+                          o
+                          <a 
+                            href="/login" 
+                            style={{ color: '#0066cc', marginLeft: '8px', textDecoration: 'underline' }}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              navigate('/login', { state: { returnTo: '/checkout', cupon: 'POPYWEB' } })
+                            }}
+                          >
+                            Inicia sesión
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="form-actions">
                 <button 
                   type="submit" 
@@ -333,8 +514,33 @@ const CheckoutPage: React.FC = () => {
             </div>
             <div className="total-pedido">
               <div className="total-box">
-                <span>Total</span>
-                <strong>$ {cartTotal}</strong>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Subtotal</span>
+                    <span>$ {cartTotal}</span>
+                  </div>
+                  {descuentoAplicado > 0 && (
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      color: '#28a745',
+                      fontSize: '14px'
+                    }}>
+                      <span>Descuento {cuponCodigo}</span>
+                      <span>-$ {descuentoAplicado.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid #ddd',
+                    paddingTop: '8px',
+                    marginTop: '4px'
+                  }}>
+                    <span>Total</span>
+                    <strong>$ {totalConDescuento.toFixed(2)}</strong>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

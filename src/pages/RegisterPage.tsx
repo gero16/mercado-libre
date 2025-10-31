@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { AuthService } from '../services/auth'
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,7 +30,13 @@ const RegisterPage: React.FC = () => {
     setLoading(true)
     try {
       await AuthService.register(nombre, email, password)
-      navigate('/')
+      // Si venía desde checkout con cupón, redirigir de vuelta
+      const state = location.state as { returnTo?: string; cupon?: string } | null
+      if (state?.returnTo === '/checkout' && state?.cupon) {
+        navigate('/checkout', { state: { cupon: state.cupon } })
+      } else {
+        navigate('/')
+      }
     } catch (err: any) {
       setError(err?.message || 'Error registrando usuario')
     } finally {
