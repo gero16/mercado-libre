@@ -105,8 +105,10 @@
     display: grid;
     grid-template-columns: 1.4fr 1fr;
     gap: 30px;
-    margin: 50px 0px 40px 0px;
-    /* min-height: 800px; */
+    margin: 50px auto;
+    padding-bottom: 60px;
+    min-height: calc(100vh - 350px);
+    align-items: start;
   }
   
   .order-page {
@@ -157,7 +159,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding-right: 4px;
-    padding-bottom: 72px; /* espacio para mantener visible el botón */
+    padding-bottom: 16px;
   }
   .checkout-form-content::-webkit-scrollbar {
     width: 6px;
@@ -167,15 +169,20 @@
     border-radius: 4px;
   }
   .form-actions {
-    margin-top: 8px;
+    margin-top: 0;
     flex: 0 0 auto;
-    position: sticky;
-    bottom: 0;
-    background: #ffffff;
+    padding: 20px 0 8px 0;
     border-top: 1px solid #eee;
-    padding-top: 12px;
-    padding-bottom: 8px;
-    z-index: 1;
+    background: #ffffff;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .form-actions .btn-orden {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 700;
   }
   
   .order-shipping {
@@ -389,6 +396,12 @@
       margin-left: 5px;
       border: 1px solid rgb(184, 178, 178);
       border-radius: 2px;
+  }
+
+  /* Animación para spinner de validación de cupón */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
 /* Estilos para el modal de MercadoPago */

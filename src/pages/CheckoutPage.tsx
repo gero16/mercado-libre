@@ -371,76 +371,25 @@ const CheckoutPage: React.FC = () => {
                 />
               </div>
             </div>
-
-            {/* Campo de cupón */}
-            <div className="form-group">
-              <label htmlFor="cupon">Cupón de descuento</label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <input 
-                  type="text" 
-                  id="cupon"
-                  name="cupon"
-                  value={cuponCodigo}
-                  onChange={(e) => setCuponCodigo(e.target.value.toUpperCase())}
-                  placeholder="Ingresa tu código de cupón"
-                  style={{ flex: 1 }}
-                />
-                {isValidatingCupon && (
-                  <span style={{ paddingTop: '8px', fontSize: '14px' }}>Validando...</span>
-                )}
-              </div>
-              {cuponValidacion && (
-                <div style={{ 
-                  marginTop: '4px', 
-                  fontSize: '12px',
-                  color: cuponValidacion.valido ? '#28a745' : '#dc3545'
-                }}>
-                  {cuponValidacion.valido ? (
-                    <span>✓ Cupón válido - Descuento aplicado</span>
-                  ) : (
-                    <div>
-                      <div>✗ {cuponValidacion.error}</div>
-                      {cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && !user && (
-                        <div style={{ marginTop: '4px', fontSize: '11px' }}>
-                          <a 
-                            href="/register" 
-                            style={{ color: '#0066cc', marginRight: '8px', textDecoration: 'underline' }}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              navigate('/register', { state: { returnTo: '/checkout', cupon: 'POPPYWEB' } })
-                            }}
-                          >
-                            Regístrate
-                          </a>
-                          o
-                          <a 
-                            href="/login" 
-                            style={{ color: '#0066cc', marginLeft: '8px', textDecoration: 'underline' }}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              navigate('/login', { state: { returnTo: '/checkout', cupon: 'POPPYWEB' } })
-                            }}
-                          >
-                            Inicia sesión
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="form-actions">
-                <button 
-                  type="submit" 
-                className="btn-orden"
-                  disabled={isCreatingPreference}
-                >
-                {isCreatingPreference ? 'Creando preferencia...' : 'Proceder al Pago'}
-                </button>
-            </div>
           </form>
+          
+          {/* Botón fuera del área scrolleable para que siempre sea visible */}
+          <div className="form-actions">
+            <button 
+              type="button" 
+              onClick={(e) => {
+                const form = e.currentTarget.closest('.checkout-form')?.querySelector('form')
+                if (form) {
+                  form.requestSubmit()
+                }
+              }}
+              className="btn-orden confirmar"
+              disabled={isCreatingPreference}
+              style={{ width: '100%' }}
+            >
+              {isCreatingPreference ? 'Creando preferencia...' : 'Proceder al Pago'}
+            </button>
+          </div>
           
           {/* Modal de Payment Brick de MercadoPago */}
           {!FEATURE_FLAGS.USE_CHECKOUT_PRO && showPaymentBrick && preferenceId && (
@@ -512,6 +461,155 @@ const CheckoutPage: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            {/* Campo de cupón en resumen del pedido */}
+            <div style={{ 
+              margin: '20px 0',
+              padding: '16px',
+              backgroundColor: '#f8f9fa',
+              border: '2px solid #e9ecef',
+              borderRadius: '8px',
+              borderLeft: '4px solid #007bff'
+            }}>
+              <label htmlFor="cupon-resumen" style={{ 
+                display: 'block',
+                fontSize: '15px', 
+                fontWeight: '700',
+                color: '#007bff',
+                marginBottom: '10px'
+              }}>
+                🎟️ Cupón de descuento
+              </label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <input 
+                  type="text" 
+                  id="cupon-resumen"
+                  name="cupon-resumen"
+                  value={cuponCodigo}
+                  onChange={(e) => setCuponCodigo(e.target.value.toUpperCase())}
+                  placeholder="Ej: POPPYWEB"
+                  style={{ 
+                    flex: 1,
+                    minWidth: '180px',
+                    padding: '10px 12px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    letterSpacing: '1px',
+                    border: cuponValidacion?.valido ? '2px solid #28a745' : '2px solid #ced4da',
+                    borderRadius: '6px',
+                    width: '100%'
+                  }}
+                />
+                {isValidatingCupon && (
+                  <span style={{ 
+                    paddingTop: '10px', 
+                    fontSize: '13px',
+                    color: '#6c757d',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <span style={{ 
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid #007bff',
+                      borderTop: '2px solid transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}></span>
+                    Validando...
+                  </span>
+                )}
+              </div>
+              {cuponValidacion && (
+                <div style={{ 
+                  marginTop: '10px', 
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  backgroundColor: cuponValidacion.valido ? '#d4edda' : '#f8d7da',
+                  color: cuponValidacion.valido ? '#155724' : '#721c24',
+                  border: `1px solid ${cuponValidacion.valido ? '#c3e6cb' : '#f5c6cb'}`
+                }}>
+                  {cuponValidacion.valido ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '16px' }}>✓</span>
+                      <span>Cupón válido - Descuento aplicado</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && !user ? '8px' : '0' }}>
+                        <span style={{ fontSize: '16px' }}>✗</span>
+                        <span>{cuponValidacion.error}</span>
+                      </div>
+                      {cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && !user && (
+                        <div style={{ 
+                          marginTop: '8px', 
+                          fontSize: '12px',
+                          paddingTop: '8px',
+                          borderTop: '1px solid rgba(114, 28, 36, 0.2)'
+                        }}>
+                          <span style={{ marginRight: '8px', display: 'block', marginBottom: '6px' }}>Este cupón requiere una cuenta:</span>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                navigate('/register', { state: { returnTo: '/checkout', cupon: 'POPPYWEB' } })
+                              }}
+                              style={{ 
+                                color: '#fff',
+                                background: '#007bff',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '11px',
+                                fontWeight: '600'
+                              }}
+                            >
+                              Regístrate gratis
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                navigate('/login', { state: { returnTo: '/checkout', cupon: 'POPPYWEB' } })
+                              }}
+                              style={{ 
+                                color: '#fff',
+                                background: '#28a745',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '11px',
+                                fontWeight: '600'
+                              }}
+                            >
+                              Inicia sesión
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {!cuponCodigo.trim() && !cuponValidacion && (
+                <div style={{ 
+                  marginTop: '8px', 
+                  fontSize: '11px',
+                  color: '#6c757d',
+                  fontStyle: 'italic'
+                }}>
+                  💡 Ingresa un código promocional para obtener descuentos
+                </div>
+              )}
+            </div>
+
             <div className="total-pedido">
               <div className="total-box">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
