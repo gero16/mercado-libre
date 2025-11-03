@@ -18,7 +18,7 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal, setCartOpen, cuponAplicado } = useCart()
+  const { cartItems, cartTotal, setCartOpen } = useCart()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
