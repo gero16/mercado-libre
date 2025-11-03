@@ -16,7 +16,7 @@ interface CustomerData {
 }
 
 const CheckoutPage: React.FC = () => {
-  const { cartItems, cartTotal, setCartOpen } = useCart()
+  const { cartItems, cartTotal, setCartOpen, cuponAplicado } = useCart()
   const navigate = useNavigate()
   
   const [customerData, setCustomerData] = useState<CustomerData>({
@@ -118,7 +118,12 @@ const CheckoutPage: React.FC = () => {
 
       if (FEATURE_FLAGS.USE_CHECKOUT_PRO) {
         // Crear preferencia vía backend y redirigir a Checkout Pro
-        const pref = await MercadoPagoService.createCheckoutProPreference(cartItems as any[], customerData as any)
+        const cuponCodigo = cuponAplicado?.cupon?.codigo || null
+        const pref = await MercadoPagoService.createCheckoutProPreference(
+          cartItems as any[], 
+          customerData as any,
+          cuponCodigo
+        )
         if (pref?.init_point) {
           window.location.href = pref.init_point
           return

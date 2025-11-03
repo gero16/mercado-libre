@@ -44,8 +44,28 @@ interface Orden {
 }
 
 // Mapeo legible de motivos de rechazo de MP
-function mapMpStatusDetail(detail?: string) {
+function mapMpStatusDetail(detail?: string, paymentStatus?: string) {
   const code = (detail || '').toLowerCase();
+  const status = (paymentStatus || '').toLowerCase();
+  
+  // Si el pago está aprobado, mostrar información positiva
+  if (status === 'approved' && code === 'accredited') {
+    return { titulo: 'Pago acreditado', mensaje: 'El pago fue procesado exitosamente.', accion: 'Pago completado correctamente.' };
+  }
+  
+  // Si el pago está pendiente
+  if (status === 'pending') {
+    switch (code) {
+      case 'pending_contingency':
+        return { titulo: 'Pago en revisión', mensaje: 'El pago está siendo revisado por Mercado Pago.', accion: 'Esperar confirmación.' };
+      case 'pending_review_manual':
+        return { titulo: 'Revisión manual', mensaje: 'El pago requiere revisión manual.', accion: 'Esperar confirmación.' };
+      default:
+        return { titulo: 'Pago pendiente', mensaje: 'El pago está pendiente de confirmación.', accion: 'Esperar confirmación.' };
+    }
+  }
+  
+  // Casos de rechazo
   switch (code) {
     case 'cc_rejected_insufficient_amount':
       return { titulo: 'Fondos insuficientes', mensaje: 'La tarjeta no tenía saldo suficiente.', accion: 'Pedir otro medio de pago o intentar más tarde.' };
@@ -69,7 +89,11 @@ function mapMpStatusDetail(detail?: string) {
     case 'cc_rejected_other_reason':
       return { titulo: 'Pago rechazado', mensaje: 'El banco rechazó el pago por un motivo general.', accion: 'Probar otra tarjeta o contactar al banco.' };
     default:
-      return { titulo: 'Error de pago', mensaje: 'No se pudo procesar el pago.', accion: 'Reintentar u optar por otro medio.' };
+      // Solo mostrar "Error de pago" si realmente es un error (rejected o cancelled)
+      if (status === 'rejected' || status === 'cancelled') {
+        return { titulo: 'Error de pago', mensaje: 'No se pudo procesar el pago.', accion: 'Reintentar u optar por otro medio.' };
+      }
+      return { titulo: 'Estado del pago', mensaje: `Estado: ${status || 'desconocido'}`, accion: 'Revisar el estado del pago.' };
   }
 }
 
@@ -275,7 +299,7 @@ const AdminOrdersPage: React.FC = () => {
                     </span>
                   </div>
                     <div style={{ display:'flex', gap:10, alignItems:'center', marginTop: 8 }}>
-                      {(() => { const info = mapMpStatusDetail(order.payment_status_detail); return (
+                      {(() => { const info = mapMpStatusDetail(order.payment_status_detail, order.payment_status); return (
                         <span style={{ fontSize: 12, color:'#8b949e' }}>
                           Estado MP: <strong style={{ color:'#c9d1d9' }}>{info.titulo}</strong>
                         </span>
@@ -326,7 +350,7 @@ const AdminOrdersPage: React.FC = () => {
                           <div style={{ fontSize:13 }}>{order.external_reference}</div>
                         </div>
                       </div>
-                      {order.payment_status_detail && (() => { const info = mapMpStatusDetail(order.payment_status_detail); return (
+                      {order.payment_status_detail && (() => { const info = mapMpStatusDetail(order.payment_status_detail, order.payment_status); return (
                         <div style={{ marginTop:12 }}>
                           <div style={{ fontWeight:700, fontSize:12, color:'#8b949e', marginBottom:4 }}>Explicación del rechazo</div>
                           <div style={{ fontSize:13 }}>
