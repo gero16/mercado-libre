@@ -306,7 +306,7 @@ const AdminNotificationsPage: React.FC = () => {
             {/* Header de tabla */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'auto 1fr 150px 140px 160px',
+              gridTemplateColumns: 'auto minmax(250px, 400px) 160px 160px 180px',
               gap: '16px',
               padding: '16px 20px',
               backgroundColor: '#f9fafb',
@@ -330,7 +330,7 @@ const AdminNotificationsPage: React.FC = () => {
                 key={n._id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'auto 1fr 150px 140px 160px',
+                  gridTemplateColumns: 'auto minmax(250px, 400px) 160px 160px 180px',
                   gap: '16px',
                   padding: '16px 20px',
                   borderTop: idx > 0 ? '1px solid #f3f4f6' : 'none',
@@ -365,12 +365,16 @@ const AdminNotificationsPage: React.FC = () => {
                 </div>
 
                 {/* Mensaje */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                     <span style={{ 
                       fontWeight: n.status === 'unread' ? '700' : '600',
                       color: '#111827',
-                      fontSize: '15px'
+                      fontSize: '14px',
+                      wordBreak: 'break-word',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '100%'
                     }}>
                       {n.message || `${(n.type || 'order').toUpperCase()} ${n.order_id || ''}`}
                     </span>
