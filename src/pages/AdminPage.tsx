@@ -62,7 +62,7 @@ const AdminPage: React.FC = () => {
   
   // 🆕 Estados para paginación
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(20)
+  const [itemsPerPage, setItemsPerPage] = useState(50)
   // 🆕 Métricas de censo/duplicados
   const [census, setCensus] = useState<CensusResponse | null>(null)
   const [dupExcess, setDupExcess] = useState<number | null>(null)
@@ -638,6 +638,11 @@ const AdminPage: React.FC = () => {
           <button 
             onClick={() => navigate('/admin/orders')}
             className="btn-orden btn-orders"
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              color: 'white',
+              fontWeight: '600'
+            }}
           >
            ↳ Ver Órdenes de Compra
           </button>
@@ -705,12 +710,12 @@ const AdminPage: React.FC = () => {
 
         {/* Controles unificados: búsqueda, ordenamiento y paginación */}
         <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: '#ffffff',
           padding: '20px',
-          borderRadius: '15px',
+          borderRadius: '12px',
           marginBottom: '20px',
-          color: 'white',
-          boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
         }}>
           <div style={{
             display: 'grid',
@@ -720,7 +725,7 @@ const AdminPage: React.FC = () => {
           }}>
             {/* Búsqueda */}
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem', color: '#374151' }}>
                 🔍 Buscar
               </label>
               <input
@@ -732,18 +737,21 @@ const AdminPage: React.FC = () => {
                   width: '100%',
                   padding: '10px 15px',
                   borderRadius: '8px',
-                  border: '2px solid white',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
+                  border: '1px solid #d1d5db',
+                  background: '#ffffff',
+                  color: '#111827',
                   fontSize: '0.95rem',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s'
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               />
             </div>
 
             {/* Ordenamiento */}
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem', color: '#374151' }}>
                 📋 Ordenar por
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -754,31 +762,40 @@ const AdminPage: React.FC = () => {
                     flex: 1,
                     padding: '10px 15px',
                     borderRadius: '8px',
-                    border: '2px solid white',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontWeight: '600',
+                    border: '1px solid #d1d5db',
+                    background: '#ffffff',
+                    color: '#111827',
+                    fontWeight: '500',
                     cursor: 'pointer',
                     fontSize: '0.95rem'
                   }}
                 >
-                  <option value="name" style={{ color: '#333' }}>Nombre</option>
-                  <option value="price" style={{ color: '#333' }}>Precio</option>
-                  <option value="stock" style={{ color: '#333' }}>Stock</option>
-                  <option value="delivery" style={{ color: '#333' }}>Entrega</option>
+                  <option value="name">Nombre</option>
+                  <option value="price">Precio</option>
+                  <option value="stock">Stock</option>
+                  <option value="delivery">Entrega</option>
                 </select>
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                   style={{
                     padding: '10px 15px',
                     borderRadius: '8px',
-                    border: '2px solid white',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    color: 'white',
+                    border: '1px solid #d1d5db',
+                    background: '#f9fafb',
+                    color: '#374151',
                     fontWeight: '700',
                     cursor: 'pointer',
                     fontSize: '1.2rem',
-                    minWidth: '50px'
+                    minWidth: '50px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#f3f4f6'
+                    e.currentTarget.style.borderColor = '#9ca3af'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f9fafb'
+                    e.currentTarget.style.borderColor = '#d1d5db'
                   }}
                 >
                   {sortOrder === 'asc' ? '↑' : '↓'}
@@ -788,15 +805,15 @@ const AdminPage: React.FC = () => {
 
             {/* Información de paginación */}
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem', color: '#374151' }}>
                 📊 Resultados
               </label>
-              <div style={{ fontSize: '0.95rem', opacity: 0.95 }}>
-                <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+              <div style={{ fontSize: '0.95rem', color: '#6b7280' }}>
+                <div style={{ fontWeight: '600', marginBottom: '4px', color: '#111827' }}>
                   {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredAndSortedItems.length)} de {filteredAndSortedItems.length}
                 </div>
                 {totalPages > 1 && (
-                  <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>
+                  <div style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
                     Página {currentPage} de {totalPages}
                   </div>
                 )}
@@ -805,7 +822,7 @@ const AdminPage: React.FC = () => {
 
             {/* Items por página */}
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem', color: '#374151' }}>
                 📄 Items por página
               </label>
               <select
@@ -815,18 +832,18 @@ const AdminPage: React.FC = () => {
                   width: '100%',
                   padding: '10px 15px',
                   borderRadius: '8px',
-                  border: '2px solid white',
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontWeight: '600',
+                  border: '1px solid #d1d5db',
+                  background: '#ffffff',
+                  color: '#111827',
+                  fontWeight: '500',
                   cursor: 'pointer',
                   fontSize: '0.95rem'
                 }}
               >
-                <option value={10} style={{ color: '#333' }}>10</option>
-                <option value={20} style={{ color: '#333' }}>20</option>
-                <option value={50} style={{ color: '#333' }}>50</option>
-                <option value={100} style={{ color: '#333' }}>100</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
               </select>
             </div>
           </div>
@@ -836,13 +853,13 @@ const AdminPage: React.FC = () => {
             <div style={{
               marginTop: '20px',
               paddingTop: '20px',
-              borderTop: '2px solid rgba(255, 255, 255, 0.3)',
+              borderTop: '1px solid #e5e7eb',
               display: 'flex',
               gap: '8px',
               alignItems: 'center',
               flexWrap: 'wrap'
             }}>
-              <span style={{ fontSize: '0.9rem', fontWeight: '600', marginRight: '8px' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: '600', marginRight: '8px', color: '#374151' }}>
                 Seleccionados: {selectedProductIds.size}
               </span>
               <button 
@@ -960,12 +977,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'all' ? '#3b82f6' : undefined,
-              background: activeFilter === 'all' ? '#eff6ff' : undefined
+              background: activeFilter === 'all' ? '#eff6ff' : undefined,
+              color: activeFilter === 'all' ? '#1e3a8a' : undefined
             }}
           >
-            <h3>Total items</h3>
-            <span className="stat-number">{adminItems.length}</span>
-            <div className="stat-subtitle">Productos + Variantes</div>
+            <h3 style={{ color: activeFilter === 'all' ? '#1e40af' : undefined }}>Total items</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'all' ? '#1e3a8a' : undefined }}>{adminItems.length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'all' ? '#1e40af' : undefined }}>Productos + Variantes</div>
           </div>
           {/* 🆕 Total real y duplicados */}
           <div 
@@ -995,12 +1013,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'products' ? '#10b981' : undefined,
-              background: activeFilter === 'products' ? '#f0fdf4' : undefined
+              background: activeFilter === 'products' ? '#f0fdf4' : undefined,
+              color: activeFilter === 'products' ? '#065f46' : undefined
             }}
           >
-            <h3>Total productos</h3>
-            <span className="stat-number">{adminItems.filter(item => !item.esVariante).length}</span>
-            <div className="stat-subtitle">Solo productos base</div>
+            <h3 style={{ color: activeFilter === 'products' ? '#047857' : undefined }}>Total productos</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'products' ? '#064e3b' : undefined }}>{adminItems.filter(item => !item.esVariante).length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'products' ? '#047857' : undefined }}>Solo productos base</div>
           </div>
           <div 
             className="stat-card"
@@ -1009,12 +1028,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'variants' ? '#8b5cf6' : undefined,
-              background: activeFilter === 'variants' ? '#faf5ff' : undefined
+              background: activeFilter === 'variants' ? '#faf5ff' : undefined,
+              color: activeFilter === 'variants' ? '#5b21b6' : undefined
             }}
           >
-            <h3>Total variantes</h3>
-            <span className="stat-number">{adminItems.filter(item => item.esVariante).length}</span>
-            <div className="stat-subtitle">Solo variantes</div>
+            <h3 style={{ color: activeFilter === 'variants' ? '#6d28d9' : undefined }}>Total variantes</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'variants' ? '#5b21b6' : undefined }}>{adminItems.filter(item => item.esVariante).length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'variants' ? '#6d28d9' : undefined }}>Solo variantes</div>
           </div>
           <div 
             className="stat-card"
@@ -1022,12 +1042,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'sin-stock' ? '#ef4444' : undefined,
-              background: activeFilter === 'sin-stock' ? '#fef2f2' : undefined
+              background: activeFilter === 'sin-stock' ? '#fef2f2' : undefined,
+              color: activeFilter === 'sin-stock' ? '#991b1b' : undefined
             }}
           >
-            <h3>Sin Stock</h3>
-            <span className="stat-number">{adminItems.filter(item => !item.isPaused && item.stock <= 0).length}</span>
-            <div className="stat-subtitle">Activos sin stock</div>
+            <h3 style={{ color: activeFilter === 'sin-stock' ? '#b91c1c' : undefined }}>Sin Stock</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'sin-stock' ? '#991b1b' : undefined }}>{adminItems.filter(item => !item.isPaused && item.stock <= 0).length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'sin-stock' ? '#b91c1c' : undefined }}>Activos sin stock</div>
           </div>
           <div 
             className="stat-card"
@@ -1035,12 +1056,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'pausados' ? '#f59e0b' : undefined,
-              background: activeFilter === 'pausados' ? '#fffbeb' : undefined
+              background: activeFilter === 'pausados' ? '#fffbeb' : undefined,
+              color: activeFilter === 'pausados' ? '#92400e' : undefined
             }}
           >
-            <h3>Pausados</h3>
-            <span className="stat-number">{adminItems.filter(item => item.isPaused).length}</span>
-            <div className="stat-subtitle">Click para filtrar</div>
+            <h3 style={{ color: activeFilter === 'pausados' ? '#b45309' : undefined }}>Pausados</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'pausados' ? '#92400e' : undefined }}>{adminItems.filter(item => item.isPaused).length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'pausados' ? '#b45309' : undefined }}>Click para filtrar</div>
           </div>
           <div 
             className="stat-card"
@@ -1048,12 +1070,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'a-pedido' ? '#6366f1' : undefined,
-              background: activeFilter === 'a-pedido' ? '#eef2ff' : undefined
+              background: activeFilter === 'a-pedido' ? '#eef2ff' : undefined,
+              color: activeFilter === 'a-pedido' ? '#3730a3' : undefined
             }}
           >
-            <h3>A Pedido</h3>
-            <span className="stat-number">{adminItems.filter(item => item.es_entrega_larga).length}</span>
-            <div className="stat-subtitle">Click para filtrar</div>
+            <h3 style={{ color: activeFilter === 'a-pedido' ? '#4338ca' : undefined }}>A Pedido</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'a-pedido' ? '#3730a3' : undefined }}>{adminItems.filter(item => item.es_entrega_larga).length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'a-pedido' ? '#4338ca' : undefined }}>Click para filtrar</div>
           </div>
           <div 
             className="stat-card"
@@ -1061,12 +1084,13 @@ const AdminPage: React.FC = () => {
             style={{ 
               cursor: 'pointer',
               borderColor: activeFilter === 'stock-fisico' ? '#059669' : undefined,
-              background: activeFilter === 'stock-fisico' ? '#f0fdfa' : undefined
+              background: activeFilter === 'stock-fisico' ? '#f0fdfa' : undefined,
+              color: activeFilter === 'stock-fisico' ? '#065f46' : undefined
             }}
           >
-            <h3>Stock Físico</h3>
-            <span className="stat-number">{adminItems.filter(item => !item.isPaused && item.stock > 0 && item.es_stock_fisico).length}</span>
-            <div className="stat-subtitle">Self Service (~7 días)</div>
+            <h3 style={{ color: activeFilter === 'stock-fisico' ? '#047857' : undefined }}>Stock Físico</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'stock-fisico' ? '#064e3b' : undefined }}>{adminItems.filter(item => !item.isPaused && item.stock > 0 && item.es_stock_fisico).length}</span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'stock-fisico' ? '#047857' : undefined }}>Self Service (~7 días)</div>
           </div>
           {/* 🆕 Tarjeta de productos destacados */}
           <div 
