@@ -603,7 +603,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   ) : (
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: (cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && (!user || cuponValidacion.error?.includes('clientes registrados'))) ? '8px' : '0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: (cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && (!user || cuponValidacion.error?.includes('usuarios registrados'))) ? '8px' : '0' }}>
                         <span style={{ fontSize: '16px' }}>✗</span>
                         <span>{cuponValidacion.error}</span>
                       </div>
@@ -657,7 +657,7 @@ const CheckoutPage: React.FC = () => {
                           </div>
                         </div>
                       )}
-                      {cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && user && cuponValidacion.error?.includes('clientes registrados') && (
+                      {cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && user && cuponValidacion.error?.includes('usuarios registrados') && (
                         <div style={{ 
                           marginTop: '8px', 
                           fontSize: '12px',
@@ -665,8 +665,8 @@ const CheckoutPage: React.FC = () => {
                           borderTop: '1px solid rgba(114, 28, 36, 0.2)'
                         }}>
                           <span style={{ marginRight: '8px', display: 'block', marginBottom: '6px' }}>
-                            Estás autenticado como <strong>{user.email}</strong>, pero tu cuenta no está registrada como cliente en el sistema. 
-                            Esto puede suceder si te registraste recientemente. Por favor, completa una compra primero para crear tu registro como cliente.
+                            Estás autenticado como <strong>{user.email}</strong>, pero tu cuenta no está registrada en el sistema. 
+                            Si acabas de registrarte, espera unos momentos o contacta al soporte si el problema persiste.
                           </span>
                         </div>
                       )}
