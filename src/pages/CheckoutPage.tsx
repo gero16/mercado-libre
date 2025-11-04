@@ -91,6 +91,23 @@ const CheckoutPage: React.FC = () => {
     setCartOpen(false)
   }, [])
 
+  // Prellenar datos del formulario cuando el usuario está autenticado
+  useEffect(() => {
+    if (user && user.email) {
+      setCustomerData(prev => {
+        // Solo actualizar si el email aún no está configurado o es diferente
+        if (!prev.email || prev.email !== user.email) {
+          return {
+            ...prev,
+            email: user.email,
+            name: user.nombre || prev.name
+          }
+        }
+        return prev
+      })
+    }
+  }, [user])
+
   // Validar cupón automáticamente cuando se restaura desde login/register
   useEffect(() => {
     const state = location.state as { cupon?: string } | null
@@ -129,11 +146,22 @@ const CheckoutPage: React.FC = () => {
         // Para usuarios no logueados, usar el email del formulario solo si lo ingresaron
         const emailParaValidar = user?.email || (customerData.email || undefined)
         
+        // Log de depuración
+        console.log('🔍 Validando cupón:', {
+          codigo: cuponCodigo,
+          usuarioAutenticado: user ? { email: user.email, nombre: user.nombre } : null,
+          emailParaValidar,
+          emailFormulario: customerData.email
+        })
+        
         const validacion = await CuponService.validar(
           cuponCodigo,
           cartTotal,
           emailParaValidar
         )
+        
+        console.log('📋 Resultado validación:', validacion)
+        
         setCuponValidacion(validacion)
         if (validacion.valido && validacion.descuento) {
           setDescuentoAplicado(validacion.descuento)
@@ -205,6 +233,13 @@ const CheckoutPage: React.FC = () => {
         // Usar el email del usuario logueado o el del formulario para validación final
         const emailFinal = user?.email || customerData.email
         
+        console.log('💳 Validando cupón antes de pago:', {
+          cuponCodigo,
+          usuarioAutenticado: user ? { email: user.email, nombre: user.nombre } : null,
+          emailFinal,
+          emailFormulario: customerData.email
+        })
+        
         if (!emailFinal && cuponCodigo.toUpperCase().trim() === 'POPPYWEB') {
           alert('El cupón POPPYWEB requiere una cuenta. Por favor regístrate o inicia sesión primero.')
           setIsCreatingPreference(false)
@@ -217,6 +252,8 @@ const CheckoutPage: React.FC = () => {
           cartTotal,
           emailFinal
         )
+        
+        console.log('📋 Validación final del cupón:', validacionFinal)
 
         if (!validacionFinal.valido) {
           alert(`Cupón inválido: ${validacionFinal.error}`)
@@ -294,6 +331,25 @@ const CheckoutPage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="checkout-form-content">
+              {/* Indicador de usuario autenticado */}
+              {user && (
+                <div style={{
+                  padding: '12px',
+                  marginBottom: '16px',
+                  backgroundColor: '#d4edda',
+                  border: '1px solid #c3e6cb',
+                  borderRadius: '6px',
+                  color: '#155724',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span>✓</span>
+                  <span>Usuario autenticado: <strong>{user.email}</strong> - El cupón se validará con este email</span>
+                </div>
+              )}
+
               <div className="form-group">
               <label htmlFor="name">Nombre completo *</label>
                 <input 
@@ -316,8 +372,15 @@ const CheckoutPage: React.FC = () => {
                   value={customerData.email}
                   onChange={handleInputChange}
                   required
-                placeholder="tu@email.com"
+                  placeholder="tu@email.com"
+                  disabled={!!user}
+                  style={user ? { backgroundColor: '#f8f9fa', cursor: 'not-allowed' } : {}}
                 />
+                {user && (
+                  <small style={{ color: '#6c757d', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                    El email está bloqueado porque estás autenticado. El cupón se validará con tu email de cuenta.
+                  </small>
+                )}
               </div>
 
               <div className="form-group">
@@ -540,7 +603,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   ) : (
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && !user ? '8px' : '0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: (cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && (!user || cuponValidacion.error?.includes('clientes registrados'))) ? '8px' : '0' }}>
                         <span style={{ fontSize: '16px' }}>✗</span>
                         <span>{cuponValidacion.error}</span>
                       </div>
@@ -592,6 +655,19 @@ const CheckoutPage: React.FC = () => {
                               Inicia sesión
                             </button>
                           </div>
+                        </div>
+                      )}
+                      {cuponCodigo.toUpperCase().trim() === 'POPPYWEB' && user && cuponValidacion.error?.includes('clientes registrados') && (
+                        <div style={{ 
+                          marginTop: '8px', 
+                          fontSize: '12px',
+                          paddingTop: '8px',
+                          borderTop: '1px solid rgba(114, 28, 36, 0.2)'
+                        }}>
+                          <span style={{ marginRight: '8px', display: 'block', marginBottom: '6px' }}>
+                            Estás autenticado como <strong>{user.email}</strong>, pero tu cuenta no está registrada como cliente en el sistema. 
+                            Esto puede suceder si te registraste recientemente. Por favor, completa una compra primero para crear tu registro como cliente.
+                          </span>
                         </div>
                       )}
                     </div>
