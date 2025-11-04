@@ -598,6 +598,16 @@ const AdminPage: React.FC = () => {
             >
               ↳ Gestionar Clientes
             </button>
+            <button 
+              onClick={() => navigate("/admin/usuarios")}
+              className="btn-orden"
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
+                color: 'white'
+              }}
+            >
+              ↳ Gestionar Usuarios
+            </button>
           {canManageExtended && (
             <>
               <button 

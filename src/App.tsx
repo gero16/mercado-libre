@@ -22,6 +22,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage'))
 const AdminDropshippingPage = lazy(() => import('./pages/AdminDropshippingPage'))
 const AdminOrdersPage = lazy(() => import('./pages/AdminOrdersPage'))
 const AdminClientesPage = lazy(() => import('./pages/AdminClientesPage')) // 🆕 Importar página de clientes
+const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage')) // 🆕 Importar página de usuarios
 const AdminDescuentos = lazy(() => import('./pages/AdminDescuentos')) // 🆕 Importar página de descuentos
 const AdminCupones = lazy(() => import('./pages/AdminCupones')) // 🆕 Importar página de cupones
 const AdminEventos = lazy(() => import('./pages/AdminEventos'))
@@ -96,6 +97,7 @@ function App() {
               <Route path="/admin/dropshipping" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDropshippingPage /></Suspense></AdminRoute>} />
               <Route path="/admin/orders" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminOrdersPage /></Suspense></AdminRoute>} />
               <Route path="/admin/clientes" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminClientesPage /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de clientes */}
+              <Route path="/admin/usuarios" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminUsuariosPage /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de usuarios */}
               <Route path="/admin/descuentos" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDescuentos /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de descuentos */}
               <Route path="/admin/cupones" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminCupones /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de cupones */}
               <Route path="/admin/eventos" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminEventos /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de eventos */}
