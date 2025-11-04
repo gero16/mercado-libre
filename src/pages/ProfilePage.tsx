@@ -12,6 +12,7 @@ const ProfilePage: React.FC = () => {
   const [success, setSuccess] = useState(false)
   const [perfil, setPerfil] = useState<ClientePerfil | null>(null)
   const [editMode, setEditMode] = useState(false)
+  const [activeTab, setActiveTab] = useState<'info' | 'direccion'>('info')
 
   // Estados del formulario
   const [nombre, setNombre] = useState('')
@@ -94,226 +95,131 @@ const ProfilePage: React.FC = () => {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="container" style={{ padding: '40px 20px', textAlign: 'center' }}>
-        <p>Cargando perfil...</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="container" style={{ maxWidth: 700, padding: '40px 20px' }}>
-      <h2 style={{ marginBottom: 30 }}>Mi Perfil</h2>
-
-      {success && (
-        <div style={{ 
-          background: '#10b981', 
-          color: 'white', 
-          padding: '12px', 
-          borderRadius: '5px', 
-          marginBottom: 20 
-        }}>
-          Perfil actualizado exitosamente
-        </div>
-      )}
-
-      {error && (
-        <div style={{ 
-          background: '#ef4444', 
-          color: 'white', 
-          padding: '12px', 
-          borderRadius: '5px', 
-          marginBottom: 20 
-        }}>
-          {error}
-        </div>
-      )}
-
-      {!editMode && perfil ? (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
-            <h3 style={{ margin: 0 }}>Información Personal</h3>
-            <button 
-              onClick={() => setEditMode(true)}
-              style={{
-                padding: '8px 16px',
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}
-            >
-              Editar
-            </button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 10000 }}>
+      <div style={{ width: 'min(760px, 96vw)', borderRadius: 12, background: 'white', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+        {/* Header modal */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: '#111827', color: 'white' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 9999, background: success ? '#10b981' : '#60a5fa' }} />
+            <h3 style={{ margin: 0, fontSize: 18 }}>Mi Perfil</h3>
           </div>
-
-          <div style={{ display: 'grid', gap: 20 }}>
-            <div>
-              <strong>Nombre:</strong> {perfil.nombre} {perfil.apellido}
-            </div>
-            <div>
-              <strong>Email:</strong> {perfil.email}
-            </div>
-            <div>
-              <strong>Teléfono:</strong> {perfil.telefono}
-            </div>
-            <div>
-              <strong>Dirección:</strong> {perfil.direccion.calle} {perfil.direccion.numero}
-              {perfil.direccion.apartamento && `, Apt. ${perfil.direccion.apartamento}`}
-            </div>
-            <div>
-              <strong>Código Postal:</strong> {perfil.direccion.codigo_postal}
-            </div>
-            <div>
-              <strong>Ciudad:</strong> {perfil.direccion.ciudad}
-            </div>
-            <div>
-              <strong>Departamento:</strong> {perfil.direccion.departamento}
-            </div>
-            <div>
-              <strong>País:</strong> {perfil.direccion.pais}
-            </div>
-            {perfil.fecha_registro && (
-              <div>
-                <strong>Miembro desde:</strong> {new Date(perfil.fecha_registro).toLocaleDateString('es-UY')}
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {!editMode && (
+              <button onClick={() => setEditMode(true)} style={{ padding: '6px 12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>Editar</button>
             )}
+            <button onClick={() => navigate(-1)} style={{ padding: 6, width: 34, height: 34, borderRadius: 6, border: '1px solid #e5e7eb', background: 'white', color: '#111', cursor: 'pointer' }}>✕</button>
           </div>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 15 }}>
-          <h3 style={{ marginBottom: 10 }}>Información Personal</h3>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <input
-              type="text"
-              placeholder="Nombre *"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Apellido *"
-              value={apellido}
-              onChange={e => setApellido(e.target.value)}
-              required
-            />
-          </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={perfil?.email || ''}
-            disabled
-            style={{ background: '#f3f4f6', cursor: 'not-allowed' }}
-          />
+        {/* Alertas */}
+        {success && (
+          <div style={{ background: '#ecfdf5', color: '#065f46', padding: '10px 14px', fontSize: 14 }}>Perfil actualizado exitosamente</div>
+        )}
+        {error && (
+          <div style={{ background: '#fef2f2', color: '#991b1b', padding: '10px 14px', fontSize: 14 }}>{error}</div>
+        )}
 
-          <input
-            type="tel"
-            placeholder="Teléfono *"
-            value={telefono}
-            onChange={e => setTelefono(e.target.value)}
-            required
-          />
-
-          <h3 style={{ marginTop: 20, marginBottom: 10 }}>Dirección</h3>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
-            <input
-              type="text"
-              placeholder="Calle *"
-              value={calle}
-              onChange={e => setCalle(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Número *"
-              value={numero}
-              onChange={e => setNumero(e.target.value)}
-              required
-            />
-          </div>
-
-          <input
-            type="text"
-            placeholder="Apartamento (opcional)"
-            value={apartamento}
-            onChange={e => setApartamento(e.target.value)}
-          />
-
-          <input
-            type="text"
-            placeholder="Código postal *"
-            value={codigoPostal}
-            onChange={e => setCodigoPostal(e.target.value)}
-            required
-          />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <input
-              type="text"
-              placeholder="Ciudad *"
-              value={ciudad}
-              onChange={e => setCiudad(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Departamento *"
-              value={departamento}
-              onChange={e => setDepartamento(e.target.value)}
-              required
-            />
-          </div>
-
-          <input
-            type="text"
-            placeholder="País"
-            value={pais}
-            onChange={e => setPais(e.target.value)}
-          />
-
-          <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                padding: '12px 24px',
-                background: '#10b981',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.7 : 1
-              }}
-            >
-              {saving ? 'Guardando...' : 'Guardar Cambios'}
-            </button>
-            {perfil && (
+        {/* Body modal sin scroll: usar pestañas para comprimir */}
+        <div style={{ padding: 16 }}>
+          {/* Tabs sólo en modo edición */}
+          {editMode && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <button
                 type="button"
-                onClick={() => {
-                  setEditMode(false)
-                  loadProfile()
-                }}
+                onClick={() => setActiveTab('info')}
                 style={{
-                  padding: '12px 24px',
-                  background: '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid',
+                  borderColor: activeTab === 'info' ? '#3b82f6' : '#e5e7eb',
+                  background: activeTab === 'info' ? '#eff6ff' : 'white',
+                  color: '#111827',
                   cursor: 'pointer'
                 }}
               >
-                Cancelar
+                Información
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => setActiveTab('direccion')}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid',
+                  borderColor: activeTab === 'direccion' ? '#3b82f6' : '#e5e7eb',
+                  background: activeTab === 'direccion' ? '#eff6ff' : 'white',
+                  color: '#111827',
+                  cursor: 'pointer'
+                }}
+              >
+                Dirección
+              </button>
+            </div>
+          )}
+
+          {/* Contenido: vista compacta si no edita */}
+          {!editMode && perfil && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ fontSize: 14 }}><strong>Nombre:</strong> {perfil.nombre} {perfil.apellido}</div>
+              <div style={{ fontSize: 14 }}><strong>Email:</strong> {perfil.email}</div>
+              <div style={{ fontSize: 14 }}><strong>Teléfono:</strong> {perfil.telefono}</div>
+              <div style={{ fontSize: 14 }}>
+                <strong>Dirección:</strong> {perfil.direccion.calle} {perfil.direccion.numero}{perfil.direccion.apartamento ? `, Apt. ${perfil.direccion.apartamento}` : ''}
+              </div>
+              <div style={{ fontSize: 14 }}><strong>CP:</strong> {perfil.direccion.codigo_postal}</div>
+              <div style={{ fontSize: 14 }}><strong>Ciudad:</strong> {perfil.direccion.ciudad}</div>
+              <div style={{ fontSize: 14 }}><strong>Departamento:</strong> {perfil.direccion.departamento}</div>
+              <div style={{ fontSize: 14 }}><strong>País:</strong> {perfil.direccion.pais}</div>
+            </div>
+          )}
+
+          {/* Formulario por pestañas en modo edición */}
+          {editMode && (
+            <form onSubmit={handleSubmit}>
+              {activeTab === 'info' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <input type="text" placeholder="Nombre *" value={nombre} onChange={e => setNombre(e.target.value)} required />
+                  <input type="text" placeholder="Apellido *" value={apellido} onChange={e => setApellido(e.target.value)} required />
+                  <input type="email" placeholder="Email" value={perfil?.email || ''} disabled style={{ background: '#f3f4f6', cursor: 'not-allowed' }} />
+                  <input type="tel" placeholder="Teléfono *" value={telefono} onChange={e => setTelefono(e.target.value)} required />
+                </div>
+              )}
+
+              {activeTab === 'direccion' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 10 }}>
+                  <input type="text" placeholder="Calle *" value={calle} onChange={e => setCalle(e.target.value)} required />
+                  <input type="text" placeholder="Número *" value={numero} onChange={e => setNumero(e.target.value)} required />
+                  <input type="text" placeholder="Apartamento (opcional)" value={apartamento} onChange={e => setApartamento(e.target.value)} />
+                  <input type="text" placeholder="Código postal *" value={codigoPostal} onChange={e => setCodigoPostal(e.target.value)} required />
+                  <input type="text" placeholder="Ciudad *" value={ciudad} onChange={e => setCiudad(e.target.value)} required />
+                  <input type="text" placeholder="Departamento *" value={departamento} onChange={e => setDepartamento(e.target.value)} required />
+                  <input type="text" placeholder="País" value={pais} onChange={e => setPais(e.target.value)} />
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'flex-end' }}>
+                {perfil && (
+                  <button type="button" onClick={() => { setEditMode(false); setActiveTab('info'); loadProfile() }} style={{ padding: '10px 16px', background: '#6b7280', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>Cancelar</button>
+                )}
+                <button type="submit" disabled={saving} style={{ padding: '10px 16px', background: '#10b981', color: 'white', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>{saving ? 'Guardando...' : 'Guardar'}</button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* Footer compacto con acciones rápidas */}
+        {!editMode && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: 12, borderTop: '1px solid #e5e7eb', background: '#fafafa' }}>
+            <button onClick={() => setEditMode(true)} style={{ padding: '8px 12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>Editar</button>
+            <button onClick={() => navigate(-1)} style={{ padding: '8px 12px', background: 'white', color: '#111827', border: '1px solid #e5e7eb', borderRadius: 6, cursor: 'pointer' }}>Cerrar</button>
           </div>
-        </form>
+        )}
+      </div>
+
+      {/* Loader superpuesto si está cargando */}
+      {loading && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600 }}>Cargando…</div>
       )}
     </div>
   )

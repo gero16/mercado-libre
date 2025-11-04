@@ -7,6 +7,7 @@ import { FEATURE_FLAGS } from '../config/featureFlags'
 import { MercadoPagoService } from '../services/mercadopago'
 import { CuponService, ValidacionCupon } from '../services/cupones'
 import { useAuth } from '../context/AuthContext'
+import { AuthService } from '../services/auth'
 
 interface CustomerData {
   name: string
@@ -106,6 +107,38 @@ const CheckoutPage: React.FC = () => {
         return prev
       })
     }
+  }, [user])
+
+  // 🆕 Intentar completar el resto de los datos desde el perfil del usuario
+  useEffect(() => {
+    const preloadProfile = async () => {
+      if (!user) return
+      try {
+        const perfil = await AuthService.getProfile()
+        if (!perfil) return
+
+        const nombreCompleto = `${perfil.nombre || ''} ${perfil.apellido || ''}`.trim()
+        const partesDireccion: string[] = []
+        if (perfil.direccion?.calle) partesDireccion.push(perfil.direccion.calle)
+        if (perfil.direccion?.numero) partesDireccion.push(perfil.direccion.numero)
+        if (perfil.direccion?.apartamento) partesDireccion.push(`Apto ${perfil.direccion.apartamento}`)
+
+        const lineaDireccion = partesDireccion.join(' ')
+
+        setCustomerData(prev => ({
+          ...prev,
+          name: prev.name || nombreCompleto || prev.name,
+          email: user.email || prev.email,
+          phone: prev.phone || perfil.telefono || prev.phone,
+          address: prev.address || lineaDireccion || prev.address,
+          city: prev.city || perfil.direccion?.ciudad || prev.city,
+          state: prev.state || perfil.direccion?.departamento || prev.state,
+        }))
+      } catch {
+        // silencioso
+      }
+    }
+    preloadProfile()
   }, [user])
 
   // Validar cupón automáticamente cuando se restaura desde login/register
