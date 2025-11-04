@@ -2,7 +2,7 @@
 .promotional-banner {
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark), var(--color-primary));
   background-size: 400% 400%;
-  animation: gradientShift 3s ease infinite, pulse 4s ease-in-out infinite;
+  animation: gradientShift 3s ease infinite;
   padding: 10px 15px;
   position: fixed !important;
   top: 95px !important;
@@ -171,12 +171,3 @@
   }
 }
 
-/* Animación de pulso para llamar la atención */
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
