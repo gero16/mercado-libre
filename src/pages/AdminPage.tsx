@@ -566,12 +566,6 @@ const AdminPage: React.FC = () => {
         {/* Navegación de administración */}
         <div className="admin-nav flex gap-20">
           <button 
-            onClick={() => navigate('/admin/dropshipping')}
-            className="btn-orden btn-dropshipping"
-          >
-            ↳ Configurar Dropshipping
-          </button>
-          <button 
             onClick={() => navigate('/admin/orders')}
             className="btn-orden btn-orders"
           >
@@ -687,25 +681,27 @@ const AdminPage: React.FC = () => {
             </select>
           </div>
           
-          {/* 🆕 Filtro de destacados */}
-          <div className="destacado-section">
-            <select
-              value={filterDestacado}
-              onChange={(e) => setFilterDestacado(e.target.value as 'all' | 'destacados' | 'no-destacados')}
-              className="admin-select"
-              style={{
-                borderColor: filterDestacado === 'destacados' ? '#fbbf24' : undefined,
-                background: filterDestacado === 'destacados' 
-                  ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' 
-                  : undefined,
-                fontWeight: filterDestacado === 'destacados' ? '600' : undefined
-              }}
-            >
-              <option value="all">Todos</option>
-              <option value="destacados">⭐ Solo Destacados</option>
-              <option value="no-destacados">☆ No Destacados</option>
-            </select>
-          </div>
+          {/* 🆕 Filtro de destacados - Solo para geronicola1696@gmail.com */}
+          {canManageExtended && (
+            <div className="destacado-section">
+              <select
+                value={filterDestacado}
+                onChange={(e) => setFilterDestacado(e.target.value as 'all' | 'destacados' | 'no-destacados')}
+                className="admin-select"
+                style={{
+                  borderColor: filterDestacado === 'destacados' ? '#fbbf24' : undefined,
+                  background: filterDestacado === 'destacados' 
+                    ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' 
+                    : undefined,
+                  fontWeight: filterDestacado === 'destacados' ? '600' : undefined
+                }}
+              >
+                <option value="all">Todos</option>
+                <option value="destacados">⭐ Solo Destacados</option>
+                <option value="no-destacados">☆ No Destacados</option>
+              </select>
+            </div>
+          )}
           
           <div className="sort-section">
             <select
