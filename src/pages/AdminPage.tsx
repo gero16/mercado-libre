@@ -55,10 +55,8 @@ const AdminPage: React.FC = () => {
   const [adminItems, setAdminItems] = useState<AdminItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<'all' | 'products' | 'variants'>('all')
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'paused'>('all')
-  const [filterDelivery, setFilterDelivery] = useState<'all' | 'fast' | 'slow'>('all')
-  const [filterDestacado, setFilterDestacado] = useState<'all' | 'destacados' | 'no-destacados'>('all')  // 🆕 Filtro de destacados
+  // Filtros activos (se activan desde las estadísticas)
+  const [activeFilter, setActiveFilter] = useState<'all' | 'products' | 'variants' | 'sin-stock' | 'pausados' | 'a-pedido' | 'stock-fisico' | 'destacados'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'delivery'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
@@ -198,12 +196,12 @@ const AdminPage: React.FC = () => {
     const fetchPage = async (reset: boolean) => {
       try {
         setServerLoading(true)
-        console.log('[Admin] Fetching page', { limit: serverLimit, offset: serverOffset, status: filterStatus, q: searchTerm, fields: SERVER_FIELDS })
+        console.log('[Admin] Fetching page', { limit: serverLimit, offset: serverOffset, status: 'all', q: searchTerm, fields: SERVER_FIELDS })
         const { total, items } = await productsCache.getAdminProductsPage({
           limit: serverLimit,
           offset: serverOffset,
           fields: SERVER_FIELDS,
-          status: filterStatus,
+          status: 'all', // Cargar todos los status, filtrar en frontend
           q: searchTerm
         })
         setServerTotal(total)
@@ -241,7 +239,7 @@ const AdminPage: React.FC = () => {
     // Cuando cambia offset/limit o filtro de status, recargar desde servidor
     fetchPage(serverOffset === 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverLimit, serverOffset, filterStatus, searchTerm])
+  }, [serverLimit, serverOffset, searchTerm])
 
   // Al cambiar el término de búsqueda, reiniciar el offset del servidor
   useEffect(() => {
@@ -275,7 +273,7 @@ const AdminPage: React.FC = () => {
         limit: 1,
         offset: 0,
         fields: SERVER_FIELDS,
-        status: filterStatus,
+        status: 'all', // Cargar todos los status
         q: options?.ignoreQuery ? '' : searchTerm
       })
       const total = firstPage.total || 0
@@ -306,7 +304,7 @@ const AdminPage: React.FC = () => {
             limit: batchLimit,
             offset,
             fields: SERVER_FIELDS,
-            status: filterStatus,
+            status: 'all', // Cargar todos los status
             q: options?.ignoreQuery ? '' : searchTerm
           }).then(({ items }) => {
             const mapped: AdminItem[] = []
@@ -387,21 +385,34 @@ const AdminPage: React.FC = () => {
       }
       }
       
-      // Filtro por tipo
-      if (filterType === 'products' && item.esVariante) return false
-      if (filterType === 'variants' && !item.esVariante) return false
-      
-      // Filtro por status
-      if (filterStatus === 'active' && item.isPaused) return false
-      if (filterStatus === 'paused' && !item.isPaused) return false
-      
-      // Filtro por tiempo de entrega
-      if (filterDelivery === 'fast' && item.es_entrega_larga) return false
-      if (filterDelivery === 'slow' && !item.es_entrega_larga) return false
-      
-      // 🆕 Filtro por destacado (solo aplica a productos, no variantes)
-      if (filterDestacado === 'destacados' && (!item.destacado || item.esVariante)) return false
-      if (filterDestacado === 'no-destacados' && (item.destacado || item.esVariante)) return false
+      // Filtro activo desde estadísticas
+      if (activeFilter !== 'all') {
+        switch (activeFilter) {
+          case 'products':
+            if (item.esVariante) return false
+            break
+          case 'variants':
+            if (!item.esVariante) return false
+            break
+          case 'sin-stock':
+            // Productos activos sin stock
+            if (item.isPaused || item.stock > 0) return false
+            break
+          case 'pausados':
+            // Productos pausados (pero también activos)
+            if (!item.isPaused) return false
+            break
+          case 'a-pedido':
+            if (!item.es_entrega_larga) return false
+            break
+          case 'stock-fisico':
+            if (item.isPaused || item.stock <= 0 || !item.es_stock_fisico) return false
+            break
+          case 'destacados':
+            if (!item.destacado || item.esVariante) return false
+            break
+        }
+      }
       
       return true
     })
@@ -424,7 +435,7 @@ const AdminPage: React.FC = () => {
       }
       
       return sortOrder === 'asc' ? comparison : -comparison
-    }), [adminItems, deferredSearchTerm, filterType, filterStatus, filterDelivery, filterDestacado, sortBy, sortOrder])
+    }), [adminItems, deferredSearchTerm, activeFilter, sortBy, sortOrder])
 
   // 🆕 Paginación (memo)
   const { totalPages, indexOfFirstItem, indexOfLastItem, currentItems } = useMemo(() => {
@@ -453,7 +464,7 @@ const AdminPage: React.FC = () => {
   // 🆕 Resetear página cuando cambien los filtros
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, filterType, filterStatus, filterDelivery, filterDestacado, sortBy, sortOrder])
+  }, [searchTerm, activeFilter, sortBy, sortOrder])
 
   // 🆕 Función para marcar/desmarcar producto como destacado
   const toggleDestacado = async (item: AdminItem) => {
@@ -692,117 +703,7 @@ const AdminPage: React.FC = () => {
           )}
         </div>
 
-        {/* Controles de filtrado y búsqueda */}
-        <div className="admin-controls">
-          <div className="search-section">
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="admin-search-input"
-            />
-          </div>
-          
-          <div className="filter-section">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as 'all' | 'products' | 'variants')}
-              className="admin-select"
-            >
-              <option value="all">Todos los items</option>
-              <option value="products">Solo productos</option>
-              <option value="variants">Solo variantes</option>
-            </select>
-          </div>
-          
-          <div className="status-section">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'paused')}
-              className="admin-select"
-            >
-              <option value="all">Todos los status</option>
-              <option value="active">Activos</option>
-              <option value="paused">Pausados</option>
-            </select>
-          </div>
-          
-          <div className="delivery-section">
-            <select
-              value={filterDelivery}
-              onChange={(e) => setFilterDelivery(e.target.value as 'all' | 'fast' | 'slow')}
-              className="admin-select"
-            >
-              <option value="all">Todos los tiempos</option>
-              <option value="fast">Stock físico </option>
-              <option value="slow">A pedido </option>
-            </select>
-          </div>
-          
-          {/* 🆕 Filtro de destacados - Solo para geronicola1696@gmail.com */}
-          {canManageExtended && (
-            <div className="destacado-section">
-              <select
-                value={filterDestacado}
-                onChange={(e) => setFilterDestacado(e.target.value as 'all' | 'destacados' | 'no-destacados')}
-                className="admin-select"
-                style={{
-                  borderColor: filterDestacado === 'destacados' ? '#fbbf24' : undefined,
-                  background: filterDestacado === 'destacados' 
-                    ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' 
-                    : undefined,
-                  fontWeight: filterDestacado === 'destacados' ? '600' : undefined
-                }}
-              >
-                <option value="all">Todos</option>
-                <option value="destacados">⭐ Solo Destacados</option>
-                <option value="no-destacados">☆ No Destacados</option>
-              </select>
-            </div>
-          )}
-          
-          <div className="sort-section">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'stock' | 'delivery')}
-              className="admin-select"
-            >
-              <option value="name">Ordenar por nombre</option>
-              <option value="price">Ordenar por precio</option>
-              <option value="stock">Ordenar por stock</option>
-              <option value="delivery">Ordenar por entrega</option>
-            </select>
-            
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="admin-sort-btn"
-            >
-              {sortOrder === 'asc' ? '↑' : '↓'}
-            </button>
-          </div>
-
-          {/* 🆕 Acciones para destacados (selección múltiple) - Solo para geronicola1696@gmail.com */}
-          {canManageExtended && (
-            <div className="featured-batch-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button className="btn-orden" onClick={selectAllCurrentPage} title="Seleccionar productos de esta página">
-                Seleccionar página
-              </button>
-              <button className="btn-orden" onClick={clearSelection} title="Limpiar selección">
-                Limpiar selección
-              </button>
-              <button className="btn-orden" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: 'white' }} onClick={() => batchSetDestacados(true)}>
-                Marcar Destacados
-              </button>
-              <button className="btn-orden" onClick={() => batchSetDestacados(false)}>
-                Quitar Destacados
-              </button>
-              <span style={{ fontSize: 12, color: '#6b7280' }}>Seleccionados: {selectedProductIds.size}</span>
-            </div>
-          )}
-        </div>
-
-        {/* 🆕 Información de paginación y control (cliente) */}
+        {/* Controles unificados: búsqueda, ordenamiento y paginación */}
         <div style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           padding: '20px',
@@ -812,45 +713,175 @@ const AdminPage: React.FC = () => {
           boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
         }}>
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '15px'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '20px',
+            alignItems: 'center'
           }}>
+            {/* Búsqueda */}
             <div>
-              <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>
-                📊 Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredAndSortedItems.length)} de {filteredAndSortedItems.length} items
-              </h3>
-              {totalPages > 1 && (
-                <p style={{ margin: 0, opacity: 0.9 }}>
-                  Página {currentPage} de {totalPages}
-                </p>
-              )}
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+                🔍 Buscar
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 15px',
+                  borderRadius: '8px',
+                  border: '2px solid white',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: '0.95rem',
+                  boxSizing: 'border-box'
+                }}
+              />
             </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <label style={{ fontWeight: '600' }}>Items por página:</label>
+
+            {/* Ordenamiento */}
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+                📋 Ordenar por
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'price' | 'stock' | 'delivery')}
+                  style={{
+                    flex: 1,
+                    padding: '10px 15px',
+                    borderRadius: '8px',
+                    border: '2px solid white',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  <option value="name" style={{ color: '#333' }}>Nombre</option>
+                  <option value="price" style={{ color: '#333' }}>Precio</option>
+                  <option value="stock" style={{ color: '#333' }}>Stock</option>
+                  <option value="delivery" style={{ color: '#333' }}>Entrega</option>
+                </select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  style={{
+                    padding: '10px 15px',
+                    borderRadius: '8px',
+                    border: '2px solid white',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    fontSize: '1.2rem',
+                    minWidth: '50px'
+                  }}
+                >
+                  {sortOrder === 'asc' ? '↑' : '↓'}
+                </button>
+              </div>
+            </div>
+
+            {/* Información de paginación */}
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+                📊 Resultados
+              </label>
+              <div style={{ fontSize: '0.95rem', opacity: 0.95 }}>
+                <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                  {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredAndSortedItems.length)} de {filteredAndSortedItems.length}
+                </div>
+                {totalPages > 1 && (
+                  <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>
+                    Página {currentPage} de {totalPages}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Items por página */}
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+                📄 Items por página
+              </label>
               <select
                 value={itemsPerPage}
                 onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                 style={{
-                  padding: '8px 15px',
+                  width: '100%',
+                  padding: '10px 15px',
                   borderRadius: '8px',
                   border: '2px solid white',
                   background: 'rgba(255, 255, 255, 0.2)',
                   color: 'white',
                   fontWeight: '600',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontSize: '0.95rem'
                 }}
               >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
+                <option value={10} style={{ color: '#333' }}>10</option>
+                <option value={20} style={{ color: '#333' }}>20</option>
+                <option value={50} style={{ color: '#333' }}>50</option>
+                <option value={100} style={{ color: '#333' }}>100</option>
               </select>
             </div>
           </div>
+
+          {/* 🆕 Acciones para destacados (selección múltiple) - Solo para geronicola1696@gmail.com */}
+          {canManageExtended && selectedProductIds.size > 0 && (
+            <div style={{
+              marginTop: '20px',
+              paddingTop: '20px',
+              borderTop: '2px solid rgba(255, 255, 255, 0.3)',
+              display: 'flex',
+              gap: '8px',
+              alignItems: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: '600', marginRight: '8px' }}>
+                Seleccionados: {selectedProductIds.size}
+              </span>
+              <button 
+                className="btn-orden" 
+                onClick={selectAllCurrentPage} 
+                title="Seleccionar productos de esta página"
+                style={{ fontSize: '0.85rem', padding: '6px 12px' }}
+              >
+                Seleccionar página
+              </button>
+              <button 
+                className="btn-orden" 
+                onClick={clearSelection} 
+                title="Limpiar selección"
+                style={{ fontSize: '0.85rem', padding: '6px 12px' }}
+              >
+                Limpiar selección
+              </button>
+              <button 
+                className="btn-orden" 
+                style={{ 
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', 
+                  color: 'white',
+                  fontSize: '0.85rem',
+                  padding: '6px 12px'
+                }} 
+                onClick={() => batchSetDestacados(true)}
+              >
+                Marcar Destacados
+              </button>
+              <button 
+                className="btn-orden" 
+                onClick={() => batchSetDestacados(false)}
+                style={{ fontSize: '0.85rem', padding: '6px 12px' }}
+              >
+                Quitar Destacados
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 🆕 Paginación de servidor */}
@@ -920,11 +951,17 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Estadísticas */}
+        {/* Estadísticas - Clickables para filtrar */}
         <div className="admin-stats">
           <div 
             className="stat-card"
             title="Productos base + Variantes"
+            onClick={() => setActiveFilter('all')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'all' ? '#3b82f6' : undefined,
+              background: activeFilter === 'all' ? '#eff6ff' : undefined
+            }}
           >
             <h3>Total items</h3>
             <span className="stat-number">{adminItems.length}</span>
@@ -954,6 +991,12 @@ const AdminPage: React.FC = () => {
           <div 
             className="stat-card"
             title="Solo publicaciones base (sin variantes)"
+            onClick={() => setActiveFilter(activeFilter === 'products' ? 'all' : 'products')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'products' ? '#10b981' : undefined,
+              background: activeFilter === 'products' ? '#f0fdf4' : undefined
+            }}
           >
             <h3>Total productos</h3>
             <span className="stat-number">{adminItems.filter(item => !item.esVariante).length}</span>
@@ -962,46 +1005,87 @@ const AdminPage: React.FC = () => {
           <div 
             className="stat-card"
             title="Cada variante individual"
+            onClick={() => setActiveFilter(activeFilter === 'variants' ? 'all' : 'variants')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'variants' ? '#8b5cf6' : undefined,
+              background: activeFilter === 'variants' ? '#faf5ff' : undefined
+            }}
           >
             <h3>Total variantes</h3>
             <span className="stat-number">{adminItems.filter(item => item.esVariante).length}</span>
             <div className="stat-subtitle">Solo variantes</div>
           </div>
-          <div className="stat-card">
+          <div 
+            className="stat-card"
+            onClick={() => setActiveFilter(activeFilter === 'sin-stock' ? 'all' : 'sin-stock')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'sin-stock' ? '#ef4444' : undefined,
+              background: activeFilter === 'sin-stock' ? '#fef2f2' : undefined
+            }}
+          >
             <h3>Sin Stock</h3>
             <span className="stat-number">{adminItems.filter(item => !item.isPaused && item.stock <= 0).length}</span>
+            <div className="stat-subtitle">Activos sin stock</div>
           </div>
-          <div className="stat-card">
+          <div 
+            className="stat-card"
+            onClick={() => setActiveFilter(activeFilter === 'pausados' ? 'all' : 'pausados')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'pausados' ? '#f59e0b' : undefined,
+              background: activeFilter === 'pausados' ? '#fffbeb' : undefined
+            }}
+          >
             <h3>Pausados</h3>
             <span className="stat-number">{adminItems.filter(item => item.isPaused).length}</span>
+            <div className="stat-subtitle">Click para filtrar</div>
           </div>
-          <div className="stat-card">
+          <div 
+            className="stat-card"
+            onClick={() => setActiveFilter(activeFilter === 'a-pedido' ? 'all' : 'a-pedido')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'a-pedido' ? '#6366f1' : undefined,
+              background: activeFilter === 'a-pedido' ? '#eef2ff' : undefined
+            }}
+          >
             <h3>A Pedido</h3>
             <span className="stat-number">{adminItems.filter(item => item.es_entrega_larga).length}</span>
+            <div className="stat-subtitle">Click para filtrar</div>
           </div>
-          <div className="stat-card">
+          <div 
+            className="stat-card"
+            onClick={() => setActiveFilter(activeFilter === 'stock-fisico' ? 'all' : 'stock-fisico')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'stock-fisico' ? '#059669' : undefined,
+              background: activeFilter === 'stock-fisico' ? '#f0fdfa' : undefined
+            }}
+          >
             <h3>Stock Físico</h3>
             <span className="stat-number">{adminItems.filter(item => !item.isPaused && item.stock > 0 && item.es_stock_fisico).length}</span>
-            <div className="stat-subtitle">
-              Self Service (~7 días)
-            </div>
+            <div className="stat-subtitle">Self Service (~7 días)</div>
           </div>
           {/* 🆕 Tarjeta de productos destacados */}
           <div 
             className="stat-card" 
+            onClick={() => setActiveFilter(activeFilter === 'destacados' ? 'all' : 'destacados')}
             style={{
-              background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+              background: activeFilter === 'destacados' 
+                ? 'linear-gradient(135deg, #fde68a 0%, #fbbf24 100%)'
+                : 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
               borderColor: '#fbbf24',
               cursor: 'pointer'
             }}
-            onClick={() => setFilterDestacado(filterDestacado === 'destacados' ? 'all' : 'destacados')}
           >
             <h3 style={{ color: '#854d0e' }}>⭐ Destacados</h3>
             <span className="stat-number" style={{ color: '#92400e' }}>
               {adminItems.filter(item => !item.esVariante && item.destacado).length}
             </span>
             <div className="stat-subtitle" style={{ color: '#a16207' }}>
-              Click para {filterDestacado === 'destacados' ? 'ver todos' : 'filtrar'}
+              Click para {activeFilter === 'destacados' ? 'ver todos' : 'filtrar'}
             </div>
           </div>
         </div>
