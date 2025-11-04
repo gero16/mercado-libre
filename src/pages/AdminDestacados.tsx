@@ -23,6 +23,10 @@ const AdminDestacados: React.FC = () => {
   const [searchLoading, setSearchLoading] = useState(false)
   const [results, setResults] = useState<AdminDestacadosItem[]>([])
   const [working, setWorking] = useState(false)
+  
+  // Control de permisos: solo geronicola1696@gmail.com puede gestionar destacados
+  const currentUser = AuthService.getStoredUser()
+  const canManageExtended = (currentUser?.email || '').toLowerCase() === 'geronicola1696@gmail.com'
 
   
 
@@ -64,6 +68,10 @@ const AdminDestacados: React.FC = () => {
   }
 
   const toggleDestacado = async (item: AdminDestacadosItem, nuevoEstado: boolean) => {
+    if (!canManageExtended) {
+      alert('No tienes permisos para gestionar productos destacados. Solo el administrador principal puede hacerlo.')
+      return
+    }
     try {
       setWorking(true)
       const token = AuthService.getToken() || ''
@@ -81,6 +89,9 @@ const AdminDestacados: React.FC = () => {
       })
       if (!res.ok) {
         const err = await (async () => { try { return await res.json() } catch { return null } })()
+        if (res.status === 403) {
+          throw new Error('No tienes permisos para gestionar productos destacados')
+        }
         throw new Error(err?.error || `HTTP ${res.status}`)
       }
       // Refrescar listas en memoria
@@ -102,6 +113,10 @@ const AdminDestacados: React.FC = () => {
   }
 
   const marcarTodosResultados = async (estado: boolean) => {
+    if (!canManageExtended) {
+      alert('No tienes permisos para gestionar productos destacados. Solo el administrador principal puede hacerlo.')
+      return
+    }
     if (results.length === 0) return
     try {
       setWorking(true)
@@ -113,7 +128,13 @@ const AdminDestacados: React.FC = () => {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ ml_ids, destacado: estado })
         })
-        if (!res.ok) throw new Error('Error actualizando destacados (batch)')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}))
+          if (res.status === 403) {
+            throw new Error('No tienes permisos para gestionar productos destacados')
+          }
+          throw new Error(errorData.error || 'Error actualizando destacados (batch)')
+        }
         setFeatured(prev => estado ? [...results, ...prev].filter((v, i, a) => a.findIndex(x => x.ml_id === v.ml_id) === i) : prev.filter(f => !results.some(r => r.ml_id === f.ml_id)))
         setResults(prev => prev.map(p => ({ ...p, destacado: estado })))
       } else {
@@ -163,7 +184,7 @@ const AdminDestacados: React.FC = () => {
               {searchLoading ? 'Buscando…' : 'Buscar'}
             </button>
           </div>
-          {results.length > 0 && (
+          {results.length > 0 && canManageExtended && (
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button className="btn-orden" onClick={() => marcarTodosResultados(true)} disabled={working}>Marcar todos</button>
               <button className="btn-orden volver" onClick={() => marcarTodosResultados(false)} disabled={working}>Quitar todos</button>
@@ -194,11 +215,13 @@ const AdminDestacados: React.FC = () => {
                     <div className="detail-row"><span className="detail-label">MLU:</span><span className="detail-value detail-id">{item.ml_id}</span></div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <button className="btn-orden" onClick={() => toggleDestacado(item, !item.destacado)} disabled={working}>
-                    {item.destacado ? 'Quitar destacado' : 'Marcar destacado'}
-                  </button>
-                </div>
+                {canManageExtended && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button className="btn-orden" onClick={() => toggleDestacado(item, !item.destacado)} disabled={working}>
+                      {item.destacado ? 'Quitar destacado' : 'Marcar destacado'}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -231,9 +254,11 @@ const AdminDestacados: React.FC = () => {
                     <div className="detail-row"><span className="detail-label">MLU:</span><span className="detail-value detail-id">{item.ml_id}</span></div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <button className="btn-orden volver" onClick={() => toggleDestacado(item, false)} disabled={working}>Quitar destacado</button>
-                </div>
+                {canManageExtended && (
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button className="btn-orden volver" onClick={() => toggleDestacado(item, false)} disabled={working}>Quitar destacado</button>
+                  </div>
+                )}
               </div>
             ))
           )}

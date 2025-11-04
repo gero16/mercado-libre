@@ -457,6 +457,10 @@ const AdminPage: React.FC = () => {
 
   // 🆕 Función para marcar/desmarcar producto como destacado
   const toggleDestacado = async (item: AdminItem) => {
+    if (!canManageExtended) {
+      alert('No tienes permisos para gestionar productos destacados. Solo el administrador principal puede hacerlo.')
+      return
+    }
     try {
       const nuevoEstado = !item.destacado
       
@@ -477,7 +481,11 @@ const AdminPage: React.FC = () => {
       )
       
       if (!response.ok) {
-        throw new Error('Error al actualizar producto destacado')
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 403) {
+          throw new Error('No tienes permisos para gestionar productos destacados')
+        }
+        throw new Error(errorData.error || 'Error al actualizar producto destacado')
       }
       
       // Actualizar el estado local
@@ -518,6 +526,10 @@ const AdminPage: React.FC = () => {
 
   // 🆕 Batch actualizar destacados
   const batchSetDestacados = async (destacado: boolean) => {
+    if (!canManageExtended) {
+      alert('No tienes permisos para gestionar productos destacados. Solo el administrador principal puede hacerlo.')
+      return
+    }
     try {
       const ml_ids = Array.from(selectedProductIds)
       if (ml_ids.length === 0) {
@@ -534,7 +546,13 @@ const AdminPage: React.FC = () => {
           },
           body: JSON.stringify({ ml_ids, destacado })
         })
-        if (!res.ok) throw new Error('Error actualizando destacados')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}))
+          if (res.status === 403) {
+            throw new Error('No tienes permisos para gestionar productos destacados')
+          }
+          throw new Error(errorData.error || 'Error actualizando destacados')
+        }
       } else {
         // Fallback sin token: iterar endpoint público por _id
         const idMap = new Map(adminItems.filter(i => !i.esVariante).map(i => [i.productId, (i as any).id]))
@@ -764,22 +782,24 @@ const AdminPage: React.FC = () => {
             </button>
           </div>
 
-          {/* 🆕 Acciones para destacados (selección múltiple) */}
-          <div className="featured-batch-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="btn-orden" onClick={selectAllCurrentPage} title="Seleccionar productos de esta página">
-              Seleccionar página
-            </button>
-            <button className="btn-orden" onClick={clearSelection} title="Limpiar selección">
-              Limpiar selección
-            </button>
-            <button className="btn-orden" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: 'white' }} onClick={() => batchSetDestacados(true)}>
-              Marcar Destacados
-            </button>
-            <button className="btn-orden" onClick={() => batchSetDestacados(false)}>
-              Quitar Destacados
-            </button>
-            <span style={{ fontSize: 12, color: '#6b7280' }}>Seleccionados: {selectedProductIds.size}</span>
-          </div>
+          {/* 🆕 Acciones para destacados (selección múltiple) - Solo para geronicola1696@gmail.com */}
+          {canManageExtended && (
+            <div className="featured-batch-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button className="btn-orden" onClick={selectAllCurrentPage} title="Seleccionar productos de esta página">
+                Seleccionar página
+              </button>
+              <button className="btn-orden" onClick={clearSelection} title="Limpiar selección">
+                Limpiar selección
+              </button>
+              <button className="btn-orden" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', color: 'white' }} onClick={() => batchSetDestacados(true)}>
+                Marcar Destacados
+              </button>
+              <button className="btn-orden" onClick={() => batchSetDestacados(false)}>
+                Quitar Destacados
+              </button>
+              <span style={{ fontSize: 12, color: '#6b7280' }}>Seleccionados: {selectedProductIds.size}</span>
+            </div>
+          )}
         </div>
 
         {/* 🆕 Información de paginación y control (cliente) */}
@@ -1069,8 +1089,8 @@ const AdminPage: React.FC = () => {
                       )}
                     </div>
                     
-                    {/* 🆕 Toggle para marcar como destacado */}
-                    {!item.esVariante && (
+                    {/* 🆕 Toggle para marcar como destacado - Solo para geronicola1696@gmail.com */}
+                    {!item.esVariante && canManageExtended && (
                       <div className="product-featured-toggle" style={{
                         marginTop: '8px',
                         display: 'flex',
