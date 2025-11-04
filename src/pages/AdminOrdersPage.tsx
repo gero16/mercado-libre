@@ -25,6 +25,8 @@ interface Orden {
   };
   items: Array<{
     product_id: string;
+    ml_id?: string; // ID de MercadoLibre
+    sku?: string; // SKU del producto
     product_name: string;
     variant_id?: string;
     color?: string;
@@ -440,31 +442,58 @@ const AdminOrdersPage: React.FC = () => {
                   </div>
                   {order.items.map((item, index) => (
                     <div key={index} style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
                       fontSize: '13px',
-                      marginBottom: '6px',
-                      padding: '6px 10px',
+                      marginBottom: '8px',
+                      padding: '8px 12px',
                       background: 'rgba(110, 118, 129, 0.1)',
                       borderRadius: '4px',
                       color: '#c9d1d9'
                     }}>
-                      <span style={{ fontWeight: '500' }}>
-                        <span style={{ 
-                          background: 'rgba(56, 139, 253, 0.15)',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          marginRight: '8px',
-                          fontSize: '12px',
-                          fontWeight: '700'
-                        }}>
-                          {item.quantity}x
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '4px'
+                      }}>
+                        <span style={{ fontWeight: '500' }}>
+                          <span style={{ 
+                            background: 'rgba(56, 139, 253, 0.15)',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            marginRight: '8px',
+                            fontSize: '12px',
+                            fontWeight: '700'
+                          }}>
+                            {item.quantity}x
+                          </span>
+                          {item.product_name}
+                          {item.color && <span style={{ color: '#8b949e', fontSize: '12px' }}> ({item.color})</span>}
+                          {item.size && <span style={{ color: '#8b949e', fontSize: '12px' }}> - Talle {item.size}</span>}
                         </span>
-                        {item.product_name}
-                        {item.color && <span style={{ color: '#8b949e', fontSize: '12px' }}> ({item.color})</span>}
-                        {item.size && <span style={{ color: '#8b949e', fontSize: '12px' }}> - Talle {item.size}</span>}
-                      </span>
-                      <span style={{ fontWeight: '700', color: '#58a6ff' }}>{formatCurrency(item.total_price)}</span>
+                        <span style={{ fontWeight: '700', color: '#58a6ff' }}>{formatCurrency(item.total_price)}</span>
+                      </div>
+                      {(item.ml_id || item.sku) && (
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: '12px',
+                          fontSize: '11px',
+                          color: '#8b949e',
+                          marginTop: '4px',
+                          paddingTop: '4px',
+                          borderTop: '1px solid rgba(110, 118, 129, 0.2)'
+                        }}>
+                          {item.ml_id && (
+                            <span>
+                              <strong style={{ color: '#7c3aed' }}>ML ID:</strong> {item.ml_id}
+                            </span>
+                          )}
+                          {item.sku && (
+                            <span>
+                              <strong style={{ color: '#059669' }}>SKU:</strong> {item.sku}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
