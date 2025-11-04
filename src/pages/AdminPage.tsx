@@ -74,6 +74,7 @@ const AdminPage: React.FC = () => {
   const [serverLimit, setServerLimit] = useState(60)
   const [serverOffset, setServerOffset] = useState(0)
   const [serverLoading, setServerLoading] = useState(false)
+  const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null)
   
 
   const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
@@ -261,39 +262,79 @@ const AdminPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm])
 
-  // 🆕 Cargar todos los lotes desde el servidor
+  // 🆕 Cargar todos los lotes desde el servidor (optimizado con carga paralela)
   const loadAllServerPages = async (options?: { ignoreQuery?: boolean }) => {
     if (serverLoading) return
     try {
       setServerLoading(true)
       setLoading(true)
-      const limit = serverLimit
-      let offset = 0
-      let allMapped: AdminItem[] = []
-      let total = 0
-      for (;;) {
-        const { total: t, items } = await productsCache.getAdminProductsPage({
-          limit,
-          offset,
-          fields: SERVER_FIELDS,
-          status: filterStatus,
-          q: options?.ignoreQuery ? '' : searchTerm
-        })
-        total = t || total
-        if (!Array.isArray(items) || items.length === 0) break
-        const mapped: AdminItem[] = []
-        items.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
-        allMapped = allMapped.concat(mapped)
-        offset += limit
-        if (offset >= total) break
+      setLoadProgress({ loaded: 0, total: 0 })
+      
+      // Primero obtener el total
+      const firstPage = await productsCache.getAdminProductsPage({
+        limit: 1,
+        offset: 0,
+        fields: SERVER_FIELDS,
+        status: filterStatus,
+        q: options?.ignoreQuery ? '' : searchTerm
+      })
+      const total = firstPage.total || 0
+      setLoadProgress({ loaded: 0, total })
+      
+      if (total === 0) {
+        setServerTotal(0)
+        setAdminItems([])
+        return
       }
+
+      // Usar lotes más grandes para reducir número de requests
+      const batchLimit = Math.max(serverLimit, 100) // Lotes de al menos 100
+      const batchCount = Math.ceil(total / batchLimit)
+      
+      // Cargar en paralelo con límite de concurrencia (máx 3 requests simultáneos)
+      const CONCURRENT_LIMIT = 3
+      let allMapped: AdminItem[] = []
+      let completedBatches = 0
+      
+      for (let i = 0; i < batchCount; i += CONCURRENT_LIMIT) {
+        const batchPromises = []
+        const batchEnd = Math.min(i + CONCURRENT_LIMIT, batchCount)
+        
+        for (let j = i; j < batchEnd; j++) {
+          const offset = j * batchLimit
+          const promise = productsCache.getAdminProductsPage({
+            limit: batchLimit,
+            offset,
+            fields: SERVER_FIELDS,
+            status: filterStatus,
+            q: options?.ignoreQuery ? '' : searchTerm
+          }).then(({ items }) => {
+            const mapped: AdminItem[] = []
+            if (Array.isArray(items) && items.length > 0) {
+              items.forEach((p: any) => mapped.push(...buildItemsFromProduct(p as any)))
+            }
+            completedBatches++
+            setLoadProgress({ loaded: Math.min(offset + batchLimit, total), total })
+            return mapped
+          })
+          batchPromises.push(promise)
+        }
+        
+        const batchResults = await Promise.all(batchPromises)
+        batchResults.forEach(mapped => {
+          allMapped = allMapped.concat(mapped)
+        })
+      }
+      
       setServerTotal(total)
       setAdminItems(allMapped)
       setServerOffset(0)
       setCurrentPage(1)
-      console.log('[Admin] Carga completa de servidor', { total, items: allMapped.length, ignoreQuery: !!options?.ignoreQuery })
+      setLoadProgress(null)
+      console.log('[Admin] Carga completa de servidor', { total, items: allMapped.length, batches: batchCount, ignoreQuery: !!options?.ignoreQuery })
     } catch (e) {
       console.error('[Admin] Error al cargar todos los lotes', e)
+      setLoadProgress(null)
     } finally {
       setLoading(false)
       setServerLoading(false)
@@ -848,7 +889,13 @@ const AdminPage: React.FC = () => {
               onClick={() => loadAllServerPages({ ignoreQuery: true })}
               title="Carga todos los lotes hasta completar"
             >
-              Cargar todo
+              {loadProgress ? (
+                <>
+                  Cargando... {loadProgress.loaded} / {loadProgress.total} ({Math.round((loadProgress.loaded / loadProgress.total) * 100)}%)
+                </>
+              ) : (
+                'Cargar todo'
+              )}
             </button>
           </div>
         </div>
