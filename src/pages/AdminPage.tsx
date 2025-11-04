@@ -549,26 +549,11 @@ const AdminPage: React.FC = () => {
   //   }
   // }
 
-  if (loading) {
-    return (
-      <main className="container">
-        <div className="admin-container">
-          <div className="admin-header">
-            <h1>Panel de Administración</h1>
-            <p>Cargando productos...</p>
-          </div>
-          <div className="admin-products-list">
-            <ProductSkeleton count={6} />
-          </div>
-        </div>
-      </main>
-    )
-  }
-
   // Control de permisos por email para opciones avanzadas del admin
   const currentUser = AuthService.getStoredUser()
   const canManageExtended = (currentUser?.email || '').toLowerCase() === 'geronicola1696@gmail.com'
 
+  // Renderizar siempre el header y la navegación, incluso durante la carga
   return (
     <main className="container">
       <div className="admin-container">
