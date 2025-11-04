@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 const PaymentSuccessPage: React.FC = () => {
-  const navigate = useNavigate()
   const location = useLocation()
   const { clearCart } = useCart()
 
