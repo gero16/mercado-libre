@@ -255,15 +255,22 @@ const Header: React.FC = () => {
             {!isAuthenticated ? (
               <li><NavLink to="/login" className={({ isActive }) => isActive ? 'active' : ''}>Ingresar</NavLink></li>
             ) : (
-              <li>
-                <button
-                  onClick={() => { logout(); navigate('/'); }}
-                  className="btn-orden"
-                  style={{ padding: '6px 12px', fontSize: '14px' }}
-                >
-                  Cerrar sesión
-                </button>
-              </li>
+              <>
+                <li>
+                  <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>
+                    Mi Perfil
+                  </NavLink>
+                </li>
+                <li>
+                  <button
+                    onClick={() => { logout(); navigate('/'); }}
+                    className="btn-orden"
+                    style={{ padding: '6px 12px', fontSize: '14px' }}
+                  >
+                    Cerrar sesión
+                  </button>
+                </li>
+              </>
             )}
             
             {/* Buscador colapsable */}

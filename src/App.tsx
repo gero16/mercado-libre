@@ -54,8 +54,10 @@ import './css/faq.css' // 🆕 Importar estilos de preguntas frecuentes
 import './css/header-dropdown.css' // 🆕 Importar estilos del dropdown del header
 import { AuthProvider } from './context/AuthContext'
 import AdminRoute from './components/AdminRoute'
+import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
 import AdminNotificationsPage from './pages/AdminNotificationsPage'
 
 // Inicializar MercadoPago con la public key y configuración en español
@@ -87,6 +89,7 @@ function App() {
 
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               
               {/* Rutas de administración protegidas (solo admin) */}
               <Route path="/admin" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminPage /></Suspense></AdminRoute>} />
