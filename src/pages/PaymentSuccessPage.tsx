@@ -1,12 +1,18 @@
 import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 const PaymentSuccessPage: React.FC = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { clearCart } = useCart()
 
   useEffect(() => {
+    // Limpiar los query params de la URL para evitar problemas de navegación
+    if (location.search) {
+      window.history.replaceState({}, '', '/payment-success')
+    }
+    
     // Limpiar el carrito cuando el pago es exitoso
     clearCart()
     
@@ -39,12 +45,31 @@ const PaymentSuccessPage: React.FC = () => {
     })
     
     // Forzar que todos los links y botones sean clickeables
+    // Esto asegura que no haya overlays invisibles bloqueando
     setTimeout(() => {
+      // Remover cualquier elemento que pueda estar bloqueando clicks
+      const blockingElements = document.querySelectorAll('[style*="z-index"][style*="position: fixed"], [style*="z-index"][style*="position: absolute"]')
+      blockingElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          const zIndex = parseInt(window.getComputedStyle(el).zIndex || '0')
+          // Si tiene z-index muy alto y está bloqueando, verificar si es necesario
+          if (zIndex > 100 && el.classList.contains('payment-modal-overlay')) {
+            el.remove()
+          }
+        }
+      })
+      
+      // Asegurar que todos los links y botones sean clickeables
       const allLinks = document.querySelectorAll('a, button, [role="button"]')
       allLinks.forEach(el => {
         if (el instanceof HTMLElement) {
-          el.style.pointerEvents = 'auto'
-          el.style.cursor = 'pointer'
+          const computedStyle = window.getComputedStyle(el)
+          if (computedStyle.pointerEvents === 'none') {
+            el.style.pointerEvents = 'auto'
+          }
+          if (computedStyle.cursor === 'not-allowed' || computedStyle.cursor === 'default') {
+            el.style.cursor = 'pointer'
+          }
         }
       })
     }, 100)
@@ -53,7 +78,7 @@ const PaymentSuccessPage: React.FC = () => {
     return () => {
       document.body.style.overflow = 'unset'
     }
-  }, [clearCart])
+  }, [clearCart, location.search])
 
   return (
     <div className="container">
@@ -81,11 +106,8 @@ const PaymentSuccessPage: React.FC = () => {
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  try {
-                    navigate('/', { replace: true })
-                  } catch (err) {
-                    window.location.href = '/'
-                  }
+                  // Usar window.location directamente para forzar navegación completa
+                  window.location.href = '/'
                 }} 
                 className="btn-orden"
                 style={{ minWidth: '150px', cursor: 'pointer' }}
@@ -96,11 +118,8 @@ const PaymentSuccessPage: React.FC = () => {
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  try {
-                    navigate('/tienda-ml', { replace: true })
-                  } catch (err) {
-                    window.location.href = '/tienda-ml'
-                  }
+                  // Usar window.location directamente para forzar navegación completa
+                  window.location.href = '/tienda-ml'
                 }} 
                 className="btn-orden"
                 style={{ minWidth: '150px', cursor: 'pointer' }}
