@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
-import ProductSkeleton from '../components/ProductSkeleton'
+import Loader from '../components/Loader'
 import { EventService } from '../services/event'
 import { AuthService } from '../services/auth'
 import { productsCache } from '../services/productsCache'
@@ -945,7 +945,9 @@ const AdminPage: React.FC = () => {
 
         {/* Lista de productos paginada */}
         <div className="admin-products-list">
-          {currentItems.length === 0 ? (
+          {loading ? (
+            <Loader type="spinner" size="large" text="Cargando productos..." />
+          ) : currentItems.length === 0 ? (
             <div className="no-products">
               <p>No se encontraron productos con los filtros seleccionados.</p>
             </div>
