@@ -9,6 +9,50 @@ const PaymentSuccessPage: React.FC = () => {
   useEffect(() => {
     // Limpiar el carrito cuando el pago es exitoso
     clearCart()
+    
+    // Asegurar que el overflow del body esté restaurado (por si quedó bloqueado del checkout)
+    document.body.style.overflow = 'unset'
+    
+    // Limpiar cualquier overlay del modal de pago que pueda quedar visible
+    const paymentOverlay = document.querySelector('.payment-modal-overlay')
+    if (paymentOverlay instanceof HTMLElement) {
+      paymentOverlay.style.display = 'none'
+      paymentOverlay.remove()
+    }
+    
+    // Limpiar iframes de MercadoPago que puedan quedar
+    const mercadopagoIframes = document.querySelectorAll('iframe[src*="mercadopago"], iframe[src*="mercadolibre"]')
+    mercadopagoIframes.forEach(iframe => {
+      if (iframe instanceof HTMLElement) {
+        iframe.style.display = 'none'
+        iframe.remove()
+      }
+    })
+    
+    // Asegurar que no haya elementos con pointer-events: none bloqueando la navegación
+    const blockedElements = document.querySelectorAll('[style*="pointer-events: none"]')
+    blockedElements.forEach(el => {
+      if (el instanceof HTMLElement && el.classList.contains('payment-modal-overlay')) {
+        el.style.pointerEvents = 'auto'
+        el.remove()
+      }
+    })
+    
+    // Forzar que todos los links y botones sean clickeables
+    setTimeout(() => {
+      const allLinks = document.querySelectorAll('a, button, [role="button"]')
+      allLinks.forEach(el => {
+        if (el instanceof HTMLElement) {
+          el.style.pointerEvents = 'auto'
+          el.style.cursor = 'pointer'
+        }
+      })
+    }, 100)
+    
+    // Cleanup al desmontar
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
   }, [clearCart])
 
   return (
@@ -34,16 +78,32 @@ const PaymentSuccessPage: React.FC = () => {
             
             <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button 
-                onClick={() => navigate('/')} 
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  try {
+                    navigate('/', { replace: true })
+                  } catch (err) {
+                    window.location.href = '/'
+                  }
+                }} 
                 className="btn-orden"
-                style={{ minWidth: '150px' }}
+                style={{ minWidth: '150px', cursor: 'pointer' }}
               >
                 Ir al Inicio
               </button>
               <button 
-                onClick={() => navigate('/tienda')} 
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  try {
+                    navigate('/tienda-ml', { replace: true })
+                  } catch (err) {
+                    window.location.href = '/tienda-ml'
+                  }
+                }} 
                 className="btn-orden"
-                style={{ minWidth: '150px' }}
+                style={{ minWidth: '150px', cursor: 'pointer' }}
               >
                 Seguir Comprando
               </button>
