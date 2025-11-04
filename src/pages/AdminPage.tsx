@@ -7,6 +7,7 @@ import { AuthService } from '../services/auth'
 import { productsCache } from '../services/productsCache'
 import { API_BASE_URL } from '../config/api'
 import { fetchCensus, fetchDuplicates, type CensusResponse } from '../services/diagnostics'
+import '../css/admin-duplicates.css'
 
 // Interfaz para items de administración
 interface AdminItem {
@@ -50,13 +51,88 @@ const getOptimizedImageUrl = (url?: string) => {
   return url
 }
 
+// Componente para mostrar grupos de duplicados
+const DuplicateGroupCard: React.FC<{
+  group: { _id: string; count: number; ids: string[]; items: AdminItem[] }
+  dupExcess: number
+  copyIds: () => void
+  isDuplicateOf: boolean
+}> = ({ group, dupExcess, copyIds, isDuplicateOf }) => {
+  const [open, setOpen] = useState<boolean>(true)
+  
+  return (
+    <div className="dup-card">
+      <div className="dup-header">
+        <div>
+          <div className="dup-id">
+            {isDuplicateOf ? 'Duplicado de' : 'CAT'}: {isDuplicateOf ? group._id.replace('duplicate_of_', '') : group._id}
+          </div>
+          <div className="dup-badges">
+            <span className="badge type">{isDuplicateOf ? 'Duplicado marcado' : 'Grupo CAT'}</span>
+            <span className="badge">Total: {group.count}</span>
+            {dupExcess > 0 && <span className="badge dup">Duplicados: {dupExcess}</span>}
+          </div>
+        </div>
+        <div className="dup-actions">
+          <button className="btn" onClick={() => copyIds()}>Copiar IDs</button>
+          <button className="btn btn-ghost" onClick={() => setOpen(o => !o)}>{open ? 'Colapsar' : 'Expandir'}</button>
+        </div>
+      </div>
+      {open && (
+        <div className="dup-list">
+          {group.items.map(item => {
+            const producto = item.productoPadre as any
+            const img = item.image || ''
+            const tipoCatalogo = producto?.es_catalogo ? 'Catálogo' : 'Tradicional'
+            const listingLabel = (() => {
+              const lt = (producto?.listing_type_id || '').toString().toLowerCase()
+              if (lt.includes('gold_premium') || lt.includes('gold_pro')) return 'Premium'
+              if (lt.includes('gold_special')) return 'Clásica'
+              if (lt === 'free') return 'Gratuita'
+              return producto?.listing_type_id || '-'
+            })()
+            const permalink = producto?.permalink || `https://mercadolibre.com/item/${item.productId}`
+            
+            return (
+              <div key={item.id} className="dup-product">
+                {img && (
+                  <div style={{ marginBottom: 8 }}>
+                    <a href={permalink} target="_blank" rel="noreferrer">
+                      <img src={img} alt={item.title} style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 8, border: '1px solid #e5e7eb' }} />
+                    </a>
+                  </div>
+                )}
+                <div className="dup-title">
+                  <a href={permalink} target="_blank" rel="noreferrer">{item.title}</a>
+                </div>
+                <div className="dup-meta" style={{ marginTop: 6 }}>
+                  <span className="badge" title={producto?.catalog_product_id ? `Catálogo: ${producto.catalog_product_id}` : ''}>{tipoCatalogo}</span>
+                  <span className="badge type">{listingLabel}</span>
+                  <span className="badge" title="MLU / ID de publicación">{item.productId}</span>
+                </div>
+                <div className="dup-meta">
+                  <span>Status: {producto?.status || '-'}</span>
+                  <span>Sold: {producto?.sold_quantity ?? '-'}</span>
+                  <span>Health: {producto?.health ?? '-'}</span>
+                  <span>Price: {item.price ?? '-'}</span>
+                  <span>Stock: {item.stock ?? '-'}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const AdminPage: React.FC = () => {
   const navigate = useNavigate()
   const [adminItems, setAdminItems] = useState<AdminItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   // Filtros activos (se activan desde las estadísticas)
-  const [activeFilter, setActiveFilter] = useState<'all' | 'products' | 'variants' | 'sin-stock' | 'pausados' | 'a-pedido' | 'stock-fisico' | 'destacados'>('all')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'products' | 'variants' | 'sin-stock' | 'pausados' | 'a-pedido' | 'stock-fisico' | 'destacados' | 'duplicados'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'delivery'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
@@ -65,7 +141,6 @@ const AdminPage: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50)
   // 🆕 Métricas de censo/duplicados
   const [census, setCensus] = useState<CensusResponse | null>(null)
-  const [dupExcess, setDupExcess] = useState<number | null>(null)
 
   // Config paginación servidor
   const [serverTotal, setServerTotal] = useState(0)
@@ -75,7 +150,7 @@ const AdminPage: React.FC = () => {
   const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null)
   
 
-  const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
+  const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,catalog_product_id,duplicate_of_ml_id,es_catalogo,sold_quantity,health,listing_type_id,permalink,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
 
   // Normalización básica para búsqueda insensible a acentos/espacios
   const normalize = (s: string) => {
@@ -351,12 +426,11 @@ const AdminPage: React.FC = () => {
     if (loading) return
     const loadCensusAndDuplicates = async () => {
       try {
-        const [c, d] = await Promise.all([
+        const [c] = await Promise.all([
           fetchCensus(),
           fetchDuplicates({ type: 'catalog', limit: 1000, summary: true })
         ])
         setCensus(c)
-        setDupExcess((d as any)?.summary?.excess_catalog ?? null)
       } catch (e) {
         console.error('Error cargando métricas de duplicados/censo:', e)
       }
@@ -371,6 +445,21 @@ const AdminPage: React.FC = () => {
 
   // Filtrar y ordenar items (memo + búsqueda diferida)
   const deferredSearchTerm = useDeferredValue(searchTerm)
+  
+  // Mapa de catalog_product_id para identificar duplicados
+  const catalogProductMap = useMemo(() => {
+    const map = new Map<string, number>()
+    adminItems.forEach(item => {
+      if (!item.esVariante) {
+        const catalogId = (item.productoPadre as any)?.catalog_product_id
+        if (catalogId) {
+          map.set(catalogId, (map.get(catalogId) || 0) + 1)
+        }
+      }
+    })
+    return map
+  }, [adminItems])
+  
   const filteredAndSortedItems = useMemo(() => adminItems
     .filter(item => {
       // Filtro por búsqueda
@@ -411,6 +500,15 @@ const AdminPage: React.FC = () => {
           case 'destacados':
             if (!item.destacado || item.esVariante) return false
             break
+          case 'duplicados':
+            // Filtrar productos que son duplicados (tienen duplicate_of_ml_id o catalog_product_id compartido)
+            if (item.esVariante) return false
+            const producto = item.productoPadre as any
+            const hasDuplicateOf = producto?.duplicate_of_ml_id
+            const catalogId = producto?.catalog_product_id
+            const isDuplicate = hasDuplicateOf || (catalogId && (catalogProductMap.get(catalogId) || 0) > 1)
+            if (!isDuplicate) return false
+            break
         }
       }
       
@@ -435,7 +533,62 @@ const AdminPage: React.FC = () => {
       }
       
       return sortOrder === 'asc' ? comparison : -comparison
-    }), [adminItems, deferredSearchTerm, activeFilter, sortBy, sortOrder])
+    }), [adminItems, deferredSearchTerm, activeFilter, sortBy, sortOrder, catalogProductMap])
+
+  // 🆕 Agrupar duplicados por catalog_product_id cuando el filtro está activo
+  const duplicateGroups = useMemo(() => {
+    if (activeFilter !== 'duplicados') return []
+    
+    const groups = new Map<string, AdminItem[]>()
+    const duplicateOfItems: AdminItem[] = []
+    
+    filteredAndSortedItems.forEach(item => {
+      if (item.esVariante) return
+      const producto = item.productoPadre as any
+      const catalogId = producto?.catalog_product_id
+      const hasDuplicateOf = producto?.duplicate_of_ml_id
+      
+      if (hasDuplicateOf) {
+        duplicateOfItems.push(item)
+      } else if (catalogId && (catalogProductMap.get(catalogId) || 0) > 1) {
+        const arr = groups.get(catalogId) || []
+        arr.push(item)
+        groups.set(catalogId, arr)
+      }
+    })
+    
+    // Convertir a array de grupos
+    const groupArray = Array.from(groups.entries()).map(([catalogId, items]) => ({
+      _id: catalogId,
+      count: items.length,
+      ids: items.map(i => i.productId),
+      items: items
+    }))
+    
+    // Agregar items con duplicate_of_ml_id como grupo separado
+    if (duplicateOfItems.length > 0) {
+      const duplicateOfGroups = new Map<string, AdminItem[]>()
+      duplicateOfItems.forEach(item => {
+        const producto = item.productoPadre as any
+        const duplicateOf = producto?.duplicate_of_ml_id
+        if (duplicateOf) {
+          const arr = duplicateOfGroups.get(duplicateOf) || []
+          arr.push(item)
+          duplicateOfGroups.set(duplicateOf, arr)
+        }
+      })
+      Array.from(duplicateOfGroups.entries()).forEach(([duplicateOf, items]) => {
+        groupArray.push({
+          _id: `duplicate_of_${duplicateOf}`,
+          count: items.length,
+          ids: items.map(i => i.productId),
+          items: items
+        })
+      })
+    }
+    
+    return groupArray.sort((a, b) => b.count - a.count)
+  }, [filteredAndSortedItems, activeFilter, catalogProductMap])
 
   // 🆕 Paginación (memo)
   const { totalPages, indexOfFirstItem, indexOfLastItem, currentItems } = useMemo(() => {
@@ -625,7 +778,7 @@ const AdminPage: React.FC = () => {
 
   // Renderizar siempre el header y la navegación, incluso durante la carga
   return (
-    <main className="container">
+    <main className={`container ${activeFilter === 'duplicados' ? 'admin-duplicates' : ''}`}>
       <div className="admin-container">
         {/* Header */}
         <div className="admin-header">
@@ -998,13 +1151,28 @@ const AdminPage: React.FC = () => {
           </div>
           <div 
             className="stat-card"
-            title="Exceso por catálogo: suma de (count - 1) por grupo"
-            onClick={() => navigate('/admin/duplicados')}
-            style={{ cursor: 'pointer' }}
+            title="Productos duplicados (catalog_product_id compartido o marcados como duplicados)"
+            onClick={() => setActiveFilter(activeFilter === 'duplicados' ? 'all' : 'duplicados')}
+            style={{ 
+              cursor: 'pointer',
+              borderColor: activeFilter === 'duplicados' ? '#dc2626' : undefined,
+              background: activeFilter === 'duplicados' ? '#fef2f2' : undefined,
+              color: activeFilter === 'duplicados' ? '#991b1b' : undefined
+            }}
           >
-            <h3>Duplicados</h3>
-            <span className="stat-number">{typeof dupExcess === 'number' ? dupExcess : '-'}</span>
-            <div className="stat-subtitle">Click para ver detalles</div>
+            <h3 style={{ color: activeFilter === 'duplicados' ? '#b91c1c' : undefined }}>Duplicados</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'duplicados' ? '#991b1b' : undefined }}>
+              {adminItems.filter(item => {
+                if (item.esVariante) return false
+                const producto = item.productoPadre as any
+                const hasDuplicateOf = producto?.duplicate_of_ml_id
+                const catalogId = producto?.catalog_product_id
+                return hasDuplicateOf || (catalogId && (catalogProductMap.get(catalogId) || 0) > 1)
+              }).length}
+            </span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'duplicados' ? '#b91c1c' : undefined }}>
+              {activeFilter === 'duplicados' ? 'Click para ver todos' : 'Click para filtrar'}
+            </div>
           </div>
           <div 
             className="stat-card"
@@ -1114,16 +1282,44 @@ const AdminPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Lista de productos paginada */}
-        <div className="admin-products-list">
-          {loading ? (
-            <Loader type="spinner" size="large" text="Cargando productos..." />
-          ) : currentItems.length === 0 ? (
-            <div className="no-products">
-              <p>No se encontraron productos con los filtros seleccionados.</p>
-            </div>
-          ) : (
-            currentItems.map(item => (
+        {/* Lista de productos paginada o grupos de duplicados */}
+        {activeFilter === 'duplicados' ? (
+          <div className="dup-sections">
+            {loading ? (
+              <Loader type="spinner" size="large" text="Cargando productos..." />
+            ) : duplicateGroups.length === 0 ? (
+              <div className="no-products">
+                <p>No se encontraron productos duplicados con los filtros seleccionados.</p>
+              </div>
+            ) : (
+              <section>
+                <h2>Duplicados por catálogo</h2>
+                {duplicateGroups.map(group => {
+                  const dupExcess = Math.max(0, (group.count || 0) - 1)
+                  const copyIds = () => navigator.clipboard?.writeText((group.ids || []).join(','))
+                  const isDuplicateOf = group._id.startsWith('duplicate_of_')
+                  
+                  return <DuplicateGroupCard 
+                    key={group._id}
+                    group={group}
+                    dupExcess={dupExcess}
+                    copyIds={copyIds}
+                    isDuplicateOf={isDuplicateOf}
+                  />
+                })}
+              </section>
+            )}
+          </div>
+        ) : (
+          <div className="admin-products-list">
+            {loading ? (
+              <Loader type="spinner" size="large" text="Cargando productos..." />
+            ) : currentItems.length === 0 ? (
+              <div className="no-products">
+                <p>No se encontraron productos con los filtros seleccionados.</p>
+              </div>
+            ) : (
+              currentItems.map(item => (
               <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
                 <div className="product-image">
                   <img 
@@ -1350,8 +1546,9 @@ const AdminPage: React.FC = () => {
               
               </div>
             ))
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* 🆕 Paginación */}
         {totalPages > 1 && (
