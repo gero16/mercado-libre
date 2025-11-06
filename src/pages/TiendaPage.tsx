@@ -1901,7 +1901,7 @@ useEffect(() => {
                             margin: '0',
                             lineHeight: '1'
                           }}>
-                            US$ {tieneDescuentoML ? precioOriginalML?.toFixed(2) : precioOriginal}
+                            US$ {tieneDescuentoML ? precioOriginalML?.toFixed(2) : Number(precioOriginal).toFixed(2)}
                           </p>
                           <p style={{ 
                             color: '#d32f2f',
@@ -1910,11 +1910,11 @@ useEffect(() => {
                             margin: '0',
                             lineHeight: '1'
                           }}>
-                            US$ {item.price}
+                            US$ {Number(item.price).toFixed(2)}
                           </p>
                         </div>
                       ) : (
-                        <p style={{ margin: '0', fontSize: '0.9rem' }}>US$ {item.price}</p>
+                        <p style={{ margin: '0', fontSize: '0.9rem' }}>US$ {Number(item.price).toFixed(2)}</p>
                       )}
                     </div>
                     {/* Ocultar botón cuando no se puede comprar; mantener solo badges superiores */}

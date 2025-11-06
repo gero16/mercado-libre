@@ -551,7 +551,7 @@ const CheckoutPage: React.FC = () => {
                     <p className="item-name">{item.name}</p>
                     <div className='item-meta'>
                       <span className='badge qty'>x{item.cantidad}</span>
-                      <span className='price'>$ {item.price * item.cantidad}</span>
+                      <span className='price'>$ {(item.price * item.cantidad).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -724,7 +724,7 @@ const CheckoutPage: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Subtotal</span>
-                    <span>$ {cartTotal}</span>
+                    <span>$ {cartTotal.toFixed(2)}</span>
                   </div>
                   {descuentoAplicado > 0 && (
                     <div style={{ 

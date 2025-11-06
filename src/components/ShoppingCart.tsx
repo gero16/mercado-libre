@@ -38,7 +38,7 @@ const ShoppingCart: React.FC = () => {
               
               <div className="div-contenido-carrito centrar-texto">
                 <p>{item.name}</p>
-                <p>US$ {item.price * item.cantidad}</p>
+                <p>US$ {(item.price * item.cantidad).toFixed(2)}</p>
                 
                 <div className="stock">
                   <span 
@@ -74,7 +74,7 @@ const ShoppingCart: React.FC = () => {
     
       <div className="div-sub-total">
         <h3>SubTotal:</h3> 
-        <p className="sub-total">US$ {cartTotal}</p>
+        <p className="sub-total">US$ {cartTotal.toFixed(2)}</p>
       </div>
     
       <div className="div-comprar">

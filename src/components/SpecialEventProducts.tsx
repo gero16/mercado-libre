@@ -55,7 +55,7 @@ const SpecialEventProducts: React.FC<{ slug: string; title: string }>
                 decoding="async"
               />
               <p>{p.title}</p>
-              <p>US$ {p.price}</p>
+              <p>US$ {Number(p.price).toFixed(2)}</p>
             </div>
           ))}
         </div>

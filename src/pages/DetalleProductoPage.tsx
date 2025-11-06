@@ -527,7 +527,7 @@ const DetalleProductoPage: React.FC = () => {
                       onClick={() => handleVarianteChange(variante)}
                     >
                       <p><strong>{variante.color}</strong></p>
-                      <p>US$ {variante.price}</p>
+                      <p>US$ {Number(variante.price).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>

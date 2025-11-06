@@ -210,7 +210,7 @@ const AdminDestacados: React.FC = () => {
                     </div>
                   </div>
                   <div className="product-details">
-                    <div className="detail-row"><span className="detail-label">Precio:</span><span className="detail-value">US$ {item.price}</span></div>
+                    <div className="detail-row"><span className="detail-label">Precio:</span><span className="detail-value">US$ {Number(item.price).toFixed(2)}</span></div>
                     <div className="detail-row"><span className="detail-label">Stock:</span><span className="detail-value">{item.available_quantity ?? '-'}</span></div>
                     <div className="detail-row"><span className="detail-label">MLU:</span><span className="detail-value detail-id">{item.ml_id}</span></div>
                   </div>
@@ -249,7 +249,7 @@ const AdminDestacados: React.FC = () => {
                     </div>
                   </div>
                   <div className="product-details">
-                    <div className="detail-row"><span className="detail-label">Precio:</span><span className="detail-value">US$ {item.price}</span></div>
+                    <div className="detail-row"><span className="detail-label">Precio:</span><span className="detail-value">US$ {Number(item.price).toFixed(2)}</span></div>
                     <div className="detail-row"><span className="detail-label">Stock:</span><span className="detail-value">{item.available_quantity ?? '-'}</span></div>
                     <div className="detail-row"><span className="detail-label">MLU:</span><span className="detail-value detail-id">{item.ml_id}</span></div>
                   </div>

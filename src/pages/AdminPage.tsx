@@ -1469,7 +1469,7 @@ const AdminPage: React.FC = () => {
                   <div className="product-details">
                     <div className="detail-row">
                       <span className="detail-label">Precio:</span>
-                      <span className="detail-value">US$ {item.price}</span>
+                      <span className="detail-value">US$ {Number(item.price).toFixed(2)}</span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Stock:</span>
