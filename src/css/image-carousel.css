@@ -2,7 +2,7 @@
 .image-carousel {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: clamp(360px, 42vw, 520px);
   overflow: hidden;
   margin-bottom: 20px;
   margin-top: 10px;
@@ -164,6 +164,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .image-carousel {
+    /*  un valor que nunca baje de 220px, trate de igual 56vw y que nunca supere 360px  */
     height: clamp(220px, 56vw, 360px);
   }
   .carousel-slide {
