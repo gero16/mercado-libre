@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
@@ -12,8 +12,15 @@ const Header: React.FC = () => {
   const navigate = useNavigate()
   const { isAuthenticated, logout, user, token } = useAuth() as any
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false)
+  const [categoriesExpanded, setCategoriesExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth <= 768
+  })
+  const bodyOverflowRef = useRef<string | null>(null)
   const location = useLocation()
 
   const [categoryCounts, setCategoryCounts] = useState<{ id: string, count: number }[]>([])
@@ -138,9 +145,29 @@ const Header: React.FC = () => {
     ]
   }, [categoryCounts])
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+    setShowCategoriesDropdown(false)
+    setNotifyOpen(false)
+    setCategoriesExpanded(false)
+  }
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(prev => {
+      const next = !prev
+      if (!next) {
+        setShowCategoriesDropdown(false)
+        setNotifyOpen(false)
+        setCategoriesExpanded(false)
+      }
+      return next
+    })
+  }
+
   const handleCategoryClick = (categoryId: string) => {
     navigate('/tienda-ml', { state: { categoryFilter: categoryId } })
     setShowCategoriesDropdown(false)
+    setCategoriesExpanded(false)
+    closeMobileMenu()
   }
 
   const handleSearch = (e: React.FormEvent) => {
@@ -162,25 +189,129 @@ const Header: React.FC = () => {
     }
   }
 
+  useEffect(() => {
+    closeMobileMenu()
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onResize = () => {
+      const mobile = window.innerWidth <= 768
+      setIsMobile(mobile)
+      if (!mobile) {
+        setMobileMenuOpen(false)
+        setShowCategoriesDropdown(false)
+        setNotifyOpen(false)
+        setCategoriesExpanded(false)
+      }
+    }
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    if (bodyOverflowRef.current === null) {
+      bodyOverflowRef.current = document.body.style.overflow || ''
+    }
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = bodyOverflowRef.current || ''
+    }
+    return () => {
+      document.body.style.overflow = bodyOverflowRef.current || ''
+    }
+  }, [mobileMenuOpen])
+
   return (
     <>
       <header className="header">
         <img className="logo" src="/img/logo.png" alt="Logo-Adidas" />
 
-        <div className="navbar">
-          <ul>
-            <li><NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>Inicio</NavLink></li>
-            
-            <li 
-              className="dropdown-menu"
-              onMouseEnter={() => setShowCategoriesDropdown(true)}
-              onMouseLeave={() => setShowCategoriesDropdown(false)}
+        {isMobile && (
+          <div className="mobile-quick-links">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) => `mobile-quick-link ${isActive ? 'active' : ''}`}
+              onClick={closeMobileMenu}
             >
-              <NavLink to="/tienda-ml" className={({ isActive }) => isActive ? 'active' : ''}>
-                Tienda Online ▾
-              </NavLink>
+              Inicio
+            </NavLink>
+            <NavLink
+              to="/tienda-ml"
+              className={({ isActive }) => `mobile-quick-link ${isActive ? 'active' : ''}`}
+              onClick={closeMobileMenu}
+            >
+              Tienda
+            </NavLink>
+            <NavLink
+              to="/contacto"
+              className={({ isActive }) => `mobile-quick-link ${isActive ? 'active' : ''}`}
+              onClick={closeMobileMenu}
+            >
+              Contacto
+            </NavLink>
+            <button
+              className="mobile-cart-button"
+              onClick={() => { setCartOpen(!cartOpen); closeMobileMenu() }}
+              aria-label="Ver carrito"
+            >
+              <img className="carrito" src="/img/carrito.png" alt="Carrito" />
+              {cartItemCount > 0 && <span className="mobile-cart-count">{cartItemCount}</span>}
+            </button>
+          </div>
+        )}
+
+        <button
+          className={`mobile-menu-toggle ${mobileMenuOpen ? 'is-active' : ''}`}
+          onClick={toggleMobileMenu}
+          aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <nav className={`navbar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          <ul>
+            {!isMobile && (
+              <li>
+                <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                  Inicio
+                </NavLink>
+              </li>
+            )}
+
+            <li 
+              className={`dropdown-menu ${isMobile ? 'mobile' : ''}`}
+              onMouseEnter={!isMobile ? () => setShowCategoriesDropdown(true) : undefined}
+              onMouseLeave={!isMobile ? () => setShowCategoriesDropdown(false) : undefined}
+            >
+              <div className="category-trigger">
+                <NavLink
+                  to="/tienda-ml"
+                  className={({ isActive }) => isActive ? 'active' : ''}
+                  onClick={closeMobileMenu}
+                >
+                  Tienda Online
+                </NavLink>
+                {isMobile ? (
+                  <button
+                    type="button"
+                    className="category-toggle"
+                    onClick={() => setCategoriesExpanded(prev => !prev)}
+                    aria-expanded={categoriesExpanded}
+                  >
+                    {categoriesExpanded ? '▲' : '▼'}
+                  </button>
+                ) : (
+                  <span className="category-caret">▾</span>
+                )}
+              </div>
               
-              {showCategoriesDropdown && (
+              {(isMobile ? categoriesExpanded : showCategoriesDropdown) && (
                 <div className="dropdown-content">
                   {(loadingCategories ? [] : dynamicCategories).map(category => (
                     <button
@@ -196,17 +327,23 @@ const Header: React.FC = () => {
               )}
             </li>
             
-            <li><NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
+            {!isMobile && (
+              <li>
+                <NavLink to="/contacto" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                  Contacto
+                </NavLink>
+              </li>
+            )}
 
             {/* Link directo a panel Admin */}
             {isAuthenticated && user?.rol === 'admin' && (
-              <li>
-                <NavLink to="/admin" className={({ isActive }) => isActive ? 'active' : ''}>Admin</NavLink>
+              <li className={isMobile ? 'admin-link-mobile' : undefined}>
+                <NavLink to="/admin" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>Admin</NavLink>
               </li>
             )}
 
             {/* Notificaciones admin */}
-            {isAuthenticated && user?.rol === 'admin' && (
+            {!isMobile && isAuthenticated && user?.rol === 'admin' && (
               <li style={{ position: 'relative' }}
                   onMouseEnter={() => { setNotifyOpen(true); if (!notifications.length) fetchNotifications() }}
                   onMouseLeave={() => setNotifyOpen(false)}>
@@ -253,19 +390,18 @@ const Header: React.FC = () => {
 
             {/* Autenticación */}
             {!isAuthenticated ? (
-              <li><NavLink to="/login" className={({ isActive }) => isActive ? 'active' : ''}>Ingresar</NavLink></li>
+              <li><NavLink to="/login" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>Ingresar</NavLink></li>
             ) : (
               <>
-                <li>
-                  <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''}>
+                <li className="auth-action">
+                  <NavLink to="/profile" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
                     Mi Perfil
                   </NavLink>
                 </li>
-                <li>
+                <li className="auth-action">
                   <button
-                    onClick={() => { logout(); navigate('/'); }}
-                    className="btn-orden"
-                    style={{ padding: '6px 12px', fontSize: '14px' }}
+                    onClick={() => { logout(); navigate('/'); closeMobileMenu(); }}
+                    className="btn-orden logout-button"
                   >
                     Cerrar sesión
                   </button>
@@ -353,18 +489,20 @@ const Header: React.FC = () => {
               </button>
             </li>
             
-            <li>
-              <button 
-                className="cart-button" 
-                onClick={() => setCartOpen(!cartOpen)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-              >
-                <img className="carrito" src="/img/carrito.png" alt="Carrito" />
-                <span className="numero-compras">{cartItemCount}</span>
-              </button>
-            </li>
+            {!isMobile && (
+              <li>
+                <button 
+                  className="cart-button" 
+                  onClick={() => setCartOpen(!cartOpen)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                >
+                  <img className="carrito" src="/img/carrito.png" alt="Carrito" />
+                  <span className="numero-compras">{cartItemCount}</span>
+                </button>
+              </li>
+            )}
           </ul>
-        </div>
+        </nav>
       </header>
 
       <ShoppingCart />

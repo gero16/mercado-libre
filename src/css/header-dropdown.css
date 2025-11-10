@@ -103,10 +103,17 @@
 }
 .notify-refresh:hover { background: #1d4ed8; }
 
-.dropdown-menu > a {
+.dropdown-menu .category-trigger {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+}
+
+.dropdown-menu .category-trigger > a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
 }
 
 /* Contenido del dropdown */
