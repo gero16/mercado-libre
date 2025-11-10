@@ -2,10 +2,10 @@
 .image-carousel {
   position: relative;
   width: 100%;
-  height: clamp(360px, 42vw, 520px);
+  height: clamp(320px, 36vw, 490px);
   overflow: hidden;
   margin-bottom: 20px;
-  margin-top: 10px;
+  margin-top: 45px;
 }
 
 .carousel-container {
