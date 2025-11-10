@@ -59,6 +59,10 @@ export interface ProductoML {
   available_quantity: number;
   main_image: string;
   price: number;
+  last_valid_price?: number;
+  price_invalid?: boolean;
+  price_invalid_reason?: string | null;
+  price_invalid_at?: string | null;
   status: string;
   title: string;
   permalink?: string; // URL de la publicación en MercadoLibre

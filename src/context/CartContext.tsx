@@ -66,6 +66,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const addToCart = (product: Producto & { color?: string; size?: string | null }) => {
+    if (typeof product.price !== 'number' || product.price <= 0) {
+      alert('Este producto está en revisión de precio y no puede agregarse al carrito.')
+      return
+    }
     const productKey = getCartItemKey(product);
     const existingItem = cartItems.find(
       item => getCartItemKey(item) === productKey

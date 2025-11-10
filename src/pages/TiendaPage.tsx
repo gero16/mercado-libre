@@ -347,6 +347,12 @@ function dedupeItemsByCatalog(items: ItemTienda[]): ItemTienda[] {
   return [...picked, ...others]
 }
 
+const filterVisibleItems = (items: ItemTienda[]) =>
+  items.filter(item => {
+    const productInvalid = (item.productoPadre as any)?.price_invalid === true
+    return typeof item.price === 'number' && item.price > 0 && !productInvalid
+  })
+
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -595,7 +601,8 @@ const TiendaMLPage: React.FC = () => {
       console.log(`📡 Solicitando ${limit} productos (offset: ${offset}) desde servidor...`)
       const startFetch = performance.now()
       const FIELDS = [
-        'ml_id','_id','title','price','images.url','main_image','available_quantity',
+        'ml_id','_id','title','price','last_valid_price','price_invalid','price_invalid_reason','price_invalid_at',
+        'images.url','main_image','available_quantity',
         'status','category_id','catalog_product_id','tipo_venta',
         'variantes.color','variantes.size','variantes.price','variantes.stock','variantes.images.url',
         'descuento','descuento_ml.original_price','sold_quantity','health'
@@ -613,7 +620,8 @@ const TiendaMLPage: React.FC = () => {
   // 🚀 Búsqueda completa en servidor (toma toda la DB usando q)
   const fetchServerSearch = async (page: number, perPage: number, query: string, categorySlug?: string): Promise<{ items: ItemTienda[], total: number }> => {
     const FIELDS = [
-      'ml_id','_id','title','price','images.url','main_image','available_quantity',
+      'ml_id','_id','title','price','last_valid_price','price_invalid','price_invalid_reason','price_invalid_at',
+      'images.url','main_image','available_quantity',
       'status','category_id','catalog_product_id','tipo_venta',
       'variantes.color','variantes.size','variantes.price','variantes.stock','variantes.images.url',
       'descuento','descuento_ml.original_price','sold_quantity','health'
@@ -821,7 +829,8 @@ useEffect(() => {
         status: item.productoPadre?.status
       })))
       
-      const itemsUnicos = dedupeItemsByCatalog(items)
+      const itemsVisibles = filterVisibleItems(items)
+      const itemsUnicos = dedupeItemsByCatalog(itemsVisibles)
       setItemsTienda(itemsUnicos)
       setFilteredItems(itemsUnicos)
       
@@ -967,7 +976,7 @@ useEffect(() => {
           })
           
           // Deduplicar mezclando con los ya presentes
-          const merged = dedupeItemsByCatalog([...(itemsTienda || []), ...remainingItems])
+          const merged = dedupeItemsByCatalog(filterVisibleItems([...(itemsTienda || []), ...remainingItems]))
           if (mounted) {
             setItemsTienda(merged)
             setFilteredItems(merged)
@@ -1114,7 +1123,8 @@ useEffect(() => {
                 }
               }
             })
-            const itemsUnicos = dedupeItemsByCatalog(items)
+            const itemsVisibles = filterVisibleItems(items)
+            const itemsUnicos = dedupeItemsByCatalog(itemsVisibles)
             setItemsTienda(itemsUnicos)
             // Aplicar filtros locales activos
             let filtered = itemsUnicos
@@ -1143,7 +1153,7 @@ useEffect(() => {
       // Si hay texto de búsqueda, ignorar categoría (buscar globalmente)
       const { items, total } = await fetchServerSearch(1, itemsPerPage, q, q ? undefined : categoryFilter)
       // Aplicar filtros adicionales sobre resultados del servidor si están activos
-      let filtered = items
+      let filtered = filterVisibleItems(items)
       if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
       filtered = filtered.filter(i => i.price >= priceFilter)
       if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
@@ -1192,6 +1202,12 @@ useEffect(() => {
     if (item.stock <= 0) {
       console.log('🚫 Producto sin stock detectado, bloqueando agregar al carrito')
       alert('Este producto no tiene stock disponible.')
+      return
+    }
+
+    if ((item.productoPadre as any)?.price_invalid === true || item.price <= 0) {
+      console.log('🚫 Producto con precio inválido detectado, bloqueando agregar al carrito')
+      alert('Este producto está en revisión de precio y no se puede comprar por el momento.')
       return
     }
     

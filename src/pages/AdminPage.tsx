@@ -37,6 +37,10 @@ interface AdminItem {
   proveedor?: string;
   pais_origen?: string;
   destacado?: boolean;  // 🆕 Campo para productos destacados
+  priceInvalid?: boolean;
+  priceInvalidReason?: string | null;
+  priceInvalidAt?: string | Date | null;
+  lastValidPrice?: number;
 }
 
 // Optimiza URLs de imágenes de ML a la variante V (más liviana)
@@ -50,6 +54,37 @@ const getOptimizedImageUrl = (url?: string) => {
   }
   return url
 }
+
+const formatInvalidReason = (reason?: string | null) => {
+  if (!reason) return 'Valor no válido detectado';
+  switch (reason) {
+    case 'non_positive':
+      return 'Precio recibido es menor o igual a cero';
+    case 'not_a_number':
+      return 'El precio recibido no es numérico';
+    case 'not_finite':
+      return 'El precio recibido no es un número finito';
+    default:
+      return reason;
+  }
+};
+
+const formatDateTime = (value?: string | Date | null) => {
+  if (!value) return '';
+  try {
+    const date = typeof value === 'string' ? new Date(value) : value;
+    if (!date || Number.isNaN(date.getTime())) return '';
+    return date.toLocaleString('es-UY', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return '';
+  }
+};
 
 // Componente para mostrar grupos de duplicados
 const DuplicateGroupCard: React.FC<{
@@ -132,7 +167,7 @@ const AdminPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   // Filtros activos (se activan desde las estadísticas)
-  const [activeFilter, setActiveFilter] = useState<'all' | 'products' | 'variants' | 'sin-stock' | 'pausados' | 'a-pedido' | 'stock-fisico' | 'destacados' | 'duplicados'>('all')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'products' | 'variants' | 'sin-stock' | 'pausados' | 'a-pedido' | 'stock-fisico' | 'destacados' | 'duplicados' | 'precio-invalido'>('all')
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'delivery'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   
@@ -148,9 +183,11 @@ const AdminPage: React.FC = () => {
   const [serverOffset, setServerOffset] = useState(0)
   const [serverLoading, setServerLoading] = useState(false)
   const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null)
+  const [refreshingProductId, setRefreshingProductId] = useState<string | null>(null)
+  const [resolvingProductId, setResolvingProductId] = useState<string | null>(null)
   
 
-  const SERVER_FIELDS = 'ml_id,title,price,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,catalog_product_id,duplicate_of_ml_id,es_catalogo,sold_quantity,health,listing_type_id,permalink,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
+  const SERVER_FIELDS = 'ml_id,title,price,last_valid_price,price_invalid,price_invalid_reason,price_invalid_at,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,catalog_product_id,duplicate_of_ml_id,es_catalogo,sold_quantity,health,listing_type_id,permalink,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
 
   // Normalización básica para búsqueda insensible a acentos/espacios
   const normalize = (s: string) => {
@@ -218,7 +255,11 @@ const AdminPage: React.FC = () => {
       es_stock_fisico: esStockFisico,
       proveedor: producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
       pais_origen: producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
-      destacado: producto.destacado || false
+      destacado: producto.destacado || false,
+      priceInvalid: (producto as any).price_invalid === true,
+      priceInvalidReason: (producto as any).price_invalid_reason ?? null,
+      priceInvalidAt: (producto as any).price_invalid_at || null,
+      lastValidPrice: (producto as any).last_valid_price
     })
 
     if (Array.isArray(producto.variantes) && producto.variantes.length > 0 && typeof (producto.variantes[0] as any) === 'object' && (producto.variantes[0] as any).stock !== undefined) {
@@ -255,7 +296,11 @@ const AdminPage: React.FC = () => {
           es_stock_fisico: variantEsStockFisico,
           proveedor: variante.dropshipping?.proveedor || producto.dropshipping?.proveedor || producto.proveedor || 'No especificado',
           pais_origen: variante.dropshipping?.pais_origen || producto.dropshipping?.pais_origen || producto.pais_origen || 'No especificado',
-          destacado: producto.destacado || false
+          destacado: producto.destacado || false,
+          priceInvalid: (producto as any).price_invalid === true,
+          priceInvalidReason: (producto as any).price_invalid_reason ?? null,
+          priceInvalidAt: (producto as any).price_invalid_at || null,
+          lastValidPrice: (producto as any).last_valid_price
         })
       })
     }
@@ -509,6 +554,9 @@ const AdminPage: React.FC = () => {
             const isDuplicate = hasDuplicateOf || (catalogId && (catalogProductMap.get(catalogId) || 0) > 1)
             if (!isDuplicate) return false
             break
+          case 'precio-invalido':
+            if (!(item.priceInvalid || (item.productoPadre as any)?.price_invalid)) return false
+            break
         }
       }
       
@@ -670,6 +718,96 @@ const AdminPage: React.FC = () => {
 
   // 🆕 Selección múltiple de productos para destacados
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set())
+
+  const refreshProductFromML = async (item: AdminItem) => {
+    try {
+      setRefreshingProductId(item.productId)
+      const response = await fetch(`${API_BASE_URL}/ml/productos/${item.productId}/actualizar`, {
+        method: 'POST'
+      })
+      const data = await response.json().catch(() => null)
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo sincronizar el producto')
+      }
+      const producto = data?.producto
+      if (producto) {
+        setAdminItems(prev =>
+          prev.map(i => {
+            if (i.productId !== item.productId) return i
+            const updatedProduct = { ...(i.productoPadre as any), ...producto }
+            const isVar = i.esVariante
+            const updatedItem: AdminItem = {
+              ...i,
+              price: isVar ? i.price : producto.price,
+              stock: isVar ? i.stock : producto.available_quantity,
+              status: producto.status,
+              productoPadre: updatedProduct,
+              priceInvalid: producto.price_invalid === true,
+              priceInvalidReason: producto.price_invalid_reason ?? null,
+              priceInvalidAt: producto.price_invalid_at || null,
+              lastValidPrice: producto.last_valid_price
+            }
+            return updatedItem
+          })
+        )
+      }
+      alert('Producto sincronizado correctamente desde Mercado Libre.')
+    } catch (error: any) {
+      console.error('Error re-sincronizando producto', error)
+      alert(error?.message || 'Error al re-sincronizar el producto.')
+    } finally {
+      setRefreshingProductId(null)
+    }
+  }
+
+  const clearInvalidPriceFlag = async (item: AdminItem) => {
+    try {
+      const token = AuthService.getToken()
+      if (!token) {
+        alert('Necesitas iniciar sesión nuevamente para ejecutar esta acción.')
+        return
+      }
+      setResolvingProductId(item.productId)
+      const response = await fetch(`${API_BASE_URL}/ml/admin/productos/${item.productId}/clear-invalid-price`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      const data = await response.json().catch(() => null)
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo limpiar la bandera de precio inválido')
+      }
+      const producto = data?.producto
+      if (producto) {
+        setAdminItems(prev =>
+          prev.map(i => {
+            if (i.productId !== item.productId) return i
+            const updatedProduct = { ...(i.productoPadre as any), ...producto }
+            const isVar = i.esVariante
+            return {
+              ...i,
+              price: isVar ? i.price : producto.price,
+              stock: isVar ? i.stock : producto.available_quantity,
+              status: producto.status,
+              productoPadre: updatedProduct,
+              priceInvalid: producto.price_invalid === true,
+              priceInvalidReason: producto.price_invalid_reason ?? null,
+              priceInvalidAt: producto.price_invalid_at || null,
+              lastValidPrice: producto.last_valid_price
+            }
+          })
+        )
+      }
+      alert('Bandera de precio inválido eliminada. Verifica que el precio sea correcto antes de reactivar el producto.')
+    } catch (error: any) {
+      console.error('Error limpiando bandera de precio', error)
+      alert(error?.message || 'Error al limpiar la bandera de precio inválido.')
+    } finally {
+      setResolvingProductId(null)
+    }
+  }
 
   const toggleSelectProduct = (item: AdminItem) => {
     if (item.esVariante) return // solo productos base
@@ -1280,6 +1418,24 @@ const AdminPage: React.FC = () => {
               Click para {activeFilter === 'destacados' ? 'ver todos' : 'filtrar'}
             </div>
           </div>
+          <div
+            className="stat-card"
+            onClick={() => setActiveFilter(activeFilter === 'precio-invalido' ? 'all' : 'precio-invalido')}
+            style={{
+              cursor: 'pointer',
+              borderColor: activeFilter === 'precio-invalido' ? '#dc2626' : '#fecaca',
+              background: activeFilter === 'precio-invalido' ? '#fee2e2' : '#fef2f2',
+              color: activeFilter === 'precio-invalido' ? '#7f1d1d' : '#991b1b'
+            }}
+          >
+            <h3 style={{ color: activeFilter === 'precio-invalido' ? '#7f1d1d' : '#b91c1c' }}>Precios inválidos</h3>
+            <span className="stat-number" style={{ color: activeFilter === 'precio-invalido' ? '#7f1d1d' : '#b91c1c' }}>
+              {adminItems.filter(item => !item.esVariante && (item.priceInvalid || (item.productoPadre as any)?.price_invalid)).length}
+            </span>
+            <div className="stat-subtitle" style={{ color: activeFilter === 'precio-invalido' ? '#7f1d1d' : '#b91c1c' }}>
+              Click para revisar y corregir
+            </div>
+          </div>
         </div>
 
         {/* Lista de productos paginada o grupos de duplicados */}
@@ -1319,7 +1475,19 @@ const AdminPage: React.FC = () => {
                 <p>No se encontraron productos con los filtros seleccionados.</p>
               </div>
             ) : (
-              currentItems.map(item => (
+              currentItems.map(item => {
+                const productInvalid = item.priceInvalid || (item.productoPadre as any)?.price_invalid;
+                const invalidReason = productInvalid
+                  ? formatInvalidReason(item.priceInvalidReason ?? (item.productoPadre as any)?.price_invalid_reason)
+                  : '';
+                const invalidDetectedAt = productInvalid
+                  ? formatDateTime(item.priceInvalidAt ?? (item.productoPadre as any)?.price_invalid_at ?? null)
+                  : '';
+                const lastValidPrice = productInvalid
+                  ? (typeof item.lastValidPrice === 'number' ? item.lastValidPrice : (item.productoPadre as any)?.last_valid_price)
+                  : item.lastValidPrice;
+
+                return (
               <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
                 <div className="product-image">
                   <img 
@@ -1389,6 +1557,15 @@ const AdminPage: React.FC = () => {
                             : (item.productoPadre?.shipping?.logistic_type === 'xd_drop_off' && (item.dias_preparacion || 0) === 0)
                               ? '🚚 Cross Docking'
                               : `📦 ${item.tiempo_total_entrega || 7}d`}
+                        </span>
+                      )}
+                      {(item.priceInvalid || (item.productoPadre as any)?.price_invalid) && (
+                        <span className="badge" style={{
+                          backgroundColor: '#dc2626',
+                          color: '#fff',
+                          fontWeight: '600'
+                        }}>
+                          Precio inválido
                         </span>
                       )}
                     </div>
@@ -1466,11 +1643,24 @@ const AdminPage: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="product-details">
+                    <div className="product-details">
                     <div className="detail-row">
                       <span className="detail-label">Precio:</span>
                       <span className="detail-value">US$ {Number(item.price).toFixed(2)}</span>
                     </div>
+                      {productInvalid && (
+                        <div className="detail-row" style={{ alignItems: 'flex-start' }}>
+                          <span className="detail-label">Alerta:</span>
+                          <span className="detail-value" style={{ color: '#b91c1c', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span>Oculto del catálogo hasta corregir.</span>
+                            {invalidReason && <span>Motivo: {invalidReason}</span>}
+                            {invalidDetectedAt && <span>Detectado: {invalidDetectedAt}</span>}
+                            {typeof lastValidPrice === 'number' && lastValidPrice > 0 && (
+                              <span>Último precio válido: US$ {Number(lastValidPrice).toFixed(2)}</span>
+                            )}
+                          </span>
+                        </div>
+                      )}
                     <div className="detail-row">
                       <span className="detail-label">Stock:</span>
                       <span className={`detail-value ${item.stock <= 0 ? 'no-stock' : ''}`}>
@@ -1542,10 +1732,42 @@ const AdminPage: React.FC = () => {
                       </>
                     )}
                   </div>
+                    {productInvalid && (
+                      <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        <button
+                          onClick={() => refreshProductFromML(item)}
+                          disabled={refreshingProductId === item.productId}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid #2563eb',
+                            background: refreshingProductId === item.productId ? '#bfdbfe' : '#2563eb',
+                            color: '#fff',
+                            cursor: refreshingProductId === item.productId ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {refreshingProductId === item.productId ? 'Re-sincronizando...' : 'Re-sincronizar con ML'}
+                        </button>
+                        <button
+                          onClick={() => clearInvalidPriceFlag(item)}
+                          disabled={resolvingProductId === item.productId}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid #047857',
+                            background: resolvingProductId === item.productId ? '#bbf7d0' : '#047857',
+                            color: '#fff',
+                            cursor: resolvingProductId === item.productId ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {resolvingProductId === item.productId ? 'Aplicando...' : 'Marcar como revisado'}
+                        </button>
+                      </div>
+                    )}
                 </div>
               
               </div>
-            ))
+            )})
             )}
           </div>
         )}
