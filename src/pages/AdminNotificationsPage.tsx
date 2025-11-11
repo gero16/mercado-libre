@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { API_BASE_URL } from '../config/api'
+import { parseNotificationSegments } from '../utils/notifications'
+
+const SUPER_ADMIN_EMAIL = 'geronicola1696@gmail.com'
 
 const AdminNotificationsPage: React.FC = () => {
   const { isAuthenticated, user, token } = useAuth() as any
   const [items, setItems] = useState<any[]>([])
   const [page, setPage] = useState(1)
-  const [pageSize] = useState(20)
+  const [pageSize] = useState(50)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const isSuperAdmin = Boolean(user?.email && user.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase())
 
   const fetchData = async (p = page) => {
     try {
@@ -31,6 +37,23 @@ const AdminNotificationsPage: React.FC = () => {
     if (token) headers['Authorization'] = `Bearer ${token}`
     await fetch(`${API_BASE_URL}/api/admin/notifications/${id}/read`, { method: 'PATCH', headers })
     setItems(prev => prev.map(n => n._id === id ? { ...n, status: 'read' } : n))
+  }
+
+  const deleteNotification = async (id: string) => {
+    if (!isSuperAdmin) return
+    try {
+      setDeletingId(id)
+      const headers: Record<string, string> = { Accept: 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const res = await fetch(`${API_BASE_URL}/api/admin/notifications/${id}?_ts=${Date.now()}`, { method: 'DELETE', headers, cache: 'no-store' })
+      if (!res.ok) throw new Error('Error eliminando notificación')
+      setItems(prev => prev.filter(n => n._id !== id))
+      setTotal(prev => Math.max(0, prev - 1))
+    } catch (error) {
+      // silencioso
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   const markAllRead = async () => {
@@ -306,50 +329,58 @@ const AdminNotificationsPage: React.FC = () => {
             {/* Header de tabla */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'auto minmax(250px, 400px) 160px 160px 180px',
+              gridTemplateColumns: 'auto minmax(250px, 400px) 160px 160px 180px 160px',
               gap: '16px',
-              padding: '16px 20px',
-              backgroundColor: '#f9fafb',
-              borderBottom: '2px solid #e5e7eb',
-              fontWeight: '700',
-              fontSize: '13px',
-              color: '#374151',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px'
+              padding: '14px 20px',
+              backgroundColor: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              fontWeight: '600',
+              fontSize: '12.5px',
+              color: '#1f2937',
+              textTransform: 'none',
+              letterSpacing: '0.2px'
             }}>
               <div style={{ width: '40px' }}></div>
               <div>Mensaje</div>
               <div>Orden / Pago</div>
               <div>Cliente</div>
               <div>Fecha</div>
+              <div style={{ textAlign: 'right' }}>Acciones</div>
             </div>
 
             {/* Items */}
-            {filteredItems.map((n, idx) => (
-              <div
-                key={n._id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'auto minmax(250px, 400px) 160px 160px 180px',
-                  gap: '16px',
-                  padding: '16px 20px',
-                  borderTop: idx > 0 ? '1px solid #f3f4f6' : 'none',
-                  backgroundColor: n.status === 'unread' ? '#fffbeb' : 'white',
-                  borderLeft: n.status === 'unread' ? '4px solid #f59e0b' : '4px solid transparent',
-                  transition: 'all 0.2s',
-                  position: 'relative'
-                }}
-                onMouseEnter={(e) => {
-                  if (n.status === 'read') {
-                    e.currentTarget.style.backgroundColor = '#f9fafb'
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (n.status === 'read') {
-                    e.currentTarget.style.backgroundColor = 'white'
-                  }
-                }}
-              >
+            {filteredItems.map((n, idx) => {
+              const messageSegments = parseNotificationSegments(n?.message)
+              const segmentsToDisplay = messageSegments.length
+                ? messageSegments
+                : [{ value: n?.message || 'Notificación', isPrimary: true }]
+
+              return (
+                <div
+                  key={n._id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'auto minmax(250px, 400px) 160px 160px 180px 160px',
+                    gap: '16px',
+                    padding: '16px 20px',
+                    borderTop: idx > 0 ? '1px solid #f3f4f6' : 'none',
+                    backgroundColor: n.status === 'unread' ? '#f8fafc' : 'white',
+                    borderLeft: n.status === 'unread' ? '3px solid #3b82f6' : '3px solid transparent',
+                    transition: 'all 0.2s',
+                    position: 'relative',
+                    borderRadius: '10px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (n.status === 'read') {
+                      e.currentTarget.style.backgroundColor = '#f9fafb'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (n.status === 'read') {
+                      e.currentTarget.style.backgroundColor = 'white'
+                    }
+                  }}
+                >
                 {/* Icono */}
                 <div style={{
                   display: 'flex',
@@ -365,87 +396,81 @@ const AdminNotificationsPage: React.FC = () => {
                 </div>
 
                 {/* Mensaje */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                    <span style={{ 
-                      fontWeight: n.status === 'unread' ? '700' : '600',
-                      color: '#111827',
-                      fontSize: '14px',
-                      wordBreak: 'break-word',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      maxWidth: '100%'
-                    }}>
-                      {n.message || `${(n.type || 'order').toUpperCase()} ${n.order_id || ''}`}
-                    </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {segmentsToDisplay.map((segment, sIdx) => (
+                      <div
+                        key={sIdx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'baseline',
+                          gap: '10px',
+                          fontSize: segment.isPrimary ? '15px' : '13px',
+                          fontWeight: segment.isPrimary ? 600 : 500,
+                          color: segment.isPrimary ? '#111827' : '#475569',
+                          lineHeight: 1.5,
+                          wordBreak: 'break-word'
+                        }}
+                      >
+                        {segment.label ? (
+                          <span style={{
+                            fontWeight: 700,
+                            color: '#0f172a',
+                            fontSize: '11px',
+                            letterSpacing: '0.4px',
+                            textTransform: 'uppercase',
+                            minWidth: 'max-content'
+                          }}>
+                            {segment.label}
+                          </span>
+                        ) : null}
+                        <span style={{ flex: 1, color: segment.label ? '#1f2937' : segment.isPrimary ? '#111827' : '#475569' }}>
+                          {segment.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    {n.type && (
+                      <span style={{
+                        backgroundColor: `${getTypeColor(n.type)}15`,
+                        color: getTypeColor(n.type),
+                        borderRadius: '999px',
+                        padding: '4px 12px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        letterSpacing: '0.5px',
+                        textTransform: 'uppercase'
+                      }}>
+                        {n.type}
+                      </span>
+                    )}
                     {n.status === 'unread' && (
                       <span style={{
-                        backgroundColor: '#ef4444',
-                        color: 'white',
-                        borderRadius: '4px',
-                        padding: '2px 8px',
+                        backgroundColor: '#fee2e2',
+                        color: '#b91c1c',
+                        borderRadius: '999px',
+                        padding: '4px 12px',
                         fontSize: '11px',
-                        fontWeight: '700',
-                        textTransform: 'uppercase'
+                        fontWeight: '600',
+                        letterSpacing: '0.3px'
                       }}>
                         Nueva
                       </span>
                     )}
                     {n.total && (
                       <span style={{
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        borderRadius: '6px',
-                        padding: '4px 10px',
-                        fontSize: '13px',
-                        fontWeight: '700'
+                        backgroundColor: '#ecfdf5',
+                        color: '#047857',
+                        borderRadius: '999px',
+                        padding: '4px 12px',
+                        fontSize: '12px',
+                        fontWeight: '600'
                       }}>
                         ${n.total} {n.currency || ''}
                       </span>
                     )}
                   </div>
-                  {n.type && (
-                    <div style={{
-                      display: 'inline-block',
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      backgroundColor: `${getTypeColor(n.type)}20`,
-                      color: getTypeColor(n.type),
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      width: 'fit-content'
-                    }}>
-                      {n.type.charAt(0).toUpperCase() + n.type.slice(1)}
-                    </div>
-                  )}
-                  {n.status === 'unread' && (
-                    <button
-                      onClick={() => markRead(n._id)}
-                      style={{
-                        marginTop: '8px',
-                        padding: '6px 12px',
-                        backgroundColor: '#6366f1',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontWeight: '600',
-                        fontSize: '12px',
-                        width: 'fit-content',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = '#4f46e5'
-                        e.currentTarget.style.transform = 'translateY(-1px)'
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = '#6366f1'
-                        e.currentTarget.style.transform = 'translateY(0)'
-                      }}
-                    >
-                      ✓ Marcar como leída
-                    </button>
-                  )}
                 </div>
 
                 {/* Orden / Pago */}
@@ -458,14 +483,14 @@ const AdminNotificationsPage: React.FC = () => {
                 }}>
                   {n.order_id && (
                     <div>
-                      <span style={{ fontWeight: '600', color: '#374151' }}>Orden:</span>{' '}
-                      <span style={{ fontFamily: 'monospace' }}>{n.order_id}</span>
+                      <span style={{ fontWeight: '600', color: '#1f2937' }}>Orden:</span>{' '}
+                      <span style={{ fontFamily: 'SFMono-Regular,Menlo,monospace', fontWeight: 600, color: '#2563eb' }}>{n.order_id}</span>
                     </div>
                   )}
                   {n.payment_id && (
                     <div>
-                      <span style={{ fontWeight: '600', color: '#374151' }}>Pago:</span>{' '}
-                      <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>{n.payment_id}</span>
+                      <span style={{ fontWeight: '600', color: '#1f2937' }}>Pago:</span>{' '}
+                      <span style={{ fontFamily: 'SFMono-Regular,Menlo,monospace', fontSize: '12px', fontWeight: 600, color: '#7c3aed' }}>{n.payment_id}</span>
                     </div>
                   )}
                   {!n.order_id && !n.payment_id && <span style={{ color: '#9ca3af' }}>-</span>}
@@ -481,9 +506,9 @@ const AdminNotificationsPage: React.FC = () => {
                     <a
                       href={`mailto:${n.customer_email}`}
                       style={{
-                        color: '#3b82f6',
+                        color: '#2563eb',
                         textDecoration: 'none',
-                        fontWeight: '500'
+                        fontWeight: '600'
                       }}
                       onMouseOver={(e) => {
                         e.currentTarget.style.textDecoration = 'underline'
@@ -504,18 +529,85 @@ const AdminNotificationsPage: React.FC = () => {
                   fontSize: '13px',
                   color: '#6b7280'
                 }}>
-                  <div style={{ fontWeight: '600', color: '#374151', marginBottom: '2px' }}>
+                  <div style={{ fontWeight: '600', color: '#111827', marginBottom: '2px' }}>
                     {formatDate(n.createdAt)}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#9ca3af' }}>
+                  <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 500 }}>
                     {new Date(n.createdAt).toLocaleTimeString('es-ES', { 
                       hour: '2-digit', 
                       minute: '2-digit' 
                     })}
                   </div>
                 </div>
+
+                {/* Acciones */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexWrap: 'wrap'
+                }}>
+                  {n.status === 'unread' && (
+                    <button
+                      onClick={() => markRead(n._id)}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: '#6366f1',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '12px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#4f46e5'
+                        e.currentTarget.style.transform = 'translateY(-1px)'
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = '#6366f1'
+                        e.currentTarget.style.transform = 'translateY(0)'
+                      }}
+                    >
+                      ✓ Marcar como leída
+                    </button>
+                  )}
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => deleteNotification(n._id)}
+                      disabled={deletingId === n._id}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: deletingId === n._id ? '#f87171' : '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: deletingId === n._id ? 'not-allowed' : 'pointer',
+                        fontWeight: '600',
+                        fontSize: '12px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        if (deletingId !== n._id) {
+                          e.currentTarget.style.backgroundColor = '#dc2626'
+                          e.currentTarget.style.transform = 'translateY(-1px)'
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (deletingId !== n._id) {
+                          e.currentTarget.style.backgroundColor = '#ef4444'
+                          e.currentTarget.style.transform = 'translateY(0)'
+                        }
+                      }}
+                    >
+                      {deletingId === n._id ? 'Eliminando…' : 'Eliminar'}
+                    </button>
+                  )}
+                </div>
               </div>
-            ))}
+            )})}
           </>
         )}
       </div>

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 import { MAPEO_CATEGORIAS, NOMBRES_CATEGORIAS, ICONOS_CATEGORIAS } from '../utils/categories'
+import { parseNotificationSegments } from '../utils/notifications'
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
@@ -32,12 +33,14 @@ const Header: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoadingNotifs, setIsLoadingNotifs] = useState(false)
 
+  const HEADER_NOTIFICATIONS_PAGE_SIZE = 10
+
   const fetchNotifications = async () => {
     try {
       setIsLoadingNotifs(true)
       const headers: Record<string, string> = { Accept: 'application/json' }
       if (token) headers['Authorization'] = `Bearer ${token}`
-      const res = await fetch(`${API_BASE_URL}/api/admin/notifications?page=1&pageSize=10&_ts=${Date.now()}`, { headers, cache: 'no-store' })
+      const res = await fetch(`${API_BASE_URL}/api/admin/notifications?page=1&pageSize=${HEADER_NOTIFICATIONS_PAGE_SIZE}&_ts=${Date.now()}`, { headers, cache: 'no-store' })
       if (!res.ok) throw new Error('Error cargando notificaciones')
       const data = await res.json()
       const items = Array.isArray(data?.items) ? data.items : []
@@ -364,20 +367,48 @@ const Header: React.FC = () => {
                       {!isLoadingNotifs && notifications.length === 0 && (
                         <div className="notify-empty">Sin notificaciones</div>
                       )}
-                      {notifications.map((n) => (
-                        <div key={n._id} className={`notify-item ${n.status === 'unread' ? 'unread' : ''}`}>
-                          <div className="notify-main">
-                            <div className="notify-title">{n.message || `${(n.type || 'order').toUpperCase()} ${n.order_id || ''}`}</div>
-                            <div className="notify-meta">
-                              {n.total ? <span>${n.total} {n.currency || ''}</span> : null}
-                              {n.customer_email ? <span> · {n.customer_email}</span> : null}
+                      {notifications.map((n) => {
+                        const segments = parseNotificationSegments(n?.message)
+
+                        return (
+                          <div key={n._id} className={`notify-item ${n.status === 'unread' ? 'unread' : ''}`}>
+                            <div className="notify-main">
+                              <div className="notify-body">
+                                {segments.length === 0 ? (
+                                  <div className="notify-line primary">
+                                    <span className="notify-value">{n.message || 'Notificación'}</span>
+                                  </div>
+                                ) : (
+                                  segments.map((segment, idx) => (
+                                    <div key={idx} className={`notify-line ${segment.isPrimary ? 'primary' : ''}`}>
+                                      {segment.label ? (
+                                        <>
+                                          <span className="notify-label">{segment.label}</span>
+                                          <span className="notify-value">{segment.value}</span>
+                                        </>
+                                      ) : (
+                                        <span className="notify-value">{segment.value}</span>
+                                      )}
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                              <div className="notify-meta">
+                                {n.type && (
+                                  <span className="notify-chip">
+                                    {(n.type || '').toString().toUpperCase()}
+                                  </span>
+                                )}
+                                {n.total ? <span className="notify-amount">${n.total} {n.currency || ''}</span> : null}
+                                {n.customer_email ? <span className="notify-email">{n.customer_email}</span> : null}
+                              </div>
                             </div>
+                            {n.status === 'unread' && (
+                              <button className="notify-read" onClick={() => markNotificationRead(n._id)}>Marcar leída</button>
+                            )}
                           </div>
-                          {n.status === 'unread' && (
-                            <button className="notify-read" onClick={() => markNotificationRead(n._id)}>Marcar leída</button>
-                          )}
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                     <div className="notify-footer" style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
                       <button className="notify-refresh" onClick={fetchNotifications}>Actualizar</button>
