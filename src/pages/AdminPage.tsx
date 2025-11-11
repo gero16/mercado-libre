@@ -41,6 +41,7 @@ interface AdminItem {
   priceInvalidReason?: string | null;
   priceInvalidAt?: string | Date | null;
   lastValidPrice?: number;
+  priceOverride?: ProductoML['price_override'];
 }
 
 // Optimiza URLs de imágenes de ML a la variante V (más liviana)
@@ -207,7 +208,7 @@ const AdminPage: React.FC = () => {
   const [resolvingProductId, setResolvingProductId] = useState<string | null>(null)
   
 
-  const SERVER_FIELDS = 'ml_id,title,price,last_valid_price,price_invalid,price_invalid_reason,price_invalid_at,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,catalog_product_id,duplicate_of_ml_id,es_catalogo,sold_quantity,health,listing_type_id,permalink,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
+  const SERVER_FIELDS = 'ml_id,title,price,last_valid_price,price_invalid,price_invalid_reason,price_invalid_at,price_override,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,catalog_product_id,duplicate_of_ml_id,es_catalogo,sold_quantity,health,listing_type_id,permalink,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
 
   // Normalización básica para búsqueda insensible a acentos/espacios
   const normalize = (s: string) => {
@@ -279,7 +280,8 @@ const AdminPage: React.FC = () => {
       priceInvalid: (producto as any).price_invalid === true,
       priceInvalidReason: (producto as any).price_invalid_reason ?? null,
       priceInvalidAt: (producto as any).price_invalid_at || null,
-      lastValidPrice: (producto as any).last_valid_price
+      lastValidPrice: (producto as any).last_valid_price,
+      priceOverride: (producto as any).price_override
     })
 
     if (Array.isArray(producto.variantes) && producto.variantes.length > 0 && typeof (producto.variantes[0] as any) === 'object' && (producto.variantes[0] as any).stock !== undefined) {
@@ -320,7 +322,8 @@ const AdminPage: React.FC = () => {
           priceInvalid: (producto as any).price_invalid === true,
           priceInvalidReason: (producto as any).price_invalid_reason ?? null,
           priceInvalidAt: (producto as any).price_invalid_at || null,
-          lastValidPrice: (producto as any).last_valid_price
+          lastValidPrice: (producto as any).last_valid_price,
+          priceOverride: (producto as any).price_override
         })
       })
     }
@@ -738,6 +741,9 @@ const AdminPage: React.FC = () => {
 
   // 🆕 Selección múltiple de productos para destacados
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set())
+  const [priceOverrideDrafts, setPriceOverrideDrafts] = useState<Record<string, { value: string; reason: string }>>({})
+  const [savingOverrideProductId, setSavingOverrideProductId] = useState<string | null>(null)
+  const [releasingOverrideProductId, setReleasingOverrideProductId] = useState<string | null>(null)
 
   const refreshProductFromML = async (item: AdminItem) => {
     try {
@@ -777,6 +783,124 @@ const AdminPage: React.FC = () => {
       alert(error?.message || 'Error al re-sincronizar el producto.')
     } finally {
       setRefreshingProductId(null)
+    }
+  }
+
+  const updateDraftField = (productId: string, field: 'value' | 'reason', value: string, defaults?: { value: string; reason: string }) => {
+    setPriceOverrideDrafts(prev => {
+      const base = prev[productId] ?? defaults ?? { value: '', reason: '' }
+      const next = { ...base, [field]: value }
+      return { ...prev, [productId]: next }
+    })
+  }
+
+  const clearDraft = (productId: string) => {
+    setPriceOverrideDrafts(prev => {
+      if (!prev[productId]) return prev
+      const next = { ...prev }
+      delete next[productId]
+      return next
+    })
+  }
+
+  const applyManualPriceOverride = async (item: AdminItem) => {
+    const productoPadre = item.productoPadre as any
+    const overrideInfo = productoPadre?.price_override
+    const defaults = {
+      value: typeof overrideInfo?.value === 'number' && overrideInfo.value > 0
+        ? String(overrideInfo.value)
+        : (item.price ? String(item.price) : ''),
+      reason: overrideInfo?.reason ?? ''
+    }
+    const draft = priceOverrideDrafts[item.productId] ?? defaults
+    const parsedValue = Number((draft.value || '').toString().replace(',', '.'))
+    if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+      alert('Ingresá un precio manual mayor a 0')
+      return
+    }
+    try {
+      setSavingOverrideProductId(item.productId)
+      const token = AuthService.getToken()
+      if (!token) {
+        alert('Necesitas iniciar sesión como administrador para modificar precios manualmente.')
+        return
+      }
+      const response = await fetch(`${API_BASE_URL}/ml/admin/productos/${item.productId}/price-override`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          active: true,
+          value: parsedValue,
+          reason: draft.reason || undefined
+        })
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo aplicar el precio manual')
+      }
+      if (data?.producto) {
+        setAdminItems(prev => {
+          const filtered = prev.filter(i => i.productId !== data.producto.ml_id)
+          const rebuilt = buildItemsFromProduct(data.producto as ProductoML)
+          return [...filtered, ...rebuilt]
+        })
+        setPriceOverrideDrafts(prev => ({
+          ...prev,
+          [item.productId]: {
+            value: String(data.producto.price_override?.value ?? data.producto.price ?? ''),
+            reason: data.producto.price_override?.reason ?? ''
+          }
+        }))
+      }
+      alert('Precio manual aplicado correctamente.')
+    } catch (error: any) {
+      console.error('[Admin] Error aplicando override', error)
+      alert(error?.message || 'Error aplicando el override de precio. Intenta nuevamente.')
+    } finally {
+      setSavingOverrideProductId(null)
+    }
+  }
+
+  const releaseManualPriceOverride = async (item: AdminItem, syncWithMl?: boolean) => {
+    try {
+      setReleasingOverrideProductId(item.productId)
+      const token = AuthService.getToken()
+      if (!token) {
+        alert('Necesitas iniciar sesión como administrador para modificar precios manualmente.')
+        return
+      }
+      const response = await fetch(`${API_BASE_URL}/ml/admin/productos/${item.productId}/price-override`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          active: false,
+          syncWithMl: !!syncWithMl
+        })
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(data?.error || 'No se pudo liberar el override de precio')
+      }
+      if (data?.producto) {
+        setAdminItems(prev => {
+          const filtered = prev.filter(i => i.productId !== data.producto.ml_id)
+          const rebuilt = buildItemsFromProduct(data.producto as ProductoML)
+          return [...filtered, ...rebuilt]
+        })
+        clearDraft(item.productId)
+      }
+      alert(syncWithMl ? 'Override eliminado y precio actualizado con el último valor de ML.' : 'Override eliminado. El producto volverá a sincronizarse con ML.')
+    } catch (error: any) {
+      console.error('[Admin] Error liberando override', error)
+      alert(error?.message || 'Error liberando el override de precio. Intenta nuevamente.')
+    } finally {
+      setReleasingOverrideProductId(null)
     }
   }
 
@@ -1508,6 +1632,18 @@ const AdminPage: React.FC = () => {
                   : item.lastValidPrice;
             const productoPadre = item.productoPadre as any;
             const permalink = buildMLPermalink(productoPadre, item);
+            const overrideInfo = productoPadre?.price_override;
+            const overrideDefaults = {
+              value: typeof overrideInfo?.value === 'number' && overrideInfo.value > 0
+                ? String(overrideInfo.value)
+                : (Number.isFinite(item.price) ? String(item.price) : ''),
+              reason: overrideInfo?.reason ?? ''
+            };
+            const draft = priceOverrideDrafts[item.productId] ?? overrideDefaults;
+            const overrideActive = overrideInfo?.active === true;
+            const overrideUpdatedAt = overrideInfo?.updated_at ? formatDateTime(overrideInfo.updated_at as any) : '';
+            const mlSnapshot = typeof overrideInfo?.ml_price_last === 'number' ? overrideInfo.ml_price_last : null;
+            const mlSnapshotAt = overrideInfo?.ml_price_last_at ? formatDateTime(overrideInfo.ml_price_last_at as any) : '';
 
                 return (
               <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
@@ -1696,6 +1832,146 @@ const AdminPage: React.FC = () => {
                     )}
                   </div>
                   
+                  {!item.esVariante && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                      background: overrideActive ? 'rgba(251, 191, 36, 0.08)' : '#f9fafb',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontWeight: 600, color: '#111827' }}>
+                          Precio manual: {overrideActive ? 'OVERRIDE ACTIVO' : 'sin override'}
+                        </span>
+                        {overrideUpdatedAt && (
+                          <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                            Última edición: {overrideUpdatedAt}
+                          </span>
+                        )}
+                      </div>
+                      {overrideInfo?.updated_by && (
+                        <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                          Editado por: {overrideInfo.updated_by}
+                        </span>
+                      )}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '10px' }}>
+                        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.85rem', color: '#374151' }}>
+                          Valor manual (US$)
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={draft.value}
+                            onChange={(e) => updateDraftField(item.productId, 'value', e.target.value, overrideDefaults)}
+                            placeholder="Ej: 99.90"
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #d1d5db',
+                              fontSize: '0.9rem'
+                            }}
+                          />
+                        </label>
+                        <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.85rem', color: '#374151' }}>
+                          Motivo / nota interna
+                          <input
+                            type="text"
+                            value={draft.reason}
+                            onChange={(e) => updateDraftField(item.productId, 'reason', e.target.value, overrideDefaults)}
+                            placeholder="Opcional"
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #d1d5db',
+                              fontSize: '0.9rem'
+                            }}
+                          />
+                        </label>
+                      </div>
+                      {mlSnapshot !== null && (
+                        <div style={{ fontSize: '0.8rem', color: '#6b7280', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span>Último precio detectado desde Mercado Libre: US$ {mlSnapshot.toFixed(2)}</span>
+                          {mlSnapshotAt && <span>Fecha captura ML: {mlSnapshotAt}</span>}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => applyManualPriceOverride(item)}
+                          disabled={savingOverrideProductId === item.productId}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid #2563eb',
+                            background: '#2563eb',
+                            color: 'white',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            cursor: savingOverrideProductId === item.productId ? 'wait' : 'pointer'
+                          }}
+                        >
+                          {savingOverrideProductId === item.productId ? 'Guardando...' : (overrideActive ? 'Actualizar override' : 'Aplicar override')}
+                        </button>
+                        {overrideActive && (
+                          <>
+                            <button
+                              onClick={() => releaseManualPriceOverride(item, false)}
+                              disabled={releasingOverrideProductId === item.productId}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: '1px solid #d1d5db',
+                                background: '#ffffff',
+                                color: '#374151',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                cursor: releasingOverrideProductId === item.productId ? 'wait' : 'pointer'
+                              }}
+                            >
+                              {releasingOverrideProductId === item.productId ? 'Liberando...' : 'Liberar override'}
+                            </button>
+                            {mlSnapshot !== null && (
+                              <button
+                                onClick={() => releaseManualPriceOverride(item, true)}
+                                disabled={releasingOverrideProductId === item.productId}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #059669',
+                                  background: '#059669',
+                                  color: 'white',
+                                  fontSize: '0.85rem',
+                                  fontWeight: 600,
+                                  cursor: releasingOverrideProductId === item.productId ? 'wait' : 'pointer'
+                                }}
+                              >
+                                {releasingOverrideProductId === item.productId ? 'Liberando...' : `Liberar y usar ML (${mlSnapshot.toFixed(2)})`}
+                              </button>
+                            )}
+                          </>
+                        )}
+                        {!overrideActive && Object.prototype.hasOwnProperty.call(priceOverrideDrafts, item.productId) && (
+                          <button
+                            onClick={() => clearDraft(item.productId)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              border: '1px solid #e5e7eb',
+                              background: '#ffffff',
+                              color: '#6b7280',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Limpiar campos
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                     <div className="product-details">
                     <div className="detail-row">
                       <span className="detail-label">Precio:</span>
