@@ -58,8 +58,10 @@ const getOptimizedImageUrl = (url?: string) => {
 const formatInvalidReason = (reason?: string | null) => {
   if (!reason) return 'Valor no válido detectado';
   switch (reason) {
-    case 'non_positive':
-      return 'Precio recibido es menor o igual a cero';
+    case 'price_zero':
+      return 'Precio recibido es 0';
+    case 'price_negative':
+      return 'Precio recibido es negativo';
     case 'not_a_number':
       return 'El precio recibido no es numérico';
     case 'not_finite':
