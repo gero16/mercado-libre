@@ -55,6 +55,24 @@ const getOptimizedImageUrl = (url?: string) => {
   return url
 }
 
+const buildMLPermalink = (producto: any, item: AdminItem): string | null => {
+  const explicit = typeof producto?.permalink === 'string' ? producto.permalink.trim() : ''
+  if (explicit) return explicit
+
+  const rawId =
+    (typeof producto?.ml_id === 'string' ? producto.ml_id : '') ||
+    (typeof item.productId === 'string' ? item.productId : '') ||
+    (typeof (producto?.mlId) === 'string' ? producto.mlId : '')
+
+  if (!rawId) return null
+  const normalized = rawId.includes('-')
+    ? rawId
+    : rawId.replace(/^([A-Z]{3})(\d+)/, '$1-$2')
+
+  if (!normalized) return null
+  return `https://articulo.mercadolibre.com.uy/${normalized}`
+}
+
 const formatInvalidReason = (reason?: string | null) => {
   if (!reason) return 'Valor no válido detectado';
   switch (reason) {
@@ -1488,6 +1506,8 @@ const AdminPage: React.FC = () => {
                 const lastValidPrice = productInvalid
                   ? (typeof item.lastValidPrice === 'number' ? item.lastValidPrice : (item.productoPadre as any)?.last_valid_price)
                   : item.lastValidPrice;
+            const productoPadre = item.productoPadre as any;
+            const permalink = buildMLPermalink(productoPadre, item);
 
                 return (
               <div key={item.id} className={`admin-product-item ${item.es_entrega_larga ? 'slow-delivery-item' : ''}`}>
@@ -1525,6 +1545,37 @@ const AdminPage: React.FC = () => {
                     <h3 className={`product-title ${!item.esVariante && item.tieneVariantes ? 'product-base-title' : ''}`}>
                       {item.title} 
                     </h3>
+                    {permalink && (
+                      <div style={{
+                        marginTop: '6px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '8px'
+                      }}>
+                        <a
+                          href={permalink}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid #f2c037',
+                            background: 'linear-gradient(135deg, #ffe600 0%, #ffcc00 100%)',
+                            color: '#1f2933',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            textDecoration: 'none',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                          }}
+                        >
+                          <span role="img" aria-label="Mercado Libre">🛒</span>
+                          Ver publicación en ML
+                        </a>
+                      </div>
+                    )}
                     <div className="product-badges">
                       {item.esVariante ? (
                         <span className="badge badge-variant">Variante</span>
