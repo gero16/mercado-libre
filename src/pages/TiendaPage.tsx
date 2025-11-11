@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { ProductoML, Variante } from '../types'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import ProductSkeleton from '../components/ProductSkeleton'
 import Pagination from '../components/Pagination'
 import '../styles/categoryFilter.css'
@@ -347,16 +348,96 @@ function dedupeItemsByCatalog(items: ItemTienda[]): ItemTienda[] {
   return [...picked, ...others]
 }
 
-const filterVisibleItems = (items: ItemTienda[]) =>
+const filterVisibleItems = (items: ItemTienda[], allowInvalidPrices = false) =>
   items.filter(item => {
     const productInvalid = (item.productoPadre as any)?.price_invalid === true
-    return typeof item.price === 'number' && item.price > 0 && !productInvalid
+    if (!allowInvalidPrices && productInvalid) return false
+    return typeof item.price === 'number' && item.price > 0
   })
+
+const normalizeText = (value: string | number | null | undefined): string => {
+  const str = String(value ?? '')
+  if (!str) return ''
+  try {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  } catch {
+    return str.toLowerCase()
+  }
+}
+
+const normalizeIdentifier = (value: string | number | null | undefined): string => {
+  return normalizeText(value).replace(/[^a-z0-9]/g, '')
+}
+
+const matchesSearchQuery = (item: ItemTienda, rawQuery: string): boolean => {
+  const normalizedQuery = normalizeText(rawQuery)
+  if (!normalizedQuery) return true
+  const identifierQuery = normalizeIdentifier(rawQuery)
+
+  if (normalizeText(item.title).includes(normalizedQuery)) {
+    return true
+  }
+
+  const parent: any = item.productoPadre || {}
+  const mlIdSource = item.ml_id || parent.ml_id || ''
+  if (mlIdSource) {
+    const mlIdNormalized = normalizeText(mlIdSource)
+    const mlIdIdentifier = normalizeIdentifier(mlIdSource)
+    if (
+      mlIdNormalized.includes(normalizedQuery) ||
+      (identifierQuery && mlIdIdentifier.includes(identifierQuery))
+    ) {
+      return true
+    }
+  }
+
+  const itemIdNormalized = normalizeText(item.id)
+  const itemIdIdentifier = normalizeIdentifier(item.id)
+  if (
+    itemIdNormalized.includes(normalizedQuery) ||
+    (identifierQuery && itemIdIdentifier.includes(identifierQuery))
+  ) {
+    return true
+  }
+
+  const variantId = (item.variante as any)?.id || (item.variante as any)?.ml_id || ''
+  if (variantId) {
+    const variantNormalized = normalizeText(variantId)
+    const variantIdentifier = normalizeIdentifier(variantId)
+    if (
+      variantNormalized.includes(normalizedQuery) ||
+      (identifierQuery && variantIdentifier.includes(identifierQuery))
+    ) {
+      return true
+    }
+  }
+
+  const sellerSku = parent?.seller_sku
+  if (sellerSku && normalizeText(sellerSku).includes(normalizedQuery)) {
+    return true
+  }
+
+  const catalogId = parent?.catalog_product_id
+  if (catalogId) {
+    const catalogNormalized = normalizeText(catalogId)
+    const catalogIdentifier = normalizeIdentifier(catalogId)
+    if (
+      catalogNormalized.includes(normalizedQuery) ||
+      (identifierQuery && catalogIdentifier.includes(identifierQuery))
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
 
 const TiendaMLPage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
+  const { isAuthenticated, user } = useAuth() as any
+  const allowInvalidPrices = Boolean(isAuthenticated && user?.rol === 'admin')
   
   // Obtener término de búsqueda de la URL si existe
   const urlSearchQuery = searchParams.get('search') || ''
@@ -829,7 +910,7 @@ useEffect(() => {
         status: item.productoPadre?.status
       })))
       
-      const itemsVisibles = filterVisibleItems(items)
+      const itemsVisibles = filterVisibleItems(items, allowInvalidPrices)
       const itemsUnicos = dedupeItemsByCatalog(itemsVisibles)
       setItemsTienda(itemsUnicos)
       setFilteredItems(itemsUnicos)
@@ -976,7 +1057,7 @@ useEffect(() => {
           })
           
           // Deduplicar mezclando con los ya presentes
-          const merged = dedupeItemsByCatalog(filterVisibleItems([...(itemsTienda || []), ...remainingItems]))
+          const merged = dedupeItemsByCatalog(filterVisibleItems([...(itemsTienda || []), ...remainingItems], allowInvalidPrices))
           if (mounted) {
             setItemsTienda(merged)
             setFilteredItems(merged)
@@ -993,25 +1074,16 @@ useEffect(() => {
     }
     loadProducts()
     return () => { mounted = false }
-  }, [])
+  }, [allowInvalidPrices])
 
   // Filtrar items y aplicar paginación (modo local)
   useEffect(() => {
     if (isServerSearch) return
     let filtered = itemsTienda
 
-    const normalize = (s: string) => s
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-
     // Filtro por búsqueda de texto
     if (searchQuery.trim() !== '') {
-      const query = normalize(searchQuery)
-      filtered = filtered.filter(item => {
-        const titleNorm = normalize(item.title)
-        return titleNorm.includes(query)
-      })
+      filtered = filtered.filter(item => matchesSearchQuery(item, searchQuery))
     }
 
     // Filtro por categoría
@@ -1123,7 +1195,7 @@ useEffect(() => {
                 }
               }
             })
-            const itemsVisibles = filterVisibleItems(items)
+            const itemsVisibles = filterVisibleItems(items, allowInvalidPrices)
             const itemsUnicos = dedupeItemsByCatalog(itemsVisibles)
             setItemsTienda(itemsUnicos)
             // Aplicar filtros locales activos
@@ -1153,7 +1225,8 @@ useEffect(() => {
       // Si hay texto de búsqueda, ignorar categoría (buscar globalmente)
       const { items, total } = await fetchServerSearch(1, itemsPerPage, q, q ? undefined : categoryFilter)
       // Aplicar filtros adicionales sobre resultados del servidor si están activos
-      let filtered = filterVisibleItems(items)
+      let filtered = filterVisibleItems(items, allowInvalidPrices)
+      if (q) filtered = filtered.filter(item => matchesSearchQuery(item, q))
       if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
       filtered = filtered.filter(i => i.price >= priceFilter)
       if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
@@ -1168,7 +1241,7 @@ useEffect(() => {
       }
     }, 300)
     return () => { cancelled = true; clearTimeout(handle); setIsFetchingResults(false) }
-  }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter, itemsTienda])
+  }, [searchQuery, itemsPerPage, categoryFilter, priceFilter, stockFilter, pedidoFilter, itemsTienda, allowInvalidPrices])
 
   const handleProductClick = (item: ItemTienda) => {
     // Guardar scroll y página para restaurar al volver
@@ -1278,7 +1351,8 @@ useEffect(() => {
       console.log('⏳ Paginando (server)...')
       const q = searchQuery.trim()
       fetchServerSearch(page, itemsPerPage, q, q ? undefined : categoryFilter).then(({ items, total }) => {
-        let filtered = items
+        let filtered = filterVisibleItems(items, allowInvalidPrices)
+        if (q) filtered = filtered.filter(item => matchesSearchQuery(item, q))
         if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
         filtered = filtered.filter(i => i.price >= priceFilter)
         if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
@@ -1303,7 +1377,8 @@ useEffect(() => {
       console.log('⏳ Cambiando items por página (server)...')
       const q = searchQuery.trim()
       fetchServerSearch(1, items, q, q ? undefined : categoryFilter).then(({ items: list, total }) => {
-        let filtered = list
+        let filtered = filterVisibleItems(list, allowInvalidPrices)
+        if (q) filtered = filtered.filter(item => matchesSearchQuery(item, q))
         if (q === '' && categoryFilter !== 'mostrar-todo') filtered = filtered.filter(i => i.categoria === categoryFilter)
         filtered = filtered.filter(i => i.price >= priceFilter)
         if (stockFilter) filtered = filtered.filter(i => i.stock > 0 && !i.isPaused)
