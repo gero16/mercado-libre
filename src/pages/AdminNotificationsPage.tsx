@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { API_BASE_URL } from '../config/api'
-import { parseNotificationSegments } from '../utils/notifications'
+import { parseNotificationSegments, NotificationSegment } from '../utils/notifications'
 
 const SUPER_ADMIN_EMAIL = 'geronicola1696@gmail.com'
 
@@ -351,9 +351,9 @@ const AdminNotificationsPage: React.FC = () => {
             {/* Items */}
             {filteredItems.map((n, idx) => {
               const messageSegments = parseNotificationSegments(n?.message)
-              const segmentsToDisplay = messageSegments.length
+              const segmentsToDisplay: NotificationSegment[] = messageSegments.length
                 ? messageSegments
-                : [{ value: n?.message || 'Notificación', isPrimary: true }]
+                : [{ value: n?.message || 'Notificación', isPrimary: true, label: undefined }]
 
               return (
                 <div
