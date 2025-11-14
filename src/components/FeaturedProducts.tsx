@@ -179,12 +179,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
               const porcentajeDescuento = showDescuentoTienda ? product.descuento!.porcentaje : undefined
               // Descuento de MercadoLibre
               const precioOriginalML = product.descuento_ml?.original_price
-              const baseShowDescuentoML = typeof precioOriginalML === 'number' && precioOriginalML > product.price
-              const porcentajeDescuentoMLCalc = baseShowDescuentoML
-                ? Math.round(((precioOriginalML - product.price) / precioOriginalML) * 100)
-                : undefined
-              const showDescuentoML = baseShowDescuentoML && typeof porcentajeDescuentoMLCalc === 'number' && porcentajeDescuentoMLCalc >= 1
-              const porcentajeDescuentoML = showDescuentoML ? porcentajeDescuentoMLCalc : undefined
+              const showDescuentoML = typeof precioOriginalML === 'number' && precioOriginalML > product.price
+              const porcentajeDescuentoTienda = showDescuentoTienda ? product.descuento!.porcentaje : undefined
               
               return (
                 <div 
@@ -201,21 +197,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                       loading="lazy"
                       decoding="async"
                     />
-                    {(showDescuentoTienda || showDescuentoML) ? (
-                      <div className="product-badge" style={{
-                        background: showDescuentoML
-                          ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)'
-                          : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
-                        color: showDescuentoML ? '#000' : 'white',
-                        boxShadow: showDescuentoML
-                          ? '0 4px 15px rgba(255, 230, 0, 0.4)'
-                          : '0 4px 15px rgba(211, 47, 47, 0.4)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        {showDescuentoML && <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>ML</span>}
-                        -{showDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
+                    {showDescuentoTienda && typeof porcentajeDescuentoTienda === 'number' ? (
+                      <div className="product-badge">
+                        -{porcentajeDescuentoTienda}%
                       </div>
                     ) : (
                       <div className="product-badge">

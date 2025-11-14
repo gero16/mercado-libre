@@ -143,12 +143,17 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
               
               // Descuentos
               const tieneDescuento = product.descuento?.activo
-              const porcentajeDescuento = product.descuento?.porcentaje || 0
+              const porcentajeDescuento = product.descuento?.porcentaje
+              const mostrarBadgeDescuento = Boolean(
+                tieneDescuento &&
+                typeof porcentajeDescuento === 'number' &&
+                porcentajeDescuento > 0
+              )
+              const porcentajeDescuentoSeguro = mostrarBadgeDescuento
+                ? Number(porcentajeDescuento)
+                : undefined
               const tieneDescuentoML = !!product.descuento_ml?.original_price
               const precioOriginalML = product.descuento_ml?.original_price
-              const porcentajeDescuentoML = precioOriginalML 
-                ? Math.round(((precioOriginalML - product.price) / precioOriginalML) * 100)
-                : 0
               
               return (
                 <div 
@@ -165,29 +170,24 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
                   </div>
                   
                   {/* Badge de descuento */}
-                  {(tieneDescuento && porcentajeDescuento || tieneDescuentoML) && (
+                  {mostrarBadgeDescuento && porcentajeDescuentoSeguro !== undefined && (
                     <div style={{
                       position: 'absolute',
                       top: '10px',
                       right: '10px',
-                      background: tieneDescuentoML 
-                        ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)' // Amarillo de MercadoLibre
-                        : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)', // Rojo para descuentos web
-                      color: tieneDescuentoML ? '#000' : 'white',
+                      background: 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
+                      color: 'white',
                       padding: '6px 12px',
                       borderRadius: '20px',
                       fontWeight: '700',
                       fontSize: '0.75rem',
-                      boxShadow: tieneDescuentoML 
-                        ? '0 3px 10px rgba(255, 230, 0, 0.4)'
-                        : '0 3px 10px rgba(211, 47, 47, 0.4)',
+                      boxShadow: '0 3px 10px rgba(211, 47, 47, 0.4)',
                       zIndex: 3,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px'
                     }}>
-                      {tieneDescuentoML && <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>ML</span>}
-                      -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
+                      -{porcentajeDescuentoSeguro}%
                     </div>
                   )}
                   

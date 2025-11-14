@@ -32,6 +32,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, showAddButt
   const tieneDescuento = product.descuento?.activo
   const precioOriginal = product.descuento?.precio_original
   const porcentajeDescuento = product.descuento?.porcentaje
+  const mostrarBadgeDescuento = Boolean(
+    tieneDescuento &&
+    typeof porcentajeDescuento === 'number' &&
+    porcentajeDescuento > 0
+  )
+  const porcentajeDescuentoSeguro = mostrarBadgeDescuento
+    ? Number(porcentajeDescuento)
+    : undefined
   const tieneDescuentoML = !!product.descuento_ml?.original_price
   const precioOriginalML = product.descuento_ml?.original_price
   const porcentajeDescuentoML = precioOriginalML
@@ -52,20 +60,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, showAddButt
           loading="lazy"
           decoding="async"
         />
-        {(tieneDescuento && porcentajeDescuento) || tieneDescuentoML ? (
-          <div
-            className="product-badge"
-            style={{
-              background: tieneDescuentoML
-                ? 'linear-gradient(135deg, #FFE600 0%, #FFC300 100%)'
-                : 'linear-gradient(135deg, #d32f2f 0%, #e53935 100%)',
-              color: tieneDescuentoML ? '#000' : 'white',
-            }}
-          >
-            {tieneDescuentoML && (
-              <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>ML</span>
-            )}
-            -{tieneDescuentoML ? porcentajeDescuentoML : porcentajeDescuento}%
+        {mostrarBadgeDescuento && porcentajeDescuentoSeguro !== undefined ? (
+          <div className="product-badge">
+            -{porcentajeDescuentoSeguro}%
           </div>
         ) : (
           <div className="product-badge">Oferta</div>
