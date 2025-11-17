@@ -152,8 +152,6 @@ const BestSellingProducts: React.FC<BestSellingProductsProps> = ({ limit = 12 })
               const porcentajeDescuentoSeguro = mostrarBadgeDescuento
                 ? Number(porcentajeDescuento)
                 : undefined
-              const tieneDescuentoML = !!product.descuento_ml?.original_price
-              const precioOriginalML = product.descuento_ml?.original_price
               
               return (
                 <div 

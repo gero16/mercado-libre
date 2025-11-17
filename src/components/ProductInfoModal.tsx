@@ -4,11 +4,10 @@ import '../css/product-info-modal.css'
 
 interface ProductInfoModalProps {
   productId: string
-  productTitle?: string
   onClose: () => void
 }
 
-const ProductInfoModal: React.FC<ProductInfoModalProps> = ({ productId, productTitle, onClose }) => {
+const ProductInfoModal: React.FC<ProductInfoModalProps> = ({ productId, onClose }) => {
   const [info, setInfo] = useState<ProductInfoResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

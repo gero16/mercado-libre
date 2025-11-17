@@ -2303,7 +2303,6 @@ const AdminPage: React.FC = () => {
       {productInfoModalOpen && (
         <ProductInfoModal
           productId={productInfoModalOpen}
-          productTitle={adminItems.find(item => item.productId === productInfoModalOpen)?.title}
           onClose={() => setProductInfoModalOpen(null)}
         />
       )}

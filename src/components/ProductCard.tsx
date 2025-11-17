@@ -42,9 +42,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, showAddButt
     : undefined
   const tieneDescuentoML = !!product.descuento_ml?.original_price
   const precioOriginalML = product.descuento_ml?.original_price
-  const porcentajeDescuentoML = precioOriginalML
-    ? Math.round(((precioOriginalML - product.price) / precioOriginalML) * 100)
-    : 0
 
   return (
     <div

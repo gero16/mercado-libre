@@ -176,7 +176,6 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ limit = 12 }) => {
                 typeof product.descuento?.precio_original === 'number' && product.descuento.precio_original > product.price
               )
               const precioOriginal = showDescuentoTienda ? product.descuento!.precio_original : undefined
-              const porcentajeDescuento = showDescuentoTienda ? product.descuento!.porcentaje : undefined
               // Descuento de MercadoLibre
               const precioOriginalML = product.descuento_ml?.original_price
               const showDescuentoML = typeof precioOriginalML === 'number' && precioOriginalML > product.price
