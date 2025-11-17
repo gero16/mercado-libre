@@ -7,6 +7,7 @@ import { AuthService } from '../services/auth'
 import { productsCache } from '../services/productsCache'
 import { API_BASE_URL } from '../config/api'
 import { fetchCensus, fetchDuplicates, type CensusResponse } from '../services/diagnostics'
+import ProductInfoModal from '../components/ProductInfoModal'
 import '../css/admin-duplicates.css'
 
 // Interfaz para items de administración
@@ -206,6 +207,7 @@ const AdminPage: React.FC = () => {
   const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null)
   const [refreshingProductId, setRefreshingProductId] = useState<string | null>(null)
   const [resolvingProductId, setResolvingProductId] = useState<string | null>(null)
+  const [productInfoModalOpen, setProductInfoModalOpen] = useState<string | null>(null) // ml_id del producto a mostrar
   
 
   const SERVER_FIELDS = 'ml_id,title,price,last_valid_price,price_invalid,price_invalid_reason,price_invalid_at,price_override,available_quantity,status,images,main_image,category_id,shipping,tipo_venta,dropshipping.dias_preparacion,dropshipping.dias_envio_estimado,dias_preparacion,dias_envio_estimado,proveedor,pais_origen,destacado,seller_sku,catalog_product_id,duplicate_of_ml_id,es_catalogo,sold_quantity,health,listing_type_id,permalink,variantes,variantes.tipo_venta,variantes.dropshipping.dias_preparacion,variantes.dropshipping.dias_envio_estimado'
@@ -2061,8 +2063,38 @@ const AdminPage: React.FC = () => {
                       </>
                     )}
                   </div>
+                  
+                  {/* Botón para ver información completa */}
+                  <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    <button
+                      onClick={() => setProductInfoModalOpen(item.productId)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        border: '1px solid #667eea',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: '#fff',
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'transform 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)'
+                      }}
+                    >
+                      <span>📊</span>
+                      Ver Info Completa (BD + ML)
+                    </button>
+                    
                     {productInvalid && (
-                      <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      <>
                         <button
                           onClick={() => refreshProductFromML(item)}
                           disabled={refreshingProductId === item.productId}
@@ -2091,8 +2123,9 @@ const AdminPage: React.FC = () => {
                         >
                           {resolvingProductId === item.productId ? 'Aplicando...' : 'Marcar como revisado'}
                         </button>
-                      </div>
+                      </>
                     )}
+                  </div>
                 </div>
               
               </div>
@@ -2265,6 +2298,15 @@ const AdminPage: React.FC = () => {
           </div>
         )}
       </div>
+      
+      {/* Modal de información del producto */}
+      {productInfoModalOpen && (
+        <ProductInfoModal
+          productId={productInfoModalOpen}
+          productTitle={adminItems.find(item => item.productId === productInfoModalOpen)?.title}
+          onClose={() => setProductInfoModalOpen(null)}
+        />
+      )}
     </main>
   )
 }
