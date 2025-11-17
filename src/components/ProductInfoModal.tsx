@@ -112,141 +112,120 @@ const ProductInfoModal: React.FC<ProductInfoModalProps> = ({ productId, onClose 
                 </div>
               </div>
 
-              {/* Información de Base de Datos */}
-              <div className="product-info-section">
-                <h3>💾 Base de Datos</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">ID:</span>
-                    <span className="info-value">{info.producto_bd._id}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">ML ID:</span>
-                    <span className="info-value">{info.producto_bd.ml_id}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Título:</span>
-                    <span className="info-value">{info.producto_bd.title}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Precio:</span>
-                    <span className="info-value">US$ {info.producto_bd.price.toFixed(2)}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Stock:</span>
-                    <span className="info-value">{info.producto_bd.available_quantity}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Estado:</span>
-                    <span className="info-value">{info.producto_bd.status}</span>
-                  </div>
-                  {info.producto_bd.seller_sku && (
-                    <div className="info-item">
-                      <span className="info-label">SKU:</span>
-                      <span className="info-value">{info.producto_bd.seller_sku}</span>
-                    </div>
-                  )}
-                  {info.producto_bd.catalog_product_id && (
-                    <div className="info-item">
-                      <span className="info-label">Catálogo ID:</span>
-                      <span className="info-value">{info.producto_bd.catalog_product_id}</span>
-                    </div>
-                  )}
-                  {info.producto_bd.tipo_venta && (
-                    <div className="info-item">
-                      <span className="info-label">Tipo de Venta:</span>
-                      <span className="info-value">{info.producto_bd.tipo_venta}</span>
-                    </div>
-                  )}
-                  <div className="info-item">
-                    <span className="info-label">Última Actualización:</span>
-                    <span className="info-value">{formatDate(info.producto_bd.last_updated)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Información de MercadoLibre */}
-              {info.producto_ml ? (
+              {/* Contenedor de comparación lado a lado */}
+              <div className="comparison-container">
+                {/* Información de Base de Datos */}
                 <div className="product-info-section">
-                  <h3>🛍️ MercadoLibre</h3>
+                  <h3>💾 Base de Datos</h3>
                   <div className="info-grid">
                     <div className="info-item">
                       <span className="info-label">ML ID:</span>
-                      <span className="info-value">{info.producto_ml.ml_id}</span>
+                      <span className="info-value">{info.producto_bd.ml_id}</span>
                     </div>
                     <div className="info-item">
                       <span className="info-label">Título:</span>
-                      <span className="info-value">{info.producto_ml.title}</span>
+                      <span className="info-value">{info.producto_bd.title}</span>
                     </div>
                     <div className="info-item">
                       <span className="info-label">Precio:</span>
-                      <span className="info-value">US$ {info.producto_ml.price.toFixed(2)}</span>
+                      <span className="info-value">US$ {info.producto_bd.price.toFixed(2)}</span>
                     </div>
                     <div className="info-item">
                       <span className="info-label">Stock:</span>
-                      <span className="info-value">{info.producto_ml.available_quantity}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Vendidos:</span>
-                      <span className="info-value">{info.producto_ml.sold_quantity}</span>
+                      <span className="info-value">{info.producto_bd.available_quantity}</span>
                     </div>
                     <div className="info-item">
                       <span className="info-label">Estado:</span>
-                      <span className="info-value">{info.producto_ml.status}</span>
+                      <span className="info-value">{info.producto_bd.status}</span>
                     </div>
                     <div className="info-item">
-                      <span className="info-label">Condición:</span>
-                      <span className="info-value">{info.producto_ml.condition}</span>
+                      <span className="info-label">ID:</span>
+                      <span className="info-value">{info.producto_bd._id}</span>
                     </div>
-                    <div className="info-item">
-                      <span className="info-label">Health:</span>
-                      <span className="info-value">{info.producto_ml.health}</span>
-                    </div>
-                    {info.producto_ml.shipping && (
-                      <>
-                        <div className="info-item">
-                          <span className="info-label">Envío Gratis:</span>
-                          <span className="info-value">
-                            {info.producto_ml.shipping.free_shipping ? 'Sí' : 'No'}
-                          </span>
-                        </div>
-                        {info.producto_ml.shipping.logistic_type && (
-                          <div className="info-item">
-                            <span className="info-label">Tipo Logístico:</span>
-                            <span className="info-value">{info.producto_ml.shipping.logistic_type}</span>
-                          </div>
-                        )}
-                      </>
+                    {info.producto_bd.seller_sku && (
+                      <div className="info-item">
+                        <span className="info-label">SKU:</span>
+                        <span className="info-value">{info.producto_bd.seller_sku}</span>
+                      </div>
                     )}
-                    {info.producto_ml.permalink && (
-                      <div className="info-item full-width">
-                        <span className="info-label">Link:</span>
-                        <a 
-                          href={info.producto_ml.permalink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="info-link"
-                        >
-                          Ver en MercadoLibre
-                        </a>
+                    {info.producto_bd.catalog_product_id && (
+                      <div className="info-item">
+                        <span className="info-label">Catálogo ID:</span>
+                        <span className="info-value">{info.producto_bd.catalog_product_id}</span>
+                      </div>
+                    )}
+                    {info.producto_bd.tipo_venta && (
+                      <div className="info-item">
+                        <span className="info-label">Tipo de Venta:</span>
+                        <span className="info-value">{info.producto_bd.tipo_venta}</span>
                       </div>
                     )}
                     <div className="info-item">
-                      <span className="info-label">Creado:</span>
-                      <span className="info-value">{formatDate(info.producto_ml.date_created)}</span>
-                    </div>
-                    <div className="info-item">
-                      <span className="info-label">Actualizado:</span>
-                      <span className="info-value">{formatDate(info.producto_ml.last_updated)}</span>
+                      <span className="info-label">Última Actualización:</span>
+                      <span className="info-value">{formatDate(info.producto_bd.last_updated)}</span>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="product-info-section error">
-                  <h3>⚠️ Error obteniendo información de MercadoLibre</h3>
-                  <p>{info.error_ml || 'No se pudo conectar con MercadoLibre'}</p>
-                </div>
-              )}
+
+                {/* Información de MercadoLibre */}
+                {info.producto_ml ? (
+                  <div className="product-info-section">
+                    <h3>🛍️ MercadoLibre</h3>
+                    <div className="info-grid">
+                      <div className="info-item">
+                        <span className="info-label">ML ID:</span>
+                        <span className="info-value">{info.producto_ml.ml_id}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Título:</span>
+                        <span className="info-value">{info.producto_ml.title}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Precio:</span>
+                        <span className="info-value">US$ {info.producto_ml.price.toFixed(2)}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Stock:</span>
+                        <span className="info-value">{info.producto_ml.available_quantity}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Estado:</span>
+                        <span className="info-value">{info.producto_ml.status}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Vendidos:</span>
+                        <span className="info-value">{info.producto_ml.sold_quantity}</span>
+                      </div>
+                      {info.producto_ml.permalink && (
+                        <div className="info-item full-width">
+                          <span className="info-label">Link:</span>
+                          <a 
+                            href={info.producto_ml.permalink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="info-link"
+                          >
+                            Ver en MercadoLibre
+                          </a>
+                        </div>
+                      )}
+                      <div className="info-item">
+                        <span className="info-label">Creado:</span>
+                        <span className="info-value">{formatDate(info.producto_ml.date_created)}</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Actualizado:</span>
+                        <span className="info-value">{formatDate(info.producto_ml.last_updated)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="product-info-section error">
+                    <h3>⚠️ Error obteniendo información de MercadoLibre</h3>
+                    <p>{info.error_ml || 'No se pudo conectar con MercadoLibre'}</p>
+                  </div>
+                )}
+              </div>
 
               <div className="product-info-actions">
                 <button onClick={loadProductInfo} className="refresh-button">
