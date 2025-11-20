@@ -58,12 +58,20 @@ function mapMpStatusDetail(detail?: string, paymentStatus?: string) {
   // Si el pago está pendiente
   if (status === 'pending') {
     switch (code) {
+      case 'preference_created':
+        return { titulo: '⚠️ Preferencia creada (no es un pago real)', mensaje: 'Esta orden fue creada cuando el cliente fue redirigido a Mercado Pago. Aún no se ha realizado ningún pago. La orden se actualizará automáticamente cuando el cliente complete el pago.', accion: 'Esperar a que el cliente complete el pago en Mercado Pago.' };
       case 'pending_contingency':
-        return { titulo: 'Pago en revisión', mensaje: 'El pago está siendo revisado por Mercado Pago.', accion: 'Esperar confirmación.' };
+        return { titulo: 'Pago en revisión automática', mensaje: 'El pago está siendo revisado automáticamente por Mercado Pago. Esto es común en pagos en cuotas o montos altos.', accion: 'Esperar confirmación (generalmente se resuelve en minutos).' };
       case 'pending_review_manual':
-        return { titulo: 'Revisión manual', mensaje: 'El pago requiere revisión manual.', accion: 'Esperar confirmación.' };
+        return { titulo: 'Revisión manual requerida', mensaje: 'El pago requiere revisión manual por parte de Mercado Pago. Esto puede tomar más tiempo.', accion: 'Esperar confirmación (puede tardar horas o días).' };
+      case 'pending_waiting_payment':
+        return { titulo: 'Esperando confirmación de pago', mensaje: 'El pago fue procesado pero está esperando confirmación del banco o método de pago.', accion: 'Esperar confirmación del banco.' };
+      case 'pending_waiting_transfer':
+        return { titulo: 'Esperando transferencia', mensaje: 'El pago está esperando que se complete una transferencia bancaria.', accion: 'Esperar a que se complete la transferencia.' };
+      case 'pending_capture':
+        return { titulo: 'Pendiente de captura', mensaje: 'El pago fue autorizado pero requiere captura manual.', accion: 'Capturar el pago desde el panel de Mercado Pago.' };
       default:
-        return { titulo: 'Pago pendiente', mensaje: 'El pago está pendiente de confirmación.', accion: 'Esperar confirmación.' };
+        return { titulo: 'Pago pendiente', mensaje: `El pago está pendiente de confirmación. Detalle: ${code || 'desconocido'}.`, accion: 'Esperar confirmación de Mercado Pago.' };
     }
   }
   
@@ -293,11 +301,19 @@ const AdminOrdersPage: React.FC = () => {
                     <h3 style={{ color: '#f0f6fc', margin: 0, fontSize: '1.2rem', fontWeight: '700' }}>
                       📦 Orden #{order.numero_orden || order.orden_id}
                     </h3>
-                    <span className={`status-badge ${getStatusColor(order.status)}`}>
-                      {order.status === 'approved' ? '✓ ' : 
+                    <span 
+                      className={`status-badge ${getStatusColor(order.status)}`}
+                      style={{
+                        // Destacar si es solo una preferencia creada
+                        backgroundColor: order.payment_status_detail === 'preference_created' ? 'rgba(210, 153, 34, 0.15)' : undefined,
+                        border: order.payment_status_detail === 'preference_created' ? '1px solid rgba(210, 153, 34, 0.3)' : undefined
+                      }}
+                    >
+                      {order.payment_status_detail === 'preference_created' ? '🔗 ' :
+                       order.status === 'approved' ? '✓ ' : 
                        order.status === 'pending' ? '⏳ ' :
                        order.status === 'rejected' ? '✗ ' : ''}
-                      {order.status.toUpperCase()}
+                      {order.payment_status_detail === 'preference_created' ? 'PREFERENCIA' : order.status.toUpperCase()}
                     </span>
                   </div>
                     <div style={{ display:'flex', gap:10, alignItems:'center', marginTop: 8 }}>
@@ -354,18 +370,24 @@ const AdminOrdersPage: React.FC = () => {
                       </div>
                       {order.payment_status_detail && (() => { const info = mapMpStatusDetail(order.payment_status_detail, order.payment_status); return (
                         <div style={{ marginTop:12 }}>
-                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e', marginBottom:4 }}>Explicación del rechazo</div>
+                          <div style={{ fontWeight:700, fontSize:12, color:'#8b949e', marginBottom:4 }}>
+                            {order.payment_status === 'pending' ? 'Información del estado pendiente' : 
+                             order.payment_status === 'rejected' || order.payment_status === 'cancelled' ? 'Explicación del rechazo' : 
+                             'Detalles del estado'}
+                          </div>
                           <div style={{ fontSize:13 }}>
                             <div style={{ marginBottom:4 }}>{info.mensaje}</div>
                             <div style={{ color:'#9ca3af', fontSize:12 }}>Sugerencia: {info.accion}</div>
                           </div>
-                          <button 
-                            className="back-button"
-                            style={{ marginTop:8 }}
-                            onClick={() => setShowMpHelp(v => !v)}
-                          >
-                            {showMpHelp ? 'Ocultar ayuda' : '¿Por qué fue rechazado?'}
-                          </button>
+                          {(order.payment_status === 'rejected' || order.payment_status === 'cancelled') && (
+                            <button 
+                              className="back-button"
+                              style={{ marginTop:8 }}
+                              onClick={() => setShowMpHelp(v => !v)}
+                            >
+                              {showMpHelp ? 'Ocultar ayuda' : '¿Por qué fue rechazado?'}
+                            </button>
+                          )}
                           {showMpHelp && (
                             <div style={{
                               marginTop:8,
