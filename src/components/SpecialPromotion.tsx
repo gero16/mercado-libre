@@ -9,6 +9,8 @@ interface SpecialPromotionProps {
   theme: 'halloween' | 'blackfriday' | 'summer' | 'winter'
   linkTo?: string
   deadline?: string | Date // ISO/Date para countdown real
+  countdownText?: string // Texto personalizado para el contador (ej: "¡Comienza el..." o "¡Termina el...")
+  showButton?: boolean // Mostrar/ocultar el botón "¡Aprovecha Ahora!"
 }
 
 const SpecialPromotion: React.FC<SpecialPromotionProps> = ({ 
@@ -18,7 +20,9 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
   endDate, 
   theme,
   linkTo,
-  deadline
+  deadline,
+  countdownText,
+  showButton = true // Por defecto mostrar el botón
 }) => {
   const navigate = useNavigate()
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
@@ -53,7 +57,7 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
         }
       case 'blackfriday':
         return {
-          background: 'linear-gradient(135deg, #000000, #333333, #000000)',
+          background: 'linear-gradient(135deg, #000000, #1a1a1a, #2d0000, #000000)',
           icon: '🛍️',
           accentColor: '#ff0000'
         }
@@ -96,40 +100,44 @@ const SpecialPromotion: React.FC<SpecialPromotionProps> = ({
               <span className="discount-text">{discount}</span>
             </div>
             
-            <div className="promotion-timer">
-              <p className="timer-text">¡Termina el {endDate}!</p>
-              <div className="countdown">
-                <div className="time-unit">
-                  <span className="time-number">{pad(timeLeft.days)}</span>
-                  <span className="time-label">Días</span>
-                </div>
-                <div className="time-separator">:</div>
-                <div className="time-unit">
-                  <span className="time-number">{pad(timeLeft.hours)}</span>
-                  <span className="time-label">Horas</span>
-                </div>
-                <div className="time-separator">:</div>
-                <div className="time-unit">
-                  <span className="time-number">{pad(timeLeft.minutes)}</span>
-                  <span className="time-label">Min</span>
-                </div>
-                <div className="time-separator">:</div>
-                <div className="time-unit">
-                  <span className="time-number">{pad(timeLeft.seconds)}</span>
-                  <span className="time-label">Seg</span>
+            {endDate && deadline && (
+              <div className="promotion-timer">
+                <p className="timer-text">{countdownText || `¡Termina el ${endDate}!`}</p>
+                <div className="countdown">
+                  <div className="time-unit">
+                    <span className="time-number">{pad(timeLeft.days)}</span>
+                    <span className="time-label">Días</span>
+                  </div>
+                  <div className="time-separator">:</div>
+                  <div className="time-unit">
+                    <span className="time-number">{pad(timeLeft.hours)}</span>
+                    <span className="time-label">Horas</span>
+                  </div>
+                  <div className="time-separator">:</div>
+                  <div className="time-unit">
+                    <span className="time-number">{pad(timeLeft.minutes)}</span>
+                    <span className="time-label">Min</span>
+                  </div>
+                  <div className="time-separator">:</div>
+                  <div className="time-unit">
+                    <span className="time-number">{pad(timeLeft.seconds)}</span>
+                    <span className="time-label">Seg</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
           
-          <div className="promotion-action">
-          <button 
-            className="promotion-button"
-            onClick={() => linkTo ? navigate(linkTo) : navigate('/tienda-ml')}
-          >
-              ¡Aprovecha Ahora!
-            </button>
-          </div>
+          {showButton && (
+            <div className="promotion-action">
+              <button 
+                className="promotion-button"
+                onClick={() => linkTo ? navigate(linkTo) : navigate('/tienda-ml')}
+              >
+                ¡Aprovecha Ahora!
+              </button>
+            </div>
+          )}
         </div>
         
         <div className="promotion-decoration">

@@ -6,6 +6,7 @@ import CustomerReviews from '../components/CustomerReviews'
 import InstagramSection from '../components/InstagramSection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
+import SpecialPromotion from '../components/SpecialPromotion'
 import { EventService } from '../services/event'
 import { useAuth } from '../context/AuthContext'
 
@@ -63,7 +64,7 @@ const HomePage: React.FC = () => {
   }, [])
 
   // Evento activo (dinámico desde backend)
-  const [activeEvent, setActiveEvent] = useState<{ slug: string; titulo: string; theme?: string; fecha_fin?: string; subtitle?: string; discount_text?: string } | null>(null)
+  const [activeEvent, setActiveEvent] = useState<{ slug: string; titulo: string; theme?: string; fecha_inicio?: string; fecha_fin?: string; subtitle?: string; discount_text?: string; mostrar_boton?: boolean } | null>(null)
 
   useEffect(() => {
     // Preload de la imagen principal del carrusel (LCP) con alta prioridad
@@ -84,12 +85,23 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     let mounted = true
-    EventService.listActive()
+    // Usar listAll() y filtrar por activo: true para mostrar el banner aunque la fecha_inicio sea futura
+    EventService.listAll()
       .then(res => {
-        const ev = (res.eventos || [])[0] || null
-        if (mounted) setActiveEvent(ev)
+        // Filtrar eventos activos (ignorando las fechas para el banner)
+        const eventosActivos = (res.eventos || []).filter((e: any) => e.activo)
+        const ev = eventosActivos[0] || null
+        if (mounted) {
+          setActiveEvent(ev)
+          if (ev) {
+            console.log('✅ Evento activo encontrado:', ev)
+          }
+        }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('❌ Error cargando eventos:', err)
+        if (mounted) setActiveEvent(null)
+      })
     return () => { mounted = false }
   }, [])
 
@@ -154,24 +166,91 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* Evento activo dinámico */}
-      {activeEvent && (
-        <>
-          {/* <SpecialEventProducts slug={activeEvent.slug} title={`Selección ${activeEvent.titulo}`} /> 
-            <SpecialPromotion 
-            title={`${(activeEvent.theme || '').toLowerCase() === 'halloween' ? '🎃 ' : ''}${activeEvent.titulo}`}
-            subtitle={activeEvent.subtitle || ((activeEvent.theme || '').toLowerCase() === 'halloween' ? '¡No te pierdas las mejores ofertas de Halloween!' : 'Ofertas por tiempo limitado')}
+      {/* Evento activo dinámico - Banner grande de promoción */}
+      {activeEvent && (() => {
+        // Determinar la fecha para la cuenta regresiva:
+        // - Si hay fecha_inicio y es futura, usar fecha_inicio (cuenta regresiva hasta que empiece)
+        // - Si no hay fecha_inicio o ya pasó, usar fecha_fin (cuenta regresiva hasta que termine)
+        const now = new Date()
+        
+        // Crear fechas interpretándolas correctamente
+        const parseDate = (dateStr: string | undefined) => {
+          if (!dateStr) return null
+          const date = new Date(dateStr)
+          // Si la fecha es inválida, retornar null
+          if (isNaN(date.getTime())) return null
+          return date
+        }
+        
+        const fechaInicio = parseDate(activeEvent.fecha_inicio)
+        const fechaFin = parseDate(activeEvent.fecha_fin)
+        
+        // Usar fecha_inicio si es futura, sino usar fecha_fin
+        const deadlineDate = (fechaInicio && fechaInicio > now) ? fechaInicio : fechaFin
+        
+        // Formatear fecha extrayendo directamente del string original para evitar problemas de zona horaria
+        const formatDateFromString = (dateStr: string | undefined, dateObj: Date | null) => {
+          if (!dateStr || !dateObj) return ''
+          
+          // Intentar extraer la fecha directamente del string ISO si está disponible
+          // Formato esperado: "2024-11-28T00:00:00.000Z" o "2024-11-28T03:00:00.000Z"
+          const isoMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/)
+          if (isoMatch) {
+            const [, , month, day] = isoMatch
+            const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+            const monthIndex = parseInt(month, 10) - 1
+            return `${parseInt(day, 10)} de ${monthNames[monthIndex]}`
+          }
+          
+          // Fallback: usar toLocaleDateString
+          return dateObj.toLocaleDateString('es-UY', { 
+            day: 'numeric', 
+            month: 'long',
+            year: 'numeric'
+          })
+        }
+        
+        // Determinar qué string de fecha usar
+        const fechaStr = (fechaInicio && fechaInicio > now) 
+          ? activeEvent.fecha_inicio 
+          : activeEvent.fecha_fin
+        
+        const endDateText = formatDateFromString(fechaStr, deadlineDate)
+        
+        // Debug: mostrar información de fechas
+        if (fechaInicio) {
+          console.log('📅 Fecha inicio original (string):', activeEvent.fecha_inicio)
+          console.log('📅 Fecha inicio parseada (ISO):', fechaInicio.toISOString())
+          console.log('📅 Fecha inicio local:', fechaInicio.toLocaleString('es-UY'))
+          console.log('📅 Fecha inicio formateada:', endDateText)
+        }
+        
+        // Texto del contador según la fecha usada
+        const countdownText = (fechaInicio && fechaInicio > now) 
+          ? `¡Comienza el ${endDateText}!` 
+          : `¡Termina el ${endDateText}!`
+        
+        return (
+          <SpecialPromotion 
+            title={`${(activeEvent.theme || '').toLowerCase() === 'halloween' ? '🎃 ' : (activeEvent.theme || '').toLowerCase() === 'blackfriday' ? '🛍️ ' : ''}${activeEvent.titulo}`}
+            subtitle={activeEvent.subtitle || (
+              (activeEvent.theme || '').toLowerCase() === 'halloween' 
+                ? '¡No te pierdas las mejores ofertas de Halloween!' 
+                : (activeEvent.theme || '').toLowerCase() === 'blackfriday'
+                ? '¡Descuentos increíbles en toda la tienda! No te lo pierdas'
+                : 'Ofertas por tiempo limitado'
+            )}
             discount={activeEvent.discount_text || 'Hasta 50% OFF'}
-            endDate={activeEvent.fecha_fin ? new Date(activeEvent.fecha_fin).toLocaleDateString('es-UY', { day: 'numeric', month: 'long' }) : ''}
+            endDate={endDateText}
+            countdownText={countdownText}
             theme={((activeEvent.theme || 'summer') as any)}
             linkTo={`/eventos/${activeEvent.slug}`}
-            deadline={activeEvent.fecha_fin}
+            deadline={deadlineDate ? deadlineDate.toISOString() : undefined}
+            showButton={activeEvent.mostrar_boton !== undefined ? activeEvent.mostrar_boton : true}
           />
-          
-          */}
-        </>
-        
-      )}
+        )
+      })()}
 
       
 

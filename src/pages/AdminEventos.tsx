@@ -14,6 +14,7 @@ interface Evento {
   subtitle?: string
   discount_text?: string
   discount_percentage?: number
+  mostrar_boton?: boolean
 }
 
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
@@ -36,14 +37,17 @@ interface EventoProducto {
 const AdminEventos: React.FC = () => {
   const [eventos, setEventos] = useState<Evento[]>([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState<Partial<Evento>>({ activo: true })
+  const [form, setForm] = useState<Partial<Evento>>({ activo: true, mostrar_boton: true })
   const [slugSeleccionado, setSlugSeleccionado] = useState<string>('')
   const [productosInput, setProductosInput] = useState('')
   const [discountPct, setDiscountPct] = useState<number>(10)
   const [resultadoAccion, setResultadoAccion] = useState<string | null>(null)
   const [productosEvento, setProductosEvento] = useState<EventoProducto[]>([])
   const [selectAll, setSelectAll] = useState<boolean>(false)
-  const [tab, setTab] = useState<'gestionar' | 'crear' | 'productos'>('gestionar')
+  const [tab, setTab] = useState<'gestionar' | 'crear' | 'productos' | 'editar'>('gestionar')
+  const [eventoEditando, setEventoEditando] = useState<Evento | null>(null)
+  const [formEdit, setFormEdit] = useState<Partial<Evento>>({})
+  const [discountPctEdit, setDiscountPctEdit] = useState<number>(10)
   const token = AuthService.getToken() || ''
 
   const load = async () => {
@@ -71,7 +75,8 @@ const AdminEventos: React.FC = () => {
       fecha_fin: form.fecha_fin,
       subtitle: form.subtitle,
       discount_text: form.discount_text,
-      discount_percentage: discountPct
+      discount_percentage: discountPct,
+      mostrar_boton: form.mostrar_boton !== undefined ? form.mostrar_boton : true
     } as any, token)
     setForm({ activo: true })
     await load()
@@ -100,6 +105,55 @@ const AdminEventos: React.FC = () => {
   const actualizar = async (slug: string, update: Partial<Evento>) => {
     await EventService.update(slug, update, token)
     await load()
+  }
+
+  const iniciarEdicion = (evento: Evento) => {
+    setEventoEditando(evento)
+    setFormEdit({
+      titulo: evento.titulo,
+      descripcion: evento.descripcion || '',
+      theme: evento.theme || '',
+      activo: evento.activo,
+      fecha_inicio: evento.fecha_inicio ? new Date(evento.fecha_inicio).toISOString().slice(0, 16) : '',
+      fecha_fin: evento.fecha_fin ? new Date(evento.fecha_fin).toISOString().slice(0, 16) : '',
+      subtitle: evento.subtitle || '',
+      discount_text: evento.discount_text || '',
+      discount_percentage: evento.discount_percentage || 0,
+      mostrar_boton: evento.mostrar_boton !== undefined ? evento.mostrar_boton : true
+    })
+    setDiscountPctEdit(evento.discount_percentage || 10)
+    setTab('editar')
+  }
+
+  const guardarEdicion = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!eventoEditando) return
+    if (!formEdit.titulo) return alert('El título es requerido')
+    
+    await EventService.update(eventoEditando.slug, {
+      titulo: formEdit.titulo,
+      descripcion: formEdit.descripcion,
+      theme: formEdit.theme,
+      activo: formEdit.activo,
+      fecha_inicio: formEdit.fecha_inicio,
+      fecha_fin: formEdit.fecha_fin,
+      subtitle: formEdit.subtitle,
+      discount_text: formEdit.discount_text,
+      discount_percentage: discountPctEdit,
+      mostrar_boton: formEdit.mostrar_boton !== undefined ? formEdit.mostrar_boton : true
+    } as any, token)
+    
+    setEventoEditando(null)
+    setFormEdit({})
+    setTab('gestionar')
+    await load()
+    alert('✅ Evento actualizado correctamente')
+  }
+
+  const cancelarEdicion = () => {
+    setEventoEditando(null)
+    setFormEdit({})
+    setTab('gestionar')
   }
 
   const eliminar = async (slug: string) => {
@@ -198,6 +252,20 @@ const AdminEventos: React.FC = () => {
             cursor: 'pointer'
           }}
         >Productos</button>
+        {eventoEditando && (
+          <button 
+            className="btn-orden" 
+            onClick={() => setTab('editar')} 
+            style={{ 
+              background: tab==='editar' ? '#eef2ff' : '#ffffff',
+              color: tab==='editar' ? '#3730a3' : '#111827',
+              border: tab==='editar' ? '2px solid #c7d2fe' : '1px solid #e5e7eb',
+              borderRadius: 8,
+              padding: '8px 12px',
+              cursor: 'pointer'
+            }}
+          >Editar: {eventoEditando.titulo}</button>
+        )}
       </div>
 
       {/* Crear evento */}
@@ -241,6 +309,15 @@ const AdminEventos: React.FC = () => {
           </div>
           <div className="grid-2">
             <div>
+              <label>Fecha inicio</label>
+              <input 
+                type="datetime-local" 
+                value={form.fecha_inicio || ''} 
+                onChange={e => setForm({ ...form, fecha_inicio: e.target.value })} 
+                className="admin-search-input" 
+              />
+            </div>
+            <div>
               <label>Fecha fin (banner/contador)</label>
               <input 
                 type="datetime-local" 
@@ -249,6 +326,30 @@ const AdminEventos: React.FC = () => {
                 className="admin-search-input" 
               />
             </div>
+          </div>
+          <div>
+            <label>Porcentaje de descuento del evento</label>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
+              <input 
+                type="range" 
+                min={1} 
+                max={90} 
+                value={discountPct} 
+                onChange={e => setDiscountPct(Number(e.target.value))} 
+                style={{ flex: 1 }}
+              />
+              <strong style={{ minWidth: 50, textAlign: 'center' }}>{discountPct}%</strong>
+            </div>
+          </div>
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input 
+                type="checkbox" 
+                checked={form.mostrar_boton !== undefined ? form.mostrar_boton : true} 
+                onChange={e => setForm({ ...form, mostrar_boton: e.target.checked })} 
+              />
+              Mostrar botón "¡Aprovecha Ahora!" en el banner
+            </label>
           </div>
           <button type="submit" className="btn-orden">Crear evento</button>
         </form>
@@ -313,6 +414,13 @@ const AdminEventos: React.FC = () => {
                   </button>
                   <button 
                     className="btn-orden" 
+                    onClick={() => iniciarEdicion(ev)}
+                    style={{ background: '#eef2ff', color: '#3730a3' }}
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button 
+                    className="btn-orden" 
                     onClick={() => actualizar(ev.slug, { activo: !ev.activo })}
                     style={{ background: ev.activo ? '#fff7ed' : '#ecfdf5', color: ev.activo ? '#9a3412' : '#065f46' }}
                   >
@@ -331,6 +439,146 @@ const AdminEventos: React.FC = () => {
           </div>
         )}
       </section>
+      )}
+
+      {/* Editar evento */}
+      {tab === 'editar' && eventoEditando && (
+        <section style={{ marginTop: 10, padding: 20, background: '#f9fafb', borderRadius: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h2>Editar evento: {eventoEditando.titulo}</h2>
+            <button className="btn-orden" onClick={cancelarEdicion} style={{ background: '#fee2e2', color: '#b91c1c' }}>
+              Cancelar
+            </button>
+          </div>
+          <form onSubmit={guardarEdicion} className="admin-form">
+            <div className="grid-2">
+              <div>
+                <label>Slug (no editable)</label>
+                <input value={eventoEditando.slug} disabled className="admin-search-input" style={{ background: '#f3f4f6', color: '#6b7280' }} />
+                <small style={{ color: '#6b7280', fontSize: 12 }}>El slug no se puede modificar</small>
+              </div>
+              <div>
+                <label>Título *</label>
+                <input 
+                  value={formEdit.titulo || ''} 
+                  onChange={e => setFormEdit({ ...formEdit, titulo: e.target.value })} 
+                  className="admin-search-input" 
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid-2">
+              <div>
+                <label>Theme</label>
+                <select 
+                  value={formEdit.theme || ''} 
+                  onChange={e => setFormEdit({ ...formEdit, theme: e.target.value })} 
+                  className="admin-select"
+                >
+                  <option value="">Sin tema</option>
+                  <option value="halloween">Halloween</option>
+                  <option value="blackfriday">Black Friday</option>
+                  <option value="summer">Summer</option>
+                  <option value="winter">Winter</option>
+                </select>
+              </div>
+              <div>
+                <label>Activo</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input 
+                    type="checkbox" 
+                    checked={!!formEdit.activo} 
+                    onChange={e => setFormEdit({ ...formEdit, activo: e.target.checked })} 
+                  />
+                  <span style={{ fontSize: 14, color: formEdit.activo ? '#16a34a' : '#6b7280' }}>
+                    {formEdit.activo ? 'Evento activo' : 'Evento inactivo'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="grid-2">
+              <div>
+                <label>Subtítulo (para banner)</label>
+                <input 
+                  value={formEdit.subtitle || ''} 
+                  onChange={e => setFormEdit({ ...formEdit, subtitle: e.target.value })} 
+                  className="admin-search-input" 
+                  placeholder="Ej: Descuentos increíbles"
+                />
+              </div>
+              <div>
+                <label>Texto de descuento</label>
+                <input 
+                  value={formEdit.discount_text || ''} 
+                  onChange={e => setFormEdit({ ...formEdit, discount_text: e.target.value })} 
+                  className="admin-search-input" 
+                  placeholder="Ej: Hasta 70% OFF"
+                />
+              </div>
+            </div>
+            <div>
+              <label>Descripción</label>
+              <textarea 
+                value={formEdit.descripcion || ''} 
+                onChange={e => setFormEdit({ ...formEdit, descripcion: e.target.value })} 
+                className="admin-search-input" 
+                rows={4}
+              />
+            </div>
+            <div className="grid-2">
+              <div>
+                <label>Fecha inicio</label>
+                <input 
+                  type="datetime-local" 
+                  value={formEdit.fecha_inicio || ''} 
+                  onChange={e => setFormEdit({ ...formEdit, fecha_inicio: e.target.value })} 
+                  className="admin-search-input" 
+                />
+              </div>
+              <div>
+                <label>Fecha fin (banner/contador)</label>
+                <input 
+                  type="datetime-local" 
+                  value={formEdit.fecha_fin || ''} 
+                  onChange={e => setFormEdit({ ...formEdit, fecha_fin: e.target.value })} 
+                  className="admin-search-input" 
+                />
+              </div>
+            </div>
+            <div>
+              <label>Porcentaje de descuento del evento</label>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
+                <input 
+                  type="range" 
+                  min={1} 
+                  max={90} 
+                  value={discountPctEdit} 
+                  onChange={e => setDiscountPctEdit(Number(e.target.value))} 
+                  style={{ flex: 1 }}
+                />
+                <strong style={{ minWidth: 50, textAlign: 'center' }}>{discountPctEdit}%</strong>
+              </div>
+            </div>
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input 
+                  type="checkbox" 
+                  checked={formEdit.mostrar_boton !== undefined ? formEdit.mostrar_boton : true} 
+                  onChange={e => setFormEdit({ ...formEdit, mostrar_boton: e.target.checked })} 
+                />
+                Mostrar botón "¡Aprovecha Ahora!" en el banner
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <button type="submit" className="btn-orden" style={{ background: '#ecfdf5', color: '#065f46' }}>
+                💾 Guardar cambios
+              </button>
+              <button type="button" className="btn-orden" onClick={cancelarEdicion} style={{ background: '#fee2e2', color: '#b91c1c' }}>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </section>
       )}
 
       {/* Asociación de productos */}

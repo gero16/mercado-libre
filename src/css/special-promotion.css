@@ -325,3 +325,104 @@
     font-size: 1rem;
   }
 }
+
+/* Estilos específicos para Black Friday */
+.promotion-container[style*="linear-gradient(135deg, #000000"] {
+  background: linear-gradient(135deg, #000000, #1a1a1a, #2d0000, #000000) !important;
+  background-size: 400% 400% !important;
+  animation: pulseBlackFriday 4s ease-in-out infinite, gradientShiftBlackFriday 6s ease infinite !important;
+  box-shadow: 0 15px 35px rgba(255, 0, 0, 0.3) !important;
+  border: 2px solid rgba(255, 0, 0, 0.2);
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .promotion-title {
+  color: #ffffff !important;
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 2px 4px rgba(0,0,0,0.8) !important;
+  animation: textGlowRed 2s ease-in-out infinite alternate;
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .promotion-subtitle {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .discount-text {
+  background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700) !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  border: 2px solid rgba(255, 215, 0, 0.5) !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 4px 8px rgba(0,0,0,0.3) !important;
+  animation: glowGold 2s ease-in-out infinite alternate !important;
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .promotion-button {
+  background: linear-gradient(135deg, #ff0000, #cc0000) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .promotion-button:hover {
+  background: linear-gradient(135deg, #ff3333, #ff0000) !important;
+  box-shadow: 0 8px 25px rgba(255, 0, 0, 0.7) !important;
+  transform: translateY(-3px) scale(1.05);
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .time-unit {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #000000 !important;
+  border: 2px solid rgba(255, 0, 0, 0.3);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .time-separator {
+  color: #ff0000 !important;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+}
+
+.promotion-container[style*="linear-gradient(135deg, #000000"] .decoration-circle {
+  background: rgba(255, 0, 0, 0.15) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+@keyframes pulseBlackFriday {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 15px 35px rgba(255, 0, 0, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(255, 0, 0, 0.5);
+  }
+}
+
+@keyframes gradientShiftBlackFriday {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes textGlowRed {
+  from {
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 2px 4px rgba(0,0,0,0.8);
+  }
+  to {
+    text-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 40px rgba(255, 0, 0, 0.6), 0 2px 4px rgba(0,0,0,0.8);
+  }
+}
+
+@keyframes glowGold {
+  from {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 4px 8px rgba(0,0,0,0.3);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.5), 0 4px 8px rgba(0,0,0,0.3);
+  }
+}

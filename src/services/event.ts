@@ -4,7 +4,7 @@ const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || wi
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost ? 'http://localhost:3000' : PROD_BACKEND)
 
 export const EventService = {
-  async create(payload: { slug: string; titulo: string; descripcion?: string; theme?: string; activo?: boolean; fecha_inicio?: string; fecha_fin?: string; subtitle?: string; discount_text?: string }, token: string) {
+  async create(payload: { slug: string; titulo: string; descripcion?: string; theme?: string; activo?: boolean; fecha_inicio?: string; fecha_fin?: string; subtitle?: string; discount_text?: string; mostrar_boton?: boolean }, token: string) {
     const res = await fetch(`${API_BASE_URL}/api/eventos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
