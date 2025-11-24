@@ -27,6 +27,7 @@
 
 .promotion-icon {
   font-size: 3rem;
+  margin-top: 60px;
   animation: bounce 2s ease-in-out infinite;
   flex-shrink: 0;
 }
