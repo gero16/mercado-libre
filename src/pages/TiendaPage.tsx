@@ -476,6 +476,28 @@ const TiendaMLPage: React.FC = () => {
   }, [showMobileFilters])
   const [, setIsBackgroundLoading] = useState(false)
 
+  // 🚀 Preload de la primera imagen (LCP) cuando se cargan los productos
+  useEffect(() => {
+    if (paginatedItems.length > 0 && paginatedItems[0]?.image) {
+      const firstImageUrl = paginatedItems[0].image
+      // Verificar si ya existe un preload para evitar duplicados
+      const existingPreload = document.querySelector(`link[rel="preload"][as="image"][href="${firstImageUrl}"]`)
+      if (!existingPreload) {
+        const link = document.createElement('link')
+        link.rel = 'preload'
+        link.as = 'image'
+        ;(link as any).fetchPriority = 'high'
+        link.href = firstImageUrl
+        document.head.appendChild(link)
+        return () => {
+          try {
+            document.head.removeChild(link)
+          } catch {}
+        }
+      }
+    }
+  }, [paginatedItems])
+
   // 🔎 Modo búsqueda en servidor (trae resultados de toda la BD)
   const [isServerSearch, setIsServerSearch] = useState(false)
   const [serverTotalItems, setServerTotalItems] = useState(0)
@@ -1863,7 +1885,7 @@ useEffect(() => {
             <ProductSkeleton count={8} />
           ) : (
             <>
-              {paginatedItems.map(item => {
+              {paginatedItems.map((item, index) => {
                 const tieneDescuento = item.productoPadre?.descuento?.activo
                 const precioOriginal = item.productoPadre?.descuento?.precio_original
                 const porcentajeDescuento = item.productoPadre?.descuento?.porcentaje
@@ -1880,6 +1902,8 @@ useEffect(() => {
                 const precioOriginalML = item.productoPadre?.descuento_ml?.original_price
                 const productoCerrado = item.productoPadre?.status === 'closed'
                 const sinStock = item.stock === 0
+                // Primera imagen (LCP): carga inmediata con alta prioridad
+                const isFirstImage = index === 0
                 
                 return (
                   <div 
@@ -1952,7 +1976,8 @@ useEffect(() => {
                     <img 
                       src={item.image} 
                       alt={item.title}
-                      loading="lazy"
+                      loading={isFirstImage ? "eager" : "lazy"}
+                      fetchPriority={isFirstImage ? "high" : "auto"}
                       decoding="async"
                       width={250}
                       height={250}
