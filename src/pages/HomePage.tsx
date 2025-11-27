@@ -66,19 +66,27 @@ const HomePage: React.FC = () => {
   // Evento activo (dinámico desde backend)
   const [activeEvent, setActiveEvent] = useState<{ slug: string; titulo: string; theme?: string; fecha_inicio?: string; fecha_fin?: string; subtitle?: string; discount_text?: string; mostrar_boton?: boolean } | null>(null)
 
+  // Preload adicional para móviles (el preload en index.html es para desktop)
   useEffect(() => {
-    // Preload de la imagen principal del carrusel (LCP) con alta prioridad
+    // Solo agregar preload adicional si es móvil y no existe ya
     try {
-      const href = rawCarouselImages[0]
-      if (href) {
-        const link = document.createElement('link')
-        link.rel = 'preload'
-        link.as = 'image'
-        ;(link as any).fetchPriority = 'high'
-        link.href = href
-        link.crossOrigin = 'anonymous'
-        document.head.appendChild(link)
-        return () => { try { document.head.removeChild(link) } catch {} }
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+        const vw = Math.max(360, window.innerWidth)
+        const targetW = vw <= 480 ? 720 : 960
+        const optimizedUrl = optimizeCloudinary(rawCarouselImages[0], targetW)
+        
+        // Verificar si ya existe un preload (del index.html)
+        const existingPreload = document.querySelector(`link[rel="preload"][as="image"][href*="${rawCarouselImages[0]}"]`)
+        if (!existingPreload && optimizedUrl) {
+          const link = document.createElement('link')
+          link.rel = 'preload'
+          link.as = 'image'
+          ;(link as any).fetchPriority = 'high'
+          link.href = optimizedUrl
+          link.crossOrigin = 'anonymous'
+          document.head.appendChild(link)
+          return () => { try { document.head.removeChild(link) } catch {} }
+        }
       }
     } catch {}
   }, [])

@@ -14,6 +14,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   showArrows = true 
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0])) // Pre-cargar primera imagen
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,6 +25,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
     return () => clearInterval(timer)
   }, [images.length, interval])
+
+  // Pre-cargar la siguiente imagen cuando cambia el índice
+  useEffect(() => {
+    const nextIndex = (currentImageIndex + 1) % images.length
+    if (!loadedImages.has(nextIndex)) {
+      const img = new Image()
+      img.src = images[nextIndex]
+      img.onload = () => {
+        setLoadedImages(prev => new Set([...prev, nextIndex]))
+      }
+    }
+  }, [currentImageIndex, images, loadedImages])
 
   const goToPrevious = () => {
     setCurrentImageIndex((prevIndex) => 
@@ -39,6 +52,10 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   const goToSlide = (index: number) => {
     setCurrentImageIndex(index)
+  }
+
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prev => new Set([...prev, index]))
   }
 
   if (images.length === 0) {
@@ -63,8 +80,30 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             <div
               key={index}
               className={`carousel-slide ${index === currentImageIndex ? 'active' : ''}`}
-              style={{ backgroundImage: `url(${image})` }}
-            />
+            >
+              {/* Primera imagen: carga inmediata con alta prioridad (LCP) */}
+              {index === 0 ? (
+                <img
+                  src={image}
+                  alt={`Carrusel ${index + 1}`}
+                  className="carousel-image"
+                  fetchPriority="high"
+                  loading="eager"
+                  decoding="async"
+                  onLoad={() => handleImageLoad(index)}
+                />
+              ) : (
+                /* Imágenes secundarias: lazy loading */
+                <img
+                  src={image}
+                  alt={`Carrusel ${index + 1}`}
+                  className="carousel-image"
+                  loading="lazy"
+                  decoding="async"
+                  onLoad={() => handleImageLoad(index)}
+                />
+              )}
+            </div>
           ))}
         </div>
 
