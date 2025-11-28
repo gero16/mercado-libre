@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cloudinary Fetch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .image-container {
+            margin: 10px 0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .image-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .image-box img {
+            max-width: 300px;
+            height: auto;
+            display: block;
+        }
+        .url {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Cloudinary Fetch para Imágenes de MercadoLibre</h1>
+    
+    <div class="test-section">
+        <h2>1. Imagen Original de MercadoLibre</h2>
+        <div class="image-container">
+            <div class="image-box">
+                <p><strong>Original (JPG, ~66.8 KiB)</strong></p>
+                <img id="original" src="" alt="Original" onerror="handleError('original', 'error')" onload="handleLoad('original', 'success')">
+                <div id="original-status" class="status">Cargando...</div>
+                <div class="url" id="original-url"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Imagen Optimizada con Cloudinary Fetch</h2>
+        <div class="image-container">
+            <div class="image-box">
+                <p><strong>Optimizada (WebP/AVIF, ~15-25 KiB estimado)</strong></p>
+                <img id="optimized" src="" alt="Optimizada" onerror="handleError('optimized', 'error')" onload="handleLoad('optimized', 'success')">
+                <div id="optimized-status" class="status">Cargando...</div>
+                <div class="url" id="optimized-url"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Información de Carga</h2>
+        <div id="info"></div>
+    </div>
+
+    <script>
+        // URL de ejemplo de MercadoLibre (la que mencionaste)
+        const originalUrl = 'https://http2.mlstatic.com/D_744498-MLU78998991920_092024-O.jpg';
+        const cloudName = 'geronicola';
+        const targetWidth = 250;
+        
+        // Construir URL de Cloudinary fetch
+        const encodedUrl = encodeURIComponent(originalUrl);
+        const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/f_auto,q_auto,w_${targetWidth},c_limit/${encodedUrl}`;
+        
+        // Mostrar URLs
+        document.getElementById('original-url').textContent = originalUrl;
+        document.getElementById('optimized-url').textContent = cloudinaryUrl;
+        
+        // Cargar imágenes
+        const originalImg = document.getElementById('original');
+        const optimizedImg = document.getElementById('optimized');
+        
+        originalImg.src = originalUrl;
+        optimizedImg.src = cloudinaryUrl;
+        
+        function handleLoad(id, status) {
+            const statusEl = document.getElementById(id + '-status');
+            statusEl.textContent = '✅ Cargada correctamente';
+            statusEl.className = 'status success';
+            
+            // Obtener información de tamaño
+            const img = document.getElementById(id);
+            if (img.complete) {
+                updateInfo(id, img);
+            }
+        }
+        
+        function handleError(id, status) {
+            const statusEl = document.getElementById(id + '-status');
+            statusEl.textContent = '❌ Error al cargar';
+            statusEl.className = 'status error';
+        }
+        
+        function updateInfo(id, img) {
+            const info = document.getElementById('info');
+            const existing = document.getElementById(id + '-info');
+            
+            const infoDiv = existing || document.createElement('div');
+            infoDiv.id = id + '-info';
+            infoDiv.innerHTML = `
+                <h3>${id === 'original' ? 'Original' : 'Optimizada'}:</h3>
+                <p><strong>Dimensiones:</strong> ${img.naturalWidth} x ${img.naturalHeight}px</p>
+                <p><strong>Estado:</strong> <span class="status success">✅ Cargada</span></p>
+            `;
+            
+            if (!existing) {
+                info.appendChild(infoDiv);
+            }
+        }
+        
+        // Intentar obtener el tamaño real de la imagen optimizada
+        fetch(cloudinaryUrl, { method: 'HEAD' })
+            .then(response => {
+                const size = response.headers.get('content-length');
+                const contentType = response.headers.get('content-type');
+                const info = document.getElementById('info');
+                const sizeInfo = document.createElement('div');
+                sizeInfo.innerHTML = `
+                    <h3>📊 Información de la Imagen Optimizada:</h3>
+                    <p><strong>Tamaño:</strong> ${size ? (parseInt(size) / 1024).toFixed(2) + ' KiB' : 'No disponible'}</p>
+                    <p><strong>Tipo:</strong> ${contentType || 'No disponible'}</p>
+                    <p><strong>URL Cloudinary:</strong> <code style="font-size: 11px; word-break: break-all;">${cloudinaryUrl}</code></p>
+                `;
+                info.appendChild(sizeInfo);
+            })
+            .catch(error => {
+                console.error('Error obteniendo información:', error);
+                const info = document.getElementById('info');
+                const errorInfo = document.createElement('div');
+                errorInfo.innerHTML = `
+                    <h3>⚠️ Advertencia:</h3>
+                    <p>No se pudo obtener información de tamaño. Esto puede indicar que:</p>
+                    <ul>
+                        <li>Cloudinary Fetch no está habilitado en tu cuenta</li>
+                        <li>Hay un problema de CORS</li>
+                        <li>La URL de MercadoLibre no es accesible</li>
+                    </ul>
+                    <p><strong>Recomendación:</strong> Verifica en el dashboard de Cloudinary que "Fetch" esté habilitado.</p>
+                `;
+                info.appendChild(errorInfo);
+            });
+    </script>
+</body>
+</html>
+

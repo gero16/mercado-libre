@@ -10,9 +10,7 @@ import '../styles/pagination.css'
 import '../styles/tienda-improved.css'
 import { productsCache } from '../services/productsCache'
 import { MetricsService } from '../services/event'
-
-const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
-const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
+import { API_BASE_URL } from '../config/api'
 
 // Mapeo de categorías de ML a categorías GENERALES
 const mapeoCategorias: Record<string, string> = {
@@ -674,28 +672,49 @@ const TiendaMLPage: React.FC = () => {
     }
   }, [location.state])
 
-  // 🆕 Función para optimizar imágenes de ML (usar versiones de mayor calidad para móvil grande)
-  const getOptimizedImageUrl = (url: string) => {
+  // 🚀 Función para optimizar imágenes de ML usando endpoint propio del backend
+  // Convierte JPG a WebP automáticamente y redimensiona según viewport
+  // Usa el endpoint /api/images/optimize del backend
+  const getOptimizedImageUrl = (url: string, width?: number) => {
     if (!url) return url
     
-    // Mercado Libre usa diferentes sufijos para tamaños:
-    // -I.jpg = Original (muy grande, ~2-5MB)
-    // -O.jpg = 500x500px (~200KB) ← Mejor para imágenes grandes en mobile 2-col
-    // -V.jpg = 250x250px (~50KB)
-    // -S.jpg = 150x150px (~20KB)
-    
-    // Para evitar pixelación con imágenes más grandes, usar -O.jpg
-    if (url.match(/-[IOSV]\.(jpg|jpeg|png|webp)$/i)) {
-      return url.replace(/-[IOSV]\.(jpg|jpeg|png|webp)$/i, '-O.jpg')
+    // Solo optimizar URLs de MercadoLibre (mlstatic.com)
+    if (!url.includes('mlstatic.com') && !url.includes('mercadolibre')) {
+      return url
     }
     
-    // Si no tiene sufijo, intentar agregarlo antes de la extensión
-    if (url.match(/\.(jpg|jpeg|png|webp)$/i)) {
-      return url.replace(/\.(jpg|jpeg|png|webp)$/i, '-O.jpg')
+    // Si no se especifica width, calcular según viewport
+    let targetWidth = width
+    if (!targetWidth) {
+      const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280
+      
+      // Ajustar tamaño según viewport para mejor calidad sin desperdiciar ancho de banda
+      if (viewportWidth <= 480) {
+        targetWidth = 200 // Móvil pequeño
+      } else if (viewportWidth <= 768) {
+        targetWidth = 250 // Móvil grande / Tablet
+      } else if (viewportWidth <= 1024) {
+        targetWidth = 300 // Tablet grande
+      } else {
+        targetWidth = 350 // Desktop
+      }
     }
     
-    // Si nada funciona, devolver URL original
-    return url
+    // Usar endpoint propio del backend para optimizar
+    // El backend descarga la imagen, la redimensiona y la convierte a WebP
+    const encodedUrl = encodeURIComponent(url)
+    return `${API_BASE_URL}/api/images/optimize?url=${encodedUrl}&width=${targetWidth}`
+  }
+  
+  // 🚀 Generar srcset para imágenes responsivas
+  const getImageSrcSet = (url: string) => {
+    if (!url || (!url.includes('mlstatic.com') && !url.includes('mercadolibre'))) {
+      return undefined
+    }
+    
+    // Generar diferentes tamaños para srcset
+    const sizes = [200, 250, 300, 350]
+    return sizes.map(size => `${getOptimizedImageUrl(url, size)} ${size}w`).join(', ')
   }
 
   // 🚀 Función para cargar productos con paginación del servidor
@@ -1974,7 +1993,9 @@ useEffect(() => {
                       </div>
                     )}
                     <img 
-                      src={item.image} 
+                      src={getOptimizedImageUrl(item.image)} 
+                      srcSet={getImageSrcSet(item.image)}
+                      sizes="(max-width: 480px) 200px, (max-width: 768px) 250px, (max-width: 1024px) 300px, 350px"
                       alt={item.title}
                       loading={isFirstImage ? "eager" : "lazy"}
                       fetchPriority={isFirstImage ? "high" : "auto"}
