@@ -475,6 +475,7 @@ const TiendaMLPage: React.FC = () => {
   const [, setIsBackgroundLoading] = useState(false)
 
   // 🚀 Preload de la primera imagen (LCP) cuando se cargan los productos
+  // Crítico para mejorar LCP, especialmente en móviles
   useEffect(() => {
     if (paginatedItems.length > 0 && paginatedItems[0]?.image) {
       const firstImageUrl = paginatedItems[0].image
@@ -486,6 +487,10 @@ const TiendaMLPage: React.FC = () => {
         link.as = 'image'
         ;(link as any).fetchPriority = 'high'
         link.href = firstImageUrl
+        // Agregar crossorigin si es necesario
+        if (firstImageUrl.includes('http')) {
+          link.crossOrigin = 'anonymous'
+        }
         document.head.appendChild(link)
         return () => {
           try {
@@ -689,14 +694,15 @@ const TiendaMLPage: React.FC = () => {
       const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280
       
       // Ajustar tamaño según viewport para mejor calidad sin desperdiciar ancho de banda
+      // En móviles, usar tamaños más pequeños para mejorar LCP
       if (viewportWidth <= 480) {
-        targetWidth = 200 // Móvil pequeño
+        targetWidth = 180 // Móvil pequeño - más pequeño para LCP más rápido
       } else if (viewportWidth <= 768) {
-        targetWidth = 250 // Móvil grande / Tablet
+        targetWidth = 220 // Móvil grande / Tablet - más pequeño para LCP
       } else if (viewportWidth <= 1024) {
-        targetWidth = 300 // Tablet grande
+        targetWidth = 280 // Tablet grande
       } else {
-        targetWidth = 350 // Desktop
+        targetWidth = 320 // Desktop
       }
     }
     

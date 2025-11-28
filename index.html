@@ -73,11 +73,30 @@
     <!-- 🚀 Preconnect a fuentes de Google para reducir bloqueo de render -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 🚀 Google Fonts: Carga asíncrona para no bloquear renderizado -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap"></noscript>
+    <script>
+      // Fallback para navegadores que no soportan onload en link
+      (function() {
+        var link = document.querySelector('link[href*="fonts.googleapis.com"]');
+        if (link && link.media === 'print') {
+          link.onload = function() { this.media = 'all'; };
+        }
+      })();
+    </script>
+    
     <!-- 🚀 Preconnect a imágenes del carrusel (Cloudinary) -->
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
     
-    <!-- 🚀 Preload de la primera imagen del carrusel (LCP) - Optimizada para desktop -->
-    <link rel="preload" as="image" href="https://res.cloudinary.com/geronicola/image/upload/f_auto,q_auto,w_1280/v1761663362/poppy-shop/ovqszuc7akrmbmpfe4qk.webp" fetchpriority="high" crossorigin="anonymous">
+    <!-- 🚀 Preload de la primera imagen del carrusel (LCP) - Optimizada para desktop y móvil -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/geronicola/image/upload/f_auto,q_auto,w_1280/v1761663362/poppy-shop/ovqszuc7akrmbmpfe4qk.webp" fetchpriority="high" crossorigin="anonymous" media="(min-width: 769px)">
+    <link rel="preload" as="image" href="https://res.cloudinary.com/geronicola/image/upload/f_auto,q_auto,w_720/v1761663362/poppy-shop/ovqszuc7akrmbmpfe4qk.webp" fetchpriority="high" crossorigin="anonymous" media="(max-width: 768px)">
+    
+    <!-- 🚀 Preload del CSS crítico para evitar bloqueo de renderizado -->
+    <!-- Nota: El nombre del archivo puede cambiar en cada build, ajustar según necesidad -->
+    <!-- Alternativa: Cargar CSS crítico inline o usar resource hints -->
     
     <!-- 🔍 Verificación de motores de búsqueda (agregar tus códigos después) -->
     <!-- <meta name="google-site-verification" content="TU_CODIGO_AQUI" /> -->

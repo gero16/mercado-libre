@@ -35,6 +35,10 @@ export default defineConfig({
         main: path.resolve(__dirname, './index.html'),
       },
     },
+    // Optimizar CSS
+    cssCodeSplit: true,
+    // Minificar (Vite usa esbuild por defecto, más rápido que terser)
+    minify: 'esbuild',
   },
   optimizeDeps: {
     include: ['react', 'react-dom']
