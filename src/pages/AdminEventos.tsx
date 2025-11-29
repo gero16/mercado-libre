@@ -687,14 +687,14 @@ const AdminEventos: React.FC = () => {
             const allProducts = await res.json()
             // Filtra los que tienen descuento desde ML
             const mlWithDiscount = (allProducts || []).filter(
-              p => p.descuento_ml?.original_price && p.descuento_ml.original_price > p.price
+              (p: any) => p.descuento_ml?.original_price && p.descuento_ml.original_price > p.price
             )
             if (mlWithDiscount.length === 0) {
               setResultadoAccion('🔔 No se encontraron productos de ML con descuento.')
               return
             }
             // Extraer los ml_id
-            const ids = mlWithDiscount.map(p => p.ml_id)
+            const ids = mlWithDiscount.map((p: any) => p.ml_id)
             // Agregar al evento
             await EventService.addToEvent(slugSeleccionado, ids, token)
             setResultadoAccion(`✅ Agregados ${ids.length} productos con descuento de ML`)
