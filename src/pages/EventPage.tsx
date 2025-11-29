@@ -82,13 +82,20 @@ const EventPage: React.FC = () => {
   if (loading) {
     return (
       <main>
-        <section style={{ padding: '36px 0' }}>
+        <section style={{ padding: '50px 0', background: '#f7fafc', color: '#222', minHeight: 420 }}>
           <div className="container">
-            <div className="section-header">
-              <h2 className="section-title">Evento: {slug}</h2>
-              <p className="section-subtitle">Cargando productos del evento...</p>
+            <div style={{ textAlign: 'center', marginBottom: 30 }}>
+              <div style={{ fontSize: '3rem', marginBottom: 7 }}>{themeStyles.icon}</div>
+              <h2 className="section-title" style={{ color: '#222', margin:0, fontWeight: 700 }}>
+                Cargando productos del evento…
+              </h2>
+              <p className="section-subtitle" style={{ color: 'rgba(34,34,34,0.85)', fontSize:16, marginBottom:0 }}>
+                ¡Preparate para las mejores ofertas!
+              </p>
             </div>
-            <ProductSkeleton count={6} />
+            <div className="products-grid" style={{display:'flex', flexWrap:'wrap', gap:24, justifyContent:'center'}}>
+              <ProductSkeleton count={6} />
+            </div>
           </div>
         </section>
       </main>
