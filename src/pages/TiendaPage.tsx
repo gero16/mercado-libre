@@ -817,8 +817,6 @@ const TiendaMLPage: React.FC = () => {
           const effectiveStock = isPaused ? 0 : producto.available_quantity
           const imagenPrincipal = producto.images[0]?.url || producto.main_image
           // Considerar descuento de ML: el precio ya viene rebajado de ML, pero necesitamos el precio original para calcular descuento manual si existe
-          const tieneDescuentoML = !!producto.descuento_ml?.original_price
-          const precioOriginalML = producto.descuento_ml?.original_price
           
           // Si hay descuento ML, verificar que producto.price sea el precio rebajado
           // Si producto.price es igual al precio original, el precio en BD está incorrecto
@@ -1069,7 +1067,6 @@ useEffect(() => {
                 
                 // Calcular precio con descuento si está activo
                 // Considerar descuento de ML
-                const tieneDescuentoML = !!producto.descuento_ml?.original_price
                 const precioBase = variante.price || producto.price;
                 const tieneDescuento = producto.descuento?.activo || false;
                 const porcentaje = producto.descuento?.porcentaje || 0;
@@ -1101,7 +1098,6 @@ useEffect(() => {
               
               // Calcular precio con descuento si está activo
               // Considerar descuento de ML
-              const tieneDescuentoML = !!producto.descuento_ml?.original_price
               const precioBase = producto.price;
               const tieneDescuento = producto.descuento?.activo || false;
               const porcentaje = producto.descuento?.porcentaje || 0;
