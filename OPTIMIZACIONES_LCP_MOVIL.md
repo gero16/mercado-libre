@@ -113,3 +113,6 @@ Para eliminar completamente el bloqueo del CSS:
 - Si la calidad es muy baja, ajustar a 75 en lugar de 70
 - Monitorear métricas después del deploy para verificar mejoras
 
+
+
+

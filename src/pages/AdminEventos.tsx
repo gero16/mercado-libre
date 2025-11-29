@@ -422,7 +422,7 @@ const AdminEventos: React.FC = () => {
                   <button 
                     className="btn-orden" 
                     onClick={() => actualizar(ev.slug, { activo: !ev.activo })}
-                    style={{ background: ev.activo ? '#fff7ed' : '#ecfdf5', color: ev.activo ? '#9a3412' : '#065f46' }}
+                    style={{ background: ev.activo ? '#fff7ed' : '#ecfdf5', color: ev.activo ? '#065f46' : '#b91c1c' }}
                   >
                     {ev.activo ? 'Desactivar' : 'Activar'}
                   </button>
@@ -668,30 +668,40 @@ const AdminEventos: React.FC = () => {
             await removerProductos()
             setResultadoAccion('✅ Productos removidos del evento')
           }} style={{ background: '#fee2e2', color: '#b91c1c' }}>Remover</button>
-          <button 
-            className="btn-orden" 
-            onClick={async () => {
-              if (!slugSeleccionado) return alert('Selecciona un evento')
-              const ids = productosInput.split(/[\s,]+/).map(s => s.trim()).filter(Boolean)
-              const porcentaje = discountPct
-              if (ids.length === 0) return alert('Ingresa al menos un ml_id para aplicar descuento ahora, o agrega primero y aplica luego a todos')
-              const res = await fetch(`${(import.meta as any).env?.VITE_BACKEND_URL || 'https://poppy-shop-production.up.railway.app'}/api/descuentos/aplicar`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...AuthService.getAuthHeader() },
-                body: JSON.stringify({ product_ids: ids, porcentaje, fecha_fin: eventos.find(e => e.slug===slugSeleccionado)?.fecha_fin })
-              })
-              if (!res.ok) {
-                const txt = await res.text()
-                setResultadoAccion(`❌ Error aplicando descuento: ${txt}`)
-                return
+
+          {/* BOTÓN NUEVO: Agregar todos los productos con descuento de ML */}
+          <button className="btn-orden" onClick={async () => {
+            if (!slugSeleccionado) return alert('Selecciona un evento')
+            setResultadoAccion('Buscando productos con descuento de ML...')
+            // Cambiado el endpoint a /ml/productos y se añade el header de autenticación
+            const res = await fetch(`${API_BASE_URL}/ml/productos`, {
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
               }
-              const data = await res.json()
-              const ok = (data.resultados || []).filter((r: any) => r.success).length
-              const fail = (data.resultados || []).filter((r: any) => !r.success).length
-              setResultadoAccion(`✅ Descuento aplicado a ingresados: ${ok} ok, ${fail} fallidos`)
-            }}
-            style={{ background: '#ecfdf5', color: '#065f46' }}
-          >Aplicar descuento a ingresados</button>
+            })
+            if (!res.ok) {
+              setResultadoAccion('❌ Error obteniendo productos.');
+              return;
+            }
+            const allProducts = await res.json()
+            // Filtra los que tienen descuento desde ML
+            const mlWithDiscount = (allProducts || []).filter(
+              p => p.descuento_ml?.original_price && p.descuento_ml.original_price > p.price
+            )
+            if (mlWithDiscount.length === 0) {
+              setResultadoAccion('🔔 No se encontraron productos de ML con descuento.')
+              return
+            }
+            // Extraer los ml_id
+            const ids = mlWithDiscount.map(p => p.ml_id)
+            // Agregar al evento
+            await EventService.addToEvent(slugSeleccionado, ids, token)
+            setResultadoAccion(`✅ Agregados ${ids.length} productos con descuento de ML`)
+            await cargarProductosEvento(slugSeleccionado)
+          }} style={{ background: '#eef2ff', color: '#3730a3' }}>
+            Agregar todos los productos de ML con descuento
+          </button>
           <button 
             className="btn-orden" 
             onClick={async () => {

@@ -816,10 +816,23 @@ const TiendaMLPage: React.FC = () => {
         } else {
           const effectiveStock = isPaused ? 0 : producto.available_quantity
           const imagenPrincipal = producto.images[0]?.url || producto.main_image
-          const precioBase = producto.price
+          // Considerar descuento de ML: el precio ya viene rebajado de ML, pero necesitamos el precio original para calcular descuento manual si existe
+          const tieneDescuentoML = !!producto.descuento_ml?.original_price
+          const precioOriginalML = producto.descuento_ml?.original_price
+          
+          // Si hay descuento ML, verificar que producto.price sea el precio rebajado
+          // Si producto.price es igual al precio original, el precio en BD está incorrecto
+          // En ese caso, no podemos calcular el precio rebajado sin consultar ML,
+          // así que usamos producto.price tal cual (el endpoint de sincronización lo corregirá)
+          let precioBase = producto.price
+          
           const tieneDescuento = producto.descuento?.activo || false
           const porcentaje = producto.descuento?.porcentaje || 0
-          const precioConDescuento = tieneDescuento ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 : precioBase
+          // Si hay descuento manual, calcular sobre el precio base
+          // Si solo hay descuento ML, el precio debería ser el rebajado (producto.price debería serlo)
+          const precioConDescuento = tieneDescuento 
+            ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 
+            : precioBase
           if (imagenPrincipal) {
             items.push({
               id: producto.ml_id || producto._id,
@@ -1055,10 +1068,16 @@ useEffect(() => {
                 const effectiveStock = isPaused ? 0 : producto.variantes.reduce((total, v) => total + v.stock, 0);
                 
                 // Calcular precio con descuento si está activo
+                // Considerar descuento de ML
+                const tieneDescuentoML = !!producto.descuento_ml?.original_price
                 const precioBase = variante.price || producto.price;
                 const tieneDescuento = producto.descuento?.activo || false;
                 const porcentaje = producto.descuento?.porcentaje || 0;
-                const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+                // Si hay descuento manual, calcular sobre el precio base
+                // Si solo hay descuento ML, el precio ya viene rebajado
+                const precioConDescuento = tieneDescuento 
+                  ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 
+                  : precioBase;
                 
                 if (imagenVariante) {
                   remainingItems.push({
@@ -1081,10 +1100,16 @@ useEffect(() => {
               const imagenPrincipal = producto.images[0]?.url || producto.main_image;
               
               // Calcular precio con descuento si está activo
+              // Considerar descuento de ML
+              const tieneDescuentoML = !!producto.descuento_ml?.original_price
               const precioBase = producto.price;
               const tieneDescuento = producto.descuento?.activo || false;
               const porcentaje = producto.descuento?.porcentaje || 0;
-              const precioConDescuento = tieneDescuento ? precioBase * (1 - porcentaje / 100) : precioBase;
+              // Si hay descuento manual, calcular sobre el precio base
+              // Si solo hay descuento ML, el precio ya viene rebajado (producto.price)
+              const precioConDescuento = tieneDescuento 
+                ? Math.round(precioBase * (1 - porcentaje / 100) * 100) / 100 
+                : precioBase;
               
               if (imagenPrincipal) {
                 remainingItems.push({
@@ -2029,7 +2054,7 @@ useEffect(() => {
                       gap: '5px',
                       margin: '6px 0 4px 0'
                     }}>
-                      {(tieneDescuento && precioOriginal) || tieneDescuentoML ? (
+                      {(tieneDescuento && precioOriginal) || (tieneDescuentoML && precioOriginalML && precioOriginalML > item.price) ? (
                         <div style={{ 
                           display: 'flex', 
                           alignItems: 'center', 
@@ -2044,7 +2069,7 @@ useEffect(() => {
                             margin: '0',
                             lineHeight: '1'
                           }}>
-                            US$ {tieneDescuentoML ? precioOriginalML?.toFixed(2) : Number(precioOriginal).toFixed(2)}
+                            US$ {tieneDescuentoML && precioOriginalML ? precioOriginalML.toFixed(2) : Number(precioOriginal || 0).toFixed(2)}
                           </p>
                           <p style={{ 
                             color: '#d32f2f',

@@ -83,6 +83,7 @@ function App() {
               <Route path="/tienda-ml" element={<TiendaPage />} />
               <Route path="/producto/:id" element={<DetalleProductoPage />} />
               <Route path="/eventos/:slug" element={<EventPage />} />
+              <Route path="/eventos/:slug/producto/:id" element={<DetalleProductoPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/contacto" element={<ContactoPage />} />
               <Route path="/preguntas-frecuentes" element={<FAQPage />} />

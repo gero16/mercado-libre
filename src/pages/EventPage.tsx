@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ProductoML } from '../types'
 import ProductCard from '../components/ProductCard'
 import { useCart } from '../context/CartContext'
@@ -12,6 +12,7 @@ const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalhost 
 
 const EventPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const [productos, setProductos] = useState<ProductoML[]>([])
   const [loading, setLoading] = useState(true)
   const [search] = useState('')
@@ -97,7 +98,7 @@ const EventPage: React.FC = () => {
   return (
     <main>
       {/* Hero temático */}
-      <section style={{ background: themeStyles.background, padding: '36px 0' }}>
+      <section style={{ background: themeStyles.background, padding: '36px 0', marginTop: '30px' }}>
         <div className="container" style={{ color: 'white' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <div style={{ fontSize: '2rem' }}>{themeStyles.icon}</div>
@@ -140,6 +141,7 @@ const EventPage: React.FC = () => {
                       size: null
                     })
                   }}
+                  onClick={() => navigate(`/eventos/${slug}/producto/${p.ml_id}`)}
                 />
               ))
             )}

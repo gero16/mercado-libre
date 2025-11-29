@@ -90,6 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick, showAddButt
         {showAddButton && (
           <div style={{ marginTop: 8 }}>
             <button
+             style={{ color: "white", padding: "10px" }}
               className="btn btn-primary"
               onClick={(e) => { e.stopPropagation(); onAddToCart?.(product) }}
             >

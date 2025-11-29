@@ -265,9 +265,13 @@ const DetalleProductoPage: React.FC = () => {
   }
 
   // Calcular precio con descuento si está activo
+  // Considerar descuento de ML: cuando hay descuento_ml, el producto.price ya viene rebajado de ML
+  const tieneDescuentoML = !!producto?.descuento_ml?.original_price
   const tieneDescuento = producto?.descuento?.activo || false
   const porcentajeDescuento = producto?.descuento?.porcentaje || 0
   const precioBase = varianteSeleccionada?.price || producto?.price || 0
+  // Si hay descuento manual, calcular sobre el precio base (que ya puede estar rebajado de ML si tieneDescuentoML)
+  // Si solo hay descuento ML, el precio ya viene rebajado
   const precioConDescuento = tieneDescuento 
     ? Math.round(precioBase * (1 - porcentajeDescuento / 100) * 100) / 100 
     : precioBase
@@ -286,6 +290,28 @@ const DetalleProductoPage: React.FC = () => {
     }
     return producto?.available_quantity || 0;
   }
+
+  const params = useParams();
+  const slug = (params as any).slug as string | undefined;
+  const themeStyles = React.useMemo(() => {
+    switch ((slug || '').toLowerCase()) {
+      case 'halloween':
+        return {
+          background: 'linear-gradient(135deg, #ff6b35, #f7931e, #ff6b35)',
+          color: '#fff',
+        };
+      case 'blackfriday':
+        return {
+          background: 'linear-gradient(135deg, #000000, #333333, #000000)',
+          color: '#fff',
+        };
+      default:
+        return {
+          background: 'linear-gradient(135deg, var(--color-primary), #e08a00, var(--color-primary))',
+          color: '#111',
+        };
+    }
+  }, [slug]);
 
   if (loading) {
     return (
@@ -358,6 +384,21 @@ const DetalleProductoPage: React.FC = () => {
     }
     return `${producto.title} - Disponible en nuestra tienda virtual con envío a todo el país.`
   }
+
+  const precioOriginalML = producto?.descuento_ml?.original_price;
+  const precioOriginalMLString = precioOriginalML !== undefined && precioOriginalML !== null
+    ? (useUYU
+        ? `UYU ${(precioOriginalML * conv).toFixed(2)}`
+        : `US$ ${precioOriginalML.toFixed(2)}`)
+    : '—';
+
+  const ahorroTexto = useUYU
+    ? (precioOriginalML !== undefined && precioOriginalML !== null
+        ? `¡Ahorras UYU ${(displayPrice - displayDiscountPrice).toFixed(2)}!`
+        : '¡Ahorras UYU —!')
+    : (precioOriginalML !== undefined && precioOriginalML !== null
+        ? `¡Ahorras US$ ${(precioOriginalML - precioConDescuento).toFixed(2)}!`
+        : `¡Ahorras US$ ${(precioBase - precioConDescuento).toFixed(2)}!`);
 
   return (
     <>
@@ -448,6 +489,26 @@ const DetalleProductoPage: React.FC = () => {
 
           {/* Información del producto */}
           <div className="info-producto">
+            {slug && (
+              <div
+                className="evento-banner"
+                style={{
+                  background: themeStyles.background,
+                  color: themeStyles.color,
+                  fontWeight: 700,
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  marginBottom: 16,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.09)'
+                }}
+              >
+                {slug.toLowerCase() === 'blackfriday'
+                  ? '¡Promoción especial de BLACK FRIDAY!'
+                  : slug.toLowerCase() === 'halloween'
+                    ? '¡Promoción especial HALLOWEEN!'
+                    : `Evento especial: ${slug}`}
+              </div>
+            )}
             <h1>{producto.title}</h1>
             
             {/* Mostrar badge de estado - prioridad: sin stock > pausado */}
@@ -480,14 +541,23 @@ const DetalleProductoPage: React.FC = () => {
           
 
               <div className="precio-disponibilidad">
-                {tieneDescuento ? (
+                {tieneDescuento || tieneDescuentoML ? (
                   <div className="precio-con-descuento">
                     <div className="precio-descuento-header">
-                      <span className="badge-descuento">-{porcentajeDescuento}%</span>
-                      <p className="precio-original-tachado">{useUYU ? `UYU ${displayPrice.toFixed(2)}` : `US$ ${precioBase.toFixed(2)}`}</p>
+                      {tieneDescuento && porcentajeDescuento > 0 && (
+                        <span className="badge-descuento">-{porcentajeDescuento}%</span>
+                      )}
+                      {tieneDescuentoML && producto?.descuento_ml?.original_price !== undefined && (
+                        <p className="precio-original-tachado">{precioOriginalMLString}</p>
+                      )}
+                      {tieneDescuento && !tieneDescuentoML && (
+                        <p className="precio-original-tachado">{useUYU ? `UYU ${displayPrice.toFixed(2)}` : `US$ ${precioBase.toFixed(2)}`}</p>
+                      )}
                     </div>
                     <h2 className='h2-precio precio-rebajado'>{useUYU ? `UYU ${displayDiscountPrice.toFixed(2)}` : `US$ ${precioConDescuento.toFixed(2)}`}</h2>
-                    <p className="ahorro-texto">{useUYU ? `¡Ahorras UYU ${(displayPrice - displayDiscountPrice).toFixed(2)}!` : `¡Ahorras US$ ${(precioBase - precioConDescuento).toFixed(2)}!`}</p>
+                    {(tieneDescuento || tieneDescuentoML) && (
+                      <p className="ahorro-texto">{ahorroTexto}</p>
+                    )}
                   </div>
                 ) : (
                   <h2 className='h2-precio'>{useUYU ? `UYU ${displayPrice.toFixed(2)}` : `US$ ${precioBase.toFixed(2)}`}</h2>

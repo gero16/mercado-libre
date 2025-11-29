@@ -149,3 +149,4 @@ El caché se limpia automáticamente después de 24 horas. Si necesitas limpiarl
 rm -rf tienda-virtual-ts-back/cache/images/*
 ```
 
+

@@ -114,3 +114,4 @@ Si no puedes habilitar Fetch en Cloudinary (por ejemplo, en plan gratuito con re
 - Las URLs de MercadoLibre son: `http2.mlstatic.com` y `mercadolibre.com`
 - El fetch de Cloudinary es gratuito hasta cierto límite de ancho de banda
 
+
