@@ -583,7 +583,6 @@ const CheckoutPage: React.FC = () => {
                   name="cupon-resumen"
                   value={cuponCodigo}
                   onChange={(e) => setCuponCodigo(e.target.value.toUpperCase())}
-                  placeholder="Ej: POPPYWEB"
                   style={{ 
                     flex: 1,
                     minWidth: '180px',
