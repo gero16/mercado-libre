@@ -129,7 +129,7 @@ const CustomerReviews: React.FC = () => {
             <img src="/img/logo.png" alt="Poppy Shop Logo" className="brand-logo-img" />
           </div>
           <div className="brand-name">Poppy Shop</div>
-          <div className="brand-tagline">-LO QUERÉS, LO TENÉS -</div>
+          <div className="brand-tagline">LO QUERÉS, LO TENÉS </div>
         </div>
       </div>
 
