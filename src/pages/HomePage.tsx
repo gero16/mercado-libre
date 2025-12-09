@@ -7,6 +7,7 @@ import InstagramSection from '../components/InstagramSection'
 import BestSellingProducts from '../components/BestSellingProducts'
 import WelcomeSection from '../components/WelcomeSection'
 import SpecialPromotion from '../components/SpecialPromotion'
+import SEO from '../components/SEO'
 import { EventService } from '../services/event'
 import { useAuth } from '../context/AuthContext'
 
@@ -115,6 +116,16 @@ const HomePage: React.FC = () => {
 
   return (
     <>
+      {/* SEO Component - Optimización para página principal */}
+      <SEO
+        title="Poppy Shop - Lo querés, lo tenés | Tienda Online Uruguay"
+        description="Poppy Shop - Tu tienda online de confianza en Uruguay. Lo querés, lo tenés. Electrónica, gaming, hogar y más con envío rápido. Compra segura con MercadoPago."
+        keywords="poppy shop, tienda online uruguay, comprar online, electrónica, gaming, envío rápido, mercadopago, productos importados uruguay"
+        image="https://www.poppyshopuy.com/img/logo.png"
+        url="https://www.poppyshopuy.com/"
+        type="website"
+      />
+      
       {/* Carrusel de imágenes principal */}
       <ImageCarousel 
         images={carouselImages}

@@ -55,15 +55,32 @@
     <!-- 🔗 Canonical URL -->
     <link rel="canonical" href="https://www.poppyshopuy.com/" />
     
-    <!-- 🧭 Structured Data: WebSite + Organization -->
+    <!-- 🧭 Structured Data: WebSite + Organization + LocalBusiness -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": ["WebSite", "Organization"],
+      "@type": ["WebSite", "Organization", "LocalBusiness"],
       "name": "Poppy Shop",
       "alternateName": ["PoppyShop", "Poppy Shop Uruguay"],
       "url": "https://www.poppyshopuy.com/",
-      "logo": "https://www.poppyshopuy.com/img/logo.png"
+      "logo": "https://www.poppyshopuy.com/img/logo.png",
+      "description": "Tienda online de confianza en Uruguay. Lo querés, lo tenés. Electrónica, gaming, hogar y más con envío rápido.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "UY",
+        "addressLocality": "Uruguay"
+      },
+      "sameAs": [
+        "https://www.instagram.com/poppyshopuy"
+      ],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.poppyshopuy.com/tienda-ml?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
     }
     </script>
     
