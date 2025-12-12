@@ -60,6 +60,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminNotificationsPage from './pages/AdminNotificationsPage'
+const AdminCrearProductoPage = lazy(() => import('./pages/AdminCrearProductoPage'));
 
 // Inicializar MercadoPago con la public key y configuración en español
 initMercadoPago(MERCADOPAGO_CONFIG.PUBLIC_KEY, { locale: 'es-AR' })
@@ -105,6 +106,7 @@ function App() {
               <Route path="/admin/destacados" element={<AdminRoute><AdminDestacados /></AdminRoute>} /> {/* 🆕 Ruta de destacados */}
               <Route path="/admin/duplicados" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando admin…</div>}><AdminDuplicadosPage /></Suspense></AdminRoute>} /> {/* 🆕 Ruta de duplicados */}
               <Route path="/admin/notificaciones" element={<AdminRoute><AdminNotificationsPage /></AdminRoute>} />
+              <Route path="/admin/crear-producto" element={<AdminRoute><Suspense fallback={<div style={{padding:20}}>Cargando nuevo producto…</div>}><AdminCrearProductoPage /></Suspense></AdminRoute>} />
               
               {/* Rutas de resultado de pago */}
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
