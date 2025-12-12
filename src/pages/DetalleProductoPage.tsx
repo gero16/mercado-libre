@@ -375,14 +375,52 @@ const DetalleProductoPage: React.FC = () => {
   }
 
   // Preparar datos para SEO
-  const getProductUrl = () => `https://mercado-libre-roan.vercel.app/producto/${id}`
+  const getProductUrl = () => `https://www.poppyshopuy.com/producto/${id}`
   const getProductImage = () => getImagenPrincipal()
+  
+  // Obtener todas las imágenes para el schema (máximo 5 para SEO)
+  const getAllProductImages = (): string[] => {
+    const imagenesDisponibles = getImagenesDisponibles()
+    return imagenesDisponibles.slice(0, 5) // Google recomienda máximo 5 imágenes
+  }
+  
   const getProductDescription = () => {
     if (producto.description) {
-      // Tomar solo los primeros 155 caracteres para la meta descripción
-      return producto.description.substring(0, 155) + (producto.description.length > 155 ? '...' : '')
+      // Optimizar descripción: 150-160 caracteres es ideal para Google
+      const cleanDescription = producto.description
+        .replace(/\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+      
+      if (cleanDescription.length <= 160) {
+        return cleanDescription
+      }
+      
+      // Truncar en un punto lógico (punto, coma, espacio)
+      let truncated = cleanDescription.substring(0, 155)
+      const lastSpace = truncated.lastIndexOf(' ')
+      const lastPeriod = truncated.lastIndexOf('.')
+      const lastComma = truncated.lastIndexOf(',')
+      const cutPoint = Math.max(lastPeriod, lastComma, lastSpace)
+      
+      if (cutPoint > 100) {
+        truncated = truncated.substring(0, cutPoint)
+      }
+      
+      return truncated + '...'
     }
-    return `${producto.title} - Disponible en nuestra tienda virtual con envío a todo el país.`
+    // Descripción por defecto optimizada con palabras clave
+    return `${producto.title} - Compra online en Poppy Shop Uruguay. Envío rápido y seguro. Disponible ahora.`
+  }
+  
+  // Preparar breadcrumbs estructurados
+  const getBreadcrumbs = () => {
+    const baseUrl = 'https://www.poppyshopuy.com'
+    return [
+      { name: 'Inicio', url: `${baseUrl}/` },
+      { name: 'Productos', url: `${baseUrl}/tienda-ml` },
+      { name: producto.title, url: getProductUrl() }
+    ]
   }
 
   const precioOriginalML = producto?.descuento_ml?.original_price;
@@ -402,11 +440,11 @@ const DetalleProductoPage: React.FC = () => {
 
   return (
     <>
-      {/* SEO Component - Metadatos dinámicos para cada producto */}
+      {/* SEO Component - Metadatos dinámicos optimizados para Google */}
       <SEO
-        title={`${producto.title} - Tienda Virtual`}
+        title={`${producto.title} - Poppy Shop Uruguay`}
         description={getProductDescription()}
-        keywords={`${producto.title}, ${producto.categoria || 'productos'}, comprar online, envío rápido`}
+        keywords={`${producto.title}, ${producto.categoria || 'productos'}, comprar online Uruguay, envío rápido, Poppy Shop`}
         image={getProductImage()}
         url={getProductUrl()}
         type="product"
@@ -415,14 +453,23 @@ const DetalleProductoPage: React.FC = () => {
         availability={getStockVariante() <= 0 || isProductPaused ? 'out of stock' : 'in stock'}
         productSchema={{
           name: producto.title,
-          image: getProductImage(),
-          description: producto.description || producto.title,
+          image: getAllProductImages(), // Múltiples imágenes para mejor SEO
+          description: producto.description || `${producto.title} - Disponible en Poppy Shop Uruguay`,
           price: precioConDescuento,
           currency: 'USD',
           availability: getStockVariante() <= 0 || isProductPaused ? 'out of stock' : 'in stock',
-          brand: producto.attributes?.find((attr: any) => attr.name === 'Marca')?.value_name || 'Tienda Virtual',
+          brand: producto.attributes?.find((attr: any) => attr.name === 'Marca')?.value_name || 'Poppy Shop',
           category: producto.categoria || 'general',
-          sku: producto.ml_id || producto._id
+          sku: producto.ml_id || producto._id,
+          // Agregar ratings si están disponibles desde MercadoLibre
+          rating: producto.metrics?.reviews?.rating_average && producto.metrics.reviews.total > 0
+            ? {
+                average: producto.metrics.reviews.rating_average,
+                count: producto.metrics.reviews.total
+              }
+            : undefined,
+          // Breadcrumbs estructurados para mejor navegación en Google
+          breadcrumbs: getBreadcrumbs()
         }}
       />
 
@@ -439,7 +486,12 @@ const DetalleProductoPage: React.FC = () => {
           {/* Imagen del producto */}
           <div className="imagen-container">
             <div className="imagen-producto">
-              <img src={getImagenPrincipal()} alt={producto.title} />
+              <img 
+                src={getImagenPrincipal()} 
+                alt={`${producto.title} - ${producto.attributes?.find((attr: any) => attr.name === 'Marca')?.value_name || ''} - Poppy Shop Uruguay`}
+                loading="eager"
+                itemProp="image"
+              />
             </div>
 
             {/* Galería de miniaturas con carrusel */}
@@ -467,7 +519,11 @@ const DetalleProductoPage: React.FC = () => {
                           className={`miniatura ${imagenPrincipalIndex === absoluteIndex ? 'activa' : ''}`}
                           onClick={() => handleImagenClick(absoluteIndex)}
                         >
-                          <img src={imagen} alt={`${producto.title} - imagen ${absoluteIndex + 1}`} />
+                          <img 
+                            src={imagen} 
+                            alt={`${producto.title} - Vista ${absoluteIndex + 1}${varianteSeleccionada ? ` - ${varianteSeleccionada.color}` : ''} - Poppy Shop`}
+                            loading="lazy"
+                          />
                         </div>
                       )
                     })}

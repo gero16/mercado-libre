@@ -15,7 +15,7 @@ interface SEOProps {
 
 interface ProductSchema {
   name: string
-  image: string
+  image: string | string[] // Soporta imagen única o múltiples imágenes
   description: string
   price: number
   currency: string
@@ -23,6 +23,14 @@ interface ProductSchema {
   brand?: string
   category?: string
   sku?: string
+  rating?: {
+    average?: number
+    count?: number
+  }
+  breadcrumbs?: Array<{
+    name: string
+    url: string
+  }>
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -94,26 +102,37 @@ const SEO: React.FC<SEOProps> = ({
 
     // Agregar datos estructurados JSON-LD si es un producto
     if (productSchema) {
-      const existingScript = document.getElementById('product-schema')
-      if (existingScript) {
-        existingScript.remove()
+      // Remover schemas existentes
+      const existingProductScript = document.getElementById('product-schema')
+      if (existingProductScript) {
+        existingProductScript.remove()
       }
+      const existingBreadcrumbScript = document.getElementById('breadcrumb-schema')
+      if (existingBreadcrumbScript) {
+        existingBreadcrumbScript.remove()
+      }
+
+      // Preparar imágenes (soporta string o array)
+      const images = Array.isArray(productSchema.image) 
+        ? productSchema.image 
+        : [productSchema.image]
 
       const schema: any = {
         '@context': 'https://schema.org/',
         '@type': 'Product',
         name: productSchema.name,
-        image: productSchema.image,
+        image: images.length > 1 ? images : images[0], // Array si hay múltiples, string si es una sola
         description: productSchema.description,
         offers: {
           '@type': 'Offer',
           url: url,
           priceCurrency: productSchema.currency,
-          price: productSchema.price,
+          price: productSchema.price.toString(),
           availability: productSchema.availability === 'in stock' 
             ? 'https://schema.org/InStock' 
             : 'https://schema.org/OutOfStock',
-          itemCondition: 'https://schema.org/NewCondition'
+          itemCondition: 'https://schema.org/NewCondition',
+          priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 1 año desde ahora
         }
       }
 
@@ -133,11 +152,43 @@ const SEO: React.FC<SEOProps> = ({
         schema.sku = productSchema.sku
       }
 
-      const script = document.createElement('script')
-      script.id = 'product-schema'
-      script.type = 'application/ld+json'
-      script.text = JSON.stringify(schema)
-      document.head.appendChild(script)
+      // Agregar ratings/reviews si están disponibles
+      if (productSchema.rating && productSchema.rating.average && productSchema.rating.count) {
+        schema.aggregateRating = {
+          '@type': 'AggregateRating',
+          ratingValue: productSchema.rating.average.toString(),
+          reviewCount: productSchema.rating.count.toString(),
+          bestRating: '5',
+          worstRating: '1'
+        }
+      }
+
+      // Crear y agregar script de producto
+      const productScript = document.createElement('script')
+      productScript.id = 'product-schema'
+      productScript.type = 'application/ld+json'
+      productScript.text = JSON.stringify(schema)
+      document.head.appendChild(productScript)
+
+      // Agregar breadcrumbs estructurados si están disponibles
+      if (productSchema.breadcrumbs && productSchema.breadcrumbs.length > 0) {
+        const breadcrumbSchema = {
+          '@context': 'https://schema.org/',
+          '@type': 'BreadcrumbList',
+          itemListElement: productSchema.breadcrumbs.map((crumb, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: crumb.name,
+            item: crumb.url
+          }))
+        }
+
+        const breadcrumbScript = document.createElement('script')
+        breadcrumbScript.id = 'breadcrumb-schema'
+        breadcrumbScript.type = 'application/ld+json'
+        breadcrumbScript.text = JSON.stringify(breadcrumbSchema)
+        document.head.appendChild(breadcrumbScript)
+      }
     }
   }, [title, description, keywords, image, url, type, price, currency, availability, productSchema])
 

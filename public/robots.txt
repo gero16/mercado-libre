@@ -16,9 +16,8 @@ Disallow: /payment-failure
 Disallow: /payment-pending
 Disallow: /checkout
 
-# Sitemap
+# Sitemap (usar solo el del frontend para que Google lo acepte)
 Sitemap: https://www.poppyshopuy.com/sitemap.xml
-Sitemap: https://poppy-shop-production.up.railway.app/api/sitemap.xml
 
 # Rastreadores específicos
 User-agent: Googlebot

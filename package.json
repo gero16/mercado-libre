@@ -16,6 +16,7 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@types/react-router-dom": "^5.3.3",
+    "@vercel/node": "^5.5.15",
     "@vitejs/plugin-react": "^5.0.1",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
