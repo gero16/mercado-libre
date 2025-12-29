@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 import ShoppingCart from './ShoppingCart'
 import { MAPEO_CATEGORIAS, NOMBRES_CATEGORIAS, ICONOS_CATEGORIAS } from '../utils/categories'
 import { parseNotificationSegments } from '../utils/notifications'
+import { formatMoney } from '../utils/money'
 const PROD_BACKEND = 'https://poppy-shop-production.up.railway.app'
 const API_BASE_URL = (import.meta as any).env?.VITE_BACKEND_URL || PROD_BACKEND
 
@@ -399,7 +400,7 @@ const Header: React.FC = () => {
                                     {(n.type || '').toString().toUpperCase()}
                                   </span>
                                 )}
-                                {n.total ? <span className="notify-amount">${n.total} {n.currency || ''}</span> : null}
+                                {n.total ? <span className="notify-amount">${formatMoney(n.total)} {n.currency || ''}</span> : null}
                                 {n.customer_email ? <span className="notify-email">{n.customer_email}</span> : null}
                               </div>
                             </div>

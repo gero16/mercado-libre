@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { API_BASE_URL } from '../config/api'
 import { parseNotificationSegments, NotificationSegment } from '../utils/notifications'
+import { formatMoney } from '../utils/money'
 
 const SUPER_ADMIN_EMAIL = 'geronicola1696@gmail.com'
 
@@ -467,7 +468,7 @@ const AdminNotificationsPage: React.FC = () => {
                         fontSize: '12px',
                         fontWeight: '600'
                       }}>
-                        ${n.total} {n.currency || ''}
+                        ${formatMoney(n.total)} {n.currency || ''}
                       </span>
                     )}
                   </div>
