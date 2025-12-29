@@ -45,25 +45,25 @@ const AdminCrearProductoPage: React.FC = () => {
 
   // --- Handlers dinámicos ---
   // Añadir/remover imágenes
-  const handleAddImage = () => setImages([...images, '']);
-  const handleRemoveImage = idx => setImages(images.filter((_, i) => i !== idx));
-  const handleImageChange = (idx, val) => setImages(images.map((img, i) => (i === idx ? val : img)));
+const handleAddImage = () => setImages([...images, '']);
+const handleRemoveImage = (idx: number) => setImages(images.filter((_, i) => i !== idx));
+const handleImageChange = (idx: number, val: string) => setImages(images.map((img, i) => (i === idx ? val : img)));
 
-  // Atributos
-  const addAtributo = () => setAttributes([...attributes, { id: '', name: '', value_name: '' }]);
-  const removeAtributo = i => setAttributes(attributes.filter((_, idx) => idx !== i));
-  const changeAtributo = (i, k, v) => setAttributes(attributes.map((a, idx) => idx === i ? { ...a, [k]: v } : a));
+// Atributos
+const addAtributo = () => setAttributes([...attributes, { id: '', name: '', value_name: '' }]);
+const removeAtributo = (i: number) => setAttributes(attributes.filter((_, idx) => idx !== i));
+const changeAtributo = (i: number, k: string, v: string) => setAttributes(attributes.map((a, idx) => idx === i ? { ...a, [k]: v } : a));
 
-  // Variantes
-  const addVariante = () => setVariantes([...variantes, { color: '', size: '', price: '', stock: '', images: [''] }]);
-  const removeVariante = i => setVariantes(variantes.filter((_, idx) => idx !== i));
-  const changeVariante = (i, k, v) => setVariantes(variantes.map((variante, idx) => idx === i ? { ...variante, [k]: v } : variante));
-  const addImgVariante = (i) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: [...v.images, ''] } : v));
-  const rmImgVariante = (i, j) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.filter((_, idy) => idy !== j) } : v));
-  const chImgVariante = (i, j, value) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.map((img, idy) => idy === j ? value : img) } : v));
+// Variantes
+const addVariante = () => setVariantes([...variantes, { color: '', size: '', price: '', stock: '', images: [''] }]);
+const removeVariante = (i: number) => setVariantes(variantes.filter((_, idx) => idx !== i));
+const changeVariante = (i: number, k: string, v: string) => setVariantes(variantes.map((variante, idx) => idx === i ? { ...variante, [k]: v } : variante));
+const addImgVariante = (i: number) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: [...v.images, ''] } : v));
+const rmImgVariante = (i: number, j: number) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.filter((_, idy) => idy !== j) } : v));
+const chImgVariante = (i: number, j: number, value: string) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.map((img, idy) => idy === j ? value : img) } : v));
 
-  // --- Submit ---
-  const handleSubmit = async e => {
+// --- Submit ---
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMensaje('');
 
@@ -95,10 +95,10 @@ const AdminCrearProductoPage: React.FC = () => {
       status,
       category_id: categoryId,
       main_image: mainImage || (images[0] || ''),
-      images: images.filter(Boolean).map((url, i) => ({ id: (i + 1).toString(), url, max_size: '' })),
+      images: images.filter(Boolean).map((url: string, i: number) => ({ id: (i + 1).toString(), url, max_size: '' })),
       description,
       attributes: attributes.filter(a => a.name && a.value_name),
-      variantes: variantes.map(v => ({ color: v.color, size: v.size, price: Number(v.price), stock: Number(v.stock), images: v.images.filter(Boolean).map((url, j) => ({ id: (j+1).toString(), url })) })),
+      variantes: variantes.map(v => ({ color: v.color, size: v.size, price: Number(v.price), stock: Number(v.stock), images: v.images.filter(Boolean).map((url: string, j: number) => ({ id: (j+1).toString(), url })) })),
       tipo_venta: tipoVenta,
       stock_fisico: tipoVenta === 'stock_fisico' ? {
         cantidad_disponible: Number(stockFisico.cantidad_disponible || 0),
