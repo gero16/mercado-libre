@@ -377,7 +377,7 @@ const Header: React.FC = () => {
                               <div className="notify-body">
                                 {segments.length === 0 ? (
                                   <div className="notify-line primary">
-                                    <span className="notify-value">{n.message || 'Notificación'}</span>
+                                    <span className="notify-value">{fixFloatString(n.message || 'Notificación')}</span>
                                   </div>
                                 ) : (
                                   segments.map((segment, idx) => (
@@ -385,10 +385,10 @@ const Header: React.FC = () => {
                                       {segment.label ? (
                                         <>
                                           <span className="notify-label">{segment.label}</span>
-                                          <span className="notify-value">{segment.value}</span>
+                                          <span className="notify-value">{fixFloatString(segment.value)}</span>
                                         </>
                                       ) : (
-                                        <span className="notify-value">{segment.value}</span>
+                                        <span className="notify-value">{fixFloatString(segment.value)}</span>
                                       )}
                                     </div>
                                   ))

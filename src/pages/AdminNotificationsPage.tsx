@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { API_BASE_URL } from '../config/api'
 import { parseNotificationSegments, NotificationSegment } from '../utils/notifications'
+import { fixFloatString } from '../utils/money'
 import { formatMoney } from '../utils/money'
 
 const SUPER_ADMIN_EMAIL = 'geronicola1696@gmail.com'
@@ -426,7 +427,7 @@ const AdminNotificationsPage: React.FC = () => {
                           </span>
                         ) : null}
                         <span style={{ flex: 1, color: segment.label ? '#1f2937' : segment.isPrimary ? '#111827' : '#475569' }}>
-                          {segment.value}
+                          {fixFloatString(segment.value)}
                         </span>
                       </div>
                     ))}
