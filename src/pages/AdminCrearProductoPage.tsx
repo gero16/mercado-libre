@@ -9,7 +9,7 @@ const AdminCrearProductoPage: React.FC = () => {
   const [availableQuantity, setAvailableQuantity] = useState('');
   const [status, setStatus] = useState('active');
   const [categoryId, setCategoryId] = useState('');
-  const [description, setDescription] = useState('');
+  const [description] = useState(''); // setDescription eliminado porque no se usa
   const [mainImage, setMainImage] = useState('');
 
   // Imágenes adicionales
@@ -59,8 +59,8 @@ const addVariante = () => setVariantes([...variantes, { color: '', size: '', pri
 const removeVariante = (i: number) => setVariantes(variantes.filter((_, idx) => idx !== i));
 const changeVariante = (i: number, k: string, v: string) => setVariantes(variantes.map((variante, idx) => idx === i ? { ...variante, [k]: v } : variante));
 const addImgVariante = (i: number) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: [...v.images, ''] } : v));
-const rmImgVariante = (i: number, j: number) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.filter((_, idy) => idy !== j) } : v));
-const chImgVariante = (i: number, j: number, value: string) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.map((img, idy) => idy === j ? value : img) } : v));
+const rmImgVariante = (i: number, j: number) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.filter((_: unknown, idy: number) => idy !== j) } : v));
+const chImgVariante = (i: number, j: number, value: string) => setVariantes(variantes.map((v, idx) => idx === i ? { ...v, images: v.images.map((img: string, idy: number) => idy === j ? value : img) } : v));
 
 // --- Submit ---
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -198,7 +198,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
               {/* Imágenes de variante */}
               <div>
                 <span>Imágenes de variante:</span>
-                {variante.images && variante.images.map((img, imgI) => (
+                {variante.images && variante.images.map((img: string, imgI: number) => (
                   <div style={{display:'flex',gap:8,marginBottom:6}} key={imgI}>
                     <input value={img} onChange={e=>chImgVariante(vI,imgI,e.target.value)} placeholder="URL imagen" style={{width:'80%'}} />
                     <button type="button" onClick={()=>rmImgVariante(vI,imgI)}>-</button>
